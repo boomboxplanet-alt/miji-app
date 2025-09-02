@@ -59,7 +59,7 @@ flutter run -d chrome
 ## 🌐 訪問應用
 
 部署完成後，你的應用將在以下地址可用：
-**https://boomboxplanet.github.io/miji-app/**
+**https://boomboxplanet-alt.github.io/miji-app/**
 
 ## 📱 功能測試清單
 

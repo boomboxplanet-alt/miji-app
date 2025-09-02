@@ -30,7 +30,7 @@
 ### 安裝步驟
 ```bash
 # 克隆項目
-git clone https://github.com/boomboxplanet/miji-app.git
+git clone https://github.com/boomboxplanet-alt/miji-app.git
 
 # 進入項目目錄
 cd miji-app
@@ -84,8 +84,8 @@ flutter build web
 
 ## 📞 聯繫方式
 
-- 項目地址: [GitHub](https://github.com/boomboxplanet/miji-app)
-- 在線演示: [GitHub Pages](https://boomboxplanet.github.io/miji-app/)
+- 項目地址: [GitHub](https://github.com/boomboxplanet-alt/miji-app)
+- 在線演示: [GitHub Pages](https://boomboxplanet-alt.github.io/miji-app/)
 
 ---
 

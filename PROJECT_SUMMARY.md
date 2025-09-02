@@ -131,8 +131,8 @@ lib/
 
 ## 🌐 線上訪問
 
-- **GitHub 倉庫**: https://github.com/boomboxplanet/miji-app
-- **在線演示**: https://boomboxplanet.github.io/miji-app/
+- **GitHub 倉庫**: https://github.com/boomboxplanet-alt/miji-app
+- **在線演示**: https://boomboxplanet-alt.github.io/miji-app/
 - **本地測試**: http://localhost:8080
 
 ## 🔮 未來規劃
@@ -165,9 +165,9 @@ lib/
 
 ## 📞 聯繫方式
 
-- **開發者**: boomboxplanet
-- **GitHub**: https://github.com/boomboxplanet
-- **項目地址**: https://github.com/boomboxplanet/miji-app
+- **開發者**: boomboxplanet-alt
+- **GitHub**: https://github.com/boomboxplanet-alt
+- **項目地址**: https://github.com/boomboxplanet-alt/miji-app
 
 ## 📄 許可證
 
