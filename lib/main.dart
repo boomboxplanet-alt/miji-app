@@ -9,6 +9,8 @@ import 'providers/task_provider.dart';
 import 'providers/auth_provider.dart';
 import 'services/auth_service.dart';
 import 'utils/app_colors.dart';
+import 'screens/ai_bot_control_screen.dart';
+import 'screens/ai_bot_test_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

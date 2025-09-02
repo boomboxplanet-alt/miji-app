@@ -10,10 +10,12 @@ import '../providers/task_provider.dart';
 import '../providers/auth_provider.dart';
 import '../screens/settings_screen.dart';
 import '../screens/task_screen.dart';
+import '../screens/ai_bot_control_screen.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_strings.dart';
 import '../widgets/quick_send_widget.dart';
 import '../widgets/message_bubble_overlay.dart';
+import '../config/ai_bot_config.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -193,12 +195,61 @@ class _MapScreenState extends State<MapScreen> {
     locationProvider.getCurrentLocation().then((_) {
       if (locationProvider.currentPosition != null) {
         _goToCurrentLocation(locationProvider.currentPosition!);
-        // 生成首次啟動的機器人訊息（3-6個，剩餘時間1小時，80%當地語言）
+        // 啟動 AI 機器人自動生成訊息
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          messageProvider.generateFirstLaunchBotMessages();
+          _startAIBotService(locationProvider.currentPosition!);
         });
       }
     });
+  }
+
+  // 啟動 AI 機器人服務
+  void _startAIBotService(dynamic position) {
+    try {
+      final aiBotService = AIGeographicBotService();
+      
+      // 設置用戶位置
+      aiBotService.updateUserLocation(
+        position.latitude,
+        position.longitude,
+      );
+      
+      // 配置回調函數，將生成的訊息添加到地圖
+      aiBotService.setOnMessageGenerated((content, lat, lng, radius, duration) {
+        final messageProvider = context.read<MessageProvider>();
+        
+        // 創建機器人訊息
+        messageProvider.sendMessage(
+          content: content,
+          latitude: lat,
+          longitude: lng,
+          radius: radius,
+          duration: duration,
+          isAnonymous: true,
+        );
+      });
+      
+      // 啟動機器人服務
+      aiBotService.startService();
+      
+      // 立即生成初始訊息，讓用戶感覺有活躍度
+      if (AIBotConfig.autoStartOnAppLaunch) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final initialCount = AIBotConfig.initialMessageMin + 
+            (DateTime.now().millisecond % (AIBotConfig.initialMessageMax - AIBotConfig.initialMessageMin + 1));
+          
+          for (int i = 0; i < initialCount; i++) {
+            Timer(Duration(milliseconds: i * AIBotConfig.initialMessageInterval), () {
+              aiBotService.generateMessageNow();
+            });
+          }
+        });
+      }
+      
+      print('🤖 AI 機器人服務已啟動，將自動生成訊息');
+    } catch (e) {
+      print('❌ 啟動 AI 機器人服務失敗: $e');
+    }
   }
 
   @override
@@ -638,6 +689,19 @@ class _MapScreenState extends State<MapScreen> {
                         );
                       },
                       badge: claimableCount > 0 ? claimableCount : null,
+                    );
+                  },
+                ),
+                const SizedBox(width: 8),
+                // AI 機器人按鈕
+                _buildTopBarButton(
+                  icon: Icons.smart_toy,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AIBotControlScreen(),
+                      ),
                     );
                   },
                 ),

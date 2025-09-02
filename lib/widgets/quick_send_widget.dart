@@ -108,47 +108,57 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
                 children: [
                   // 輸入框區域
                   Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      maxLength: _maxBytes,
-                      maxLines: null,
-                      minLines: 2,
-                      keyboardType: TextInputType.multiline,
-                      textInputAction: TextInputAction.newline,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        height: 1.4,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.3),
+                          width: 1,
+                        ),
                       ),
-                      decoration: InputDecoration(
-                        hintText: '說點什麼...（最多200字節）',
-                        border: InputBorder.none,
-                        counterText: '',
-                        hintStyle: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                      child: TextField(
+                        controller: _controller,
+                        maxLength: _maxBytes,
+                        maxLines: null,
+                        minLines: 2,
+                        keyboardType: TextInputType.multiline,
+                        textInputAction: TextInputAction.newline,
+                        style: const TextStyle(
+                          color: Colors.white,
                           fontSize: 14,
+                          height: 1.4,
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        prefixIcon: Padding(
-                          padding: const EdgeInsets.only(top: 12),
-                          child: Icon(
-                            Icons.edit_outlined,
-                            color: Colors.white.withOpacity(0.8),
-                            size: 20,
+                        decoration: InputDecoration(
+                          hintText: '說點什麼...（最多200字節）',
+                          border: InputBorder.none,
+                          counterText: '',
+                          hintStyle: TextStyle(
+                            color: Colors.white.withOpacity(0.7),
+                            fontSize: 14,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          prefixIcon: Padding(
+                            padding: const EdgeInsets.only(top: 12),
+                            child: Icon(
+                              Icons.edit_outlined,
+                              color: Colors.white.withOpacity(0.8),
+                              size: 20,
+                            ),
                           ),
                         ),
+                        onChanged: (text) {
+                          if (text.length > _maxBytes) {
+                            _controller.text = text.substring(0, _maxBytes);
+                            _controller.selection = TextSelection.fromPosition(
+                              const TextPosition(offset: _maxBytes),
+                            );
+                          }
+                        },
                       ),
-                      onChanged: (text) {
-                        if (text.length > _maxBytes) {
-                          _controller.text = text.substring(0, _maxBytes);
-                          _controller.selection = TextSelection.fromPosition(
-                            const TextPosition(offset: _maxBytes),
-                          );
-                        }
-                      },
                     ),
                   ),
 
