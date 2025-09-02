@@ -231,6 +231,7 @@ class _MapScreenState extends State<MapScreen> {
           radius: radius,
           duration: duration,
           isAnonymous: true,
+          customSenderName: null, // 機器人訊息不需要自定義名稱
         );
       });
       
@@ -1049,7 +1050,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _handleSendMessage(
-      String message, double radius, Duration duration, bool isAnonymous) {
+      String message, double radius, Duration duration, bool isAnonymous, [String? customSenderName]) {
     final locationProvider = context.read<LocationProvider>();
     final messageProvider = context.read<MessageProvider>();
 
@@ -1078,6 +1079,7 @@ class _MapScreenState extends State<MapScreen> {
       radius: radius,
       duration: duration,
       isAnonymous: isAnonymous,
+      customSenderName: customSenderName,
     )
         .then((message) {
       if (messageProvider.errorMessage == null) {

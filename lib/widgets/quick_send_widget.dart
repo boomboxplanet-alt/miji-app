@@ -5,7 +5,7 @@ import '../services/content_moderation_service.dart';
 import '../providers/task_provider.dart';
 
 class QuickSendWidget extends StatefulWidget {
-  final Function(String, double, Duration, bool) onSend;
+  final Function(String, double, Duration, bool, String?) onSend;
 
   const QuickSendWidget({super.key, required this.onSend});
 
@@ -15,6 +15,7 @@ class QuickSendWidget extends StatefulWidget {
 
 class _QuickSendWidgetState extends State<QuickSendWidget> {
   final TextEditingController _controller = TextEditingController();
+  final TextEditingController _nameController = TextEditingController(); // 用戶名稱控制器
   double _radius = 1000.0; // 1公里 = 1000米，將根據用戶權限動態更新
   Duration _destroyDuration = const Duration(hours: 1); // 預設1小時，將根據用戶權限動態更新
   bool _isAnonymous = false; // 是否匿名發送
@@ -99,6 +100,73 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // 用戶名稱輸入區域（非匿名時顯示）
+          if (!_isAnonymous)
+            Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: TextField(
+                        controller: _nameController,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: '輸入您的顯示名稱',
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          hintStyle: TextStyle(
+                            color: Colors.white.withOpacity(0.7),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // 切換到匿名模式按鈕
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        _isAnonymous = true;
+                        _nameController.clear();
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Text(
+                        '匿名',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           // 輸入框和發送按鈕區域
           Column(
             children: [
@@ -371,9 +439,26 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
                           subtitle: '隱藏您的身份信息',
                           icon: Icons.visibility_off,
                           value: _isAnonymous,
-                          onChanged: (value) =>
-                              setState(() => _isAnonymous = value),
+                          onChanged: (value) {
+                            setState(() {
+                              _isAnonymous = value;
+                              if (!value) {
+                                // 切換到非匿名模式時，清空名稱
+                                _nameController.clear();
+                              }
+                            });
+                          },
                         ),
+                        // 非匿名模式下的名稱輸入提示
+                        if (!_isAnonymous)
+                          _buildInfoTile(
+                            title: '顯示名稱',
+                            subtitle: _nameController.text.isEmpty 
+                                ? '點擊輸入您的名稱' 
+                                : '當前: ${_nameController.text}',
+                            icon: Icons.person,
+                            onTap: () => _showNameInputDialog(''), // 空訊息，僅用於名稱輸入
+                          ),
                         const Divider(color: Colors.white24, height: 1),
                         // 銷毀時間設定
                         _buildInfoTile(
@@ -900,13 +985,77 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
   }
 
   void _sendMessage(String message) {
+    // 檢查是否需要用戶名稱
+    if (!_isAnonymous && (_nameController.text.trim().isEmpty)) {
+      // 顯示名稱輸入提示
+      _showNameInputDialog(message);
+      return;
+    }
+    
     widget.onSend(
       message,
       _radius,
       _destroyDuration,
       _isAnonymous,
+      _isAnonymous ? null : _nameController.text.trim(), // 傳遞用戶名稱
     );
     _controller.clear();
+  }
+  
+  // 顯示名稱輸入對話框
+  void _showNameInputDialog(String message) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('輸入顯示名稱'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('您選擇了非匿名發送，請輸入您的顯示名稱：'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: '顯示名稱',
+                hintText: '請輸入您的名稱',
+                border: OutlineInputBorder(),
+              ),
+              autofocus: true,
+              maxLength: 20,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // 改為匿名發送
+              setState(() {
+                _isAnonymous = true;
+              });
+              // 只有在有訊息時才發送
+              if (message.isNotEmpty) {
+                _sendMessage(message);
+              }
+            },
+            child: const Text('改為匿名'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (_nameController.text.trim().isNotEmpty) {
+                Navigator.pop(context);
+                // 只有在有訊息時才發送
+                if (message.isNotEmpty) {
+                  _sendMessage(message);
+                }
+              }
+            },
+            child: const Text('確定'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showModerationDialog({

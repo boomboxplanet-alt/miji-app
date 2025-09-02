@@ -37,10 +37,41 @@ class MessageService {
 
   Future<List<Message>> getNearbyMessages(double latitude, double longitude, double maxDistance) async {
     if (isMockApi) {
-      // 模拟 API 响应，返回一个空的讯息列表
+      // 模拟 API 响应，返回模拟的附近訊息
       await Future.delayed(const Duration(milliseconds: 800));
+      
       // 模擬API：獲取附近訊息
-      return []; 
+      // 為了測試多裝置互通，我們返回一些模擬訊息
+      final mockMessages = [
+        Message(
+          id: 'mock_1',
+          content: '今天天氣真好！',
+          latitude: latitude + 0.001, // 稍微偏移的位置
+          longitude: longitude + 0.001,
+          radius: 1000.0,
+          createdAt: DateTime.now().subtract(const Duration(minutes: 30)),
+          expiresAt: DateTime.now().add(const Duration(hours: 1)),
+          isAnonymous: true,
+          senderId: 'mock_user_1',
+          senderName: '匿名用戶',
+          gender: Gender.unknown,
+        ),
+        Message(
+          id: 'mock_2',
+          content: '附近有什麼好吃的嗎？',
+          latitude: latitude - 0.001, // 稍微偏移的位置
+          longitude: longitude - 0.001,
+          radius: 800.0,
+          createdAt: DateTime.now().subtract(const Duration(minutes: 15)),
+          expiresAt: DateTime.now().add(const Duration(hours: 2)),
+          isAnonymous: false,
+          senderId: 'mock_user_2',
+          senderName: '美食探索者',
+          gender: Gender.female,
+        ),
+      ];
+      
+      return mockMessages;
     }
     
     try {

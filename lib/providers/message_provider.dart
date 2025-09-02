@@ -252,6 +252,7 @@ class MessageProvider extends ChangeNotifier {
     required double radius,
     required Duration duration,
     bool isAnonymous = true,
+    String? customSenderName, // 添加自定義發送者名稱參數
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -262,8 +263,16 @@ class MessageProvider extends ChangeNotifier {
       final random = math.Random();
       final gender = Gender.values[random.nextInt(Gender.values.length)];
       
-      // 根據匿名設定決定是否生成發送者名字
-      final senderName = isAnonymous ? null : _generateRandomName(gender);
+      // 處理發送者名稱
+      String? senderName;
+      if (isAnonymous) {
+        senderName = null; // 匿名訊息不顯示名稱
+      } else if (customSenderName != null && customSenderName.trim().isNotEmpty) {
+        senderName = customSenderName.trim(); // 使用自定義名稱
+      } else {
+        // 如果沒有自定義名稱，拋出異常提示用戶輸入
+        throw Exception('請輸入您的顯示名稱或選擇匿名發送');
+      }
       
       final message = Message(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
