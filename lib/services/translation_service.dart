@@ -10,6 +10,8 @@ class TranslationService {
   
   // 根據國家代碼獲取當地語言
   static const Map<String, String> countryToLanguage = {
+    'MO': 'zh-yue', // 澳門 -> 粵語
+    'HK': 'zh-yue', // 香港 -> 粵語
     'KH': 'km', // 柬埔寨 -> 高棉語
     'TW': 'zh-TW', // 台灣 -> 繁體中文
     'CN': 'zh-CN', // 中國 -> 簡體中文
@@ -35,6 +37,30 @@ class TranslationService {
   
   // 根據國家代碼獲取當地常用問候語和短語
   static const Map<String, List<String>> countryToLocalPhrases = {
+    'MO': [
+      '你好！有人喺度嗎？', // 粵語：你好！有人在這裡嗎？
+      '今日天氣好好啊', // 粵語：今天天氣很好
+      '我想食嘢啊', // 粵語：我想吃東西
+      '呢度好多人啊', // 粵語：這裡很多人
+      '有冇人想傾偈？', // 粵語：有人想聊天嗎？
+      '澳門嘅葡撻真係好好食', // 粵語：澳門的葡撻真的很好吃
+      '大三巴好多人影相', // 粵語：大三巴很多人拍照
+      '澳門嘅夜景真係好靚', // 粵語：澳門的夜景真的很美
+      '我想去威尼斯人', // 粵語：我想去威尼斯人
+      '澳門嘅豬扒包好出名', // 粵語：澳門的豬扒包很有名
+    ],
+    'HK': [
+      '你好！有人喺度嗎？', // 粵語：你好！有人在這裡嗎？
+      '今日天氣好好啊', // 粵語：今天天氣很好
+      '我想食嘢啊', // 粵語：我想吃東西
+      '呢度好多人啊', // 粵語：這裡很多人
+      '有冇人想傾偈？', // 粵語：有人想聊天嗎？
+      '香港嘅茶餐廳真係好好食', // 粵語：香港的茶餐廳真的很好吃
+      '維港嘅夜景好靚', // 粵語：維港的夜景很美
+      '我想去銅鑼灣shopping', // 粵語：我想去銅鑼灣購物
+      '香港嘅交通真係好方便', // 粵語：香港的交通真的很方便
+      '我想食蛋撻', // 粵語：我想吃蛋撻
+    ],
     'KH': [
       'សួស្តី! តើអ្នកកំពុងធ្វើអ្វី?', // 你好！你在做什麼？
       'ថ្ងៃនេះអាកាសធាតុល្អណាស់!', // 今天天氣真好！
@@ -70,8 +96,14 @@ class TranslationService {
   // 獲取當前位置的國家代碼
   Future<String> getCurrentCountryCode() async {
     if (isMockApi) {
-      // 模擬：假設用戶在柬埔寨
-      return 'KH';
+      // 模擬：根據座標判斷國家
+      try {
+        Position position = await Geolocator.getCurrentPosition();
+        return await _getCountryCodeFromCoordinates(position.latitude, position.longitude);
+      } catch (e) {
+        // 如果無法獲取位置，返回默認值
+        return 'TW';
+      }
     }
     
     try {
@@ -87,16 +119,52 @@ class TranslationService {
   
   // 根據座標獲取國家代碼
   Future<String> _getCountryCodeFromCoordinates(double lat, double lng) async {
-    if (isMockApi) {
-      // 模擬：根據座標判斷國家
-      if (lat >= 10.0 && lat <= 14.7 && lng >= 102.3 && lng <= 107.6) {
-        return 'KH'; // 柬埔寨範圍
-      }
-      return 'TW'; // 默認台灣
+    // 澳門 (Macau)
+    if (lat >= 22.1 && lat <= 22.2 && lng >= 113.5 && lng <= 113.6) {
+      return 'MO';
+    }
+    // 香港 (Hong Kong)
+    else if (lat >= 22.1 && lat <= 22.6 && lng >= 113.8 && lng <= 114.5) {
+      return 'HK';
+    }
+    // 台灣
+    else if (lat >= 21.9 && lat <= 25.3 && lng >= 119.3 && lng <= 122.0) {
+      return 'TW';
+    }
+    // 柬埔寨
+    else if (lat >= 10.0 && lat <= 14.7 && lng >= 102.3 && lng <= 107.6) {
+      return 'KH';
+    }
+    // 泰國
+    else if (lat >= 5.6 && lat <= 20.5 && lng >= 97.3 && lng <= 105.6) {
+      return 'TH';
+    }
+    // 越南
+    else if (lat >= 8.2 && lat <= 23.4 && lng >= 102.1 && lng <= 109.5) {
+      return 'VN';
+    }
+    // 新加坡
+    else if (lat >= 1.1 && lat <= 1.5 && lng >= 103.6 && lng <= 104.0) {
+      return 'SG';
+    }
+    // 馬來西亞
+    else if (lat >= 0.9 && lat <= 7.4 && lng >= 99.6 && lng <= 119.3) {
+      return 'MY';
+    }
+    // 日本
+    else if (lat >= 24.0 && lat <= 46.0 && lng >= 123.0 && lng <= 146.0) {
+      return 'JP';
+    }
+    // 韓國
+    else if (lat >= 33.0 && lat <= 39.0 && lng >= 124.0 && lng <= 132.0) {
+      return 'KR';
+    }
+    // 中國大陸
+    else if (lat >= 18.0 && lat <= 54.0 && lng >= 73.0 && lng <= 135.0) {
+      return 'CN';
     }
     
-    // 實際實現需要使用地理編碼API
-    return 'TW';
+    return 'TW'; // 默認台灣
   }
   
   // 根據當前位置獲取本地語言

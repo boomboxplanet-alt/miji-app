@@ -405,10 +405,33 @@ class BotService {
 
   bool get isEnabled => _isEnabled;
   
+  // 獲取當前語言偏好
+  String get languagePreference => _aiService.languagePreference;
+  
   void updateUserLocation(double latitude, double longitude) {
     _userLatitude = latitude;
     _userLongitude = longitude;
     _aiService.updateUserLocation(latitude, longitude);
+    
+    // 根據用戶位置更新語言偏好
+    _updateLanguagePreference(latitude, longitude);
+  }
+  
+  // 根據地理位置更新語言偏好
+  void _updateLanguagePreference(double latitude, double longitude) {
+    // 澳門和香港使用粵語
+    if ((latitude >= 22.1 && latitude <= 22.2 && longitude >= 113.5 && longitude <= 113.6) || // 澳門
+        (latitude >= 22.1 && latitude <= 22.6 && longitude >= 113.8 && longitude <= 114.5)) { // 香港
+      _aiService.setLanguagePreference('local');
+    }
+    // 台灣使用中文
+    else if (latitude >= 21.9 && latitude <= 25.3 && longitude >= 119.3 && longitude <= 122.0) {
+      _aiService.setLanguagePreference('zh');
+    }
+    // 其他地區使用自動檢測
+    else {
+      _aiService.setLanguagePreference('auto');
+    }
   }
 
   void updateUserRadius(double radius) {

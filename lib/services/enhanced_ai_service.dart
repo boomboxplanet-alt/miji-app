@@ -11,6 +11,10 @@ class EnhancedAIService {
   int _realUserCount = 0;
   String _systemLanguage = 'zh'; // 預設中文
   String _selectedLanguage = 'auto'; // auto, zh, local
+  
+  // 添加 getter 方法供測試使用
+  String? get currentLocation => _currentLocation;
+  String? get currentCountry => _currentCountry;
 
   // 設置用戶位置
   void updateUserLocation(double latitude, double longitude) {
@@ -52,6 +56,12 @@ class EnhancedAIService {
     if (_currentCountry != null &&
         _multiLanguageMessages.containsKey(_currentCountry)) {
       switch (_currentCountry) {
+        case '澳門':
+          options['local'] = '粵語';
+          break;
+        case '香港':
+          options['local'] = '粵語';
+          break;
         case '柬埔寨':
           options['local'] = '高棉語';
           break;
@@ -83,8 +93,16 @@ class EnhancedAIService {
 
   // 根據經緯度判斷地理位置
   String _getLocationContext(double lat, double lng) {
+    // 澳門 (Macau)
+    if (lat >= 22.1 && lat <= 22.2 && lng >= 113.5 && lng <= 113.6) {
+      return '澳門';
+    }
+    // 香港 (Hong Kong)
+    else if (lat >= 22.1 && lat <= 22.6 && lng >= 113.8 && lng <= 114.5) {
+      return '香港';
+    }
     // 台灣主要城市和地區的經緯度範圍
-    if (lat >= 25.0 && lat <= 25.3 && lng >= 121.4 && lng <= 121.7) {
+    else if (lat >= 25.0 && lat <= 25.3 && lng >= 121.4 && lng <= 121.7) {
       return '台北';
     } else if (lat >= 24.1 && lat <= 24.2 && lng >= 120.6 && lng <= 120.7) {
       return '台中';
@@ -113,8 +131,16 @@ class EnhancedAIService {
 
   // 根據經緯度判斷國家
   String _getCountryContext(double lat, double lng) {
+    // 澳門 (Macau)
+    if (lat >= 22.1 && lat <= 22.2 && lng >= 113.5 && lng <= 113.6) {
+      return '澳門';
+    }
+    // 香港 (Hong Kong)
+    else if (lat >= 22.1 && lat <= 22.6 && lng >= 113.8 && lng <= 114.5) {
+      return '香港';
+    }
     // 台灣
-    if (lat >= 21.9 && lat <= 25.3 && lng >= 119.3 && lng <= 122.0) {
+    else if (lat >= 21.9 && lat <= 25.3 && lng >= 119.3 && lng <= 122.0) {
       return '台灣';
     }
     // 柬埔寨
@@ -155,6 +181,30 @@ class EnhancedAIService {
 
   // 基於地理位置的訊息模板
   Map<String, List<String>> get _locationBasedMessages => {
+        '澳門': [
+          '大三巴好多人影相，要排隊',
+          '威尼斯人嘅賭場好大',
+          '澳門嘅葡撻真係好好食',
+          '新馬路嘅手信店好多',
+          '澳門嘅夜景真係好靚',
+          '我想去官也街食嘢',
+          '澳門嘅豬扒包好出名',
+          '我想去澳門塔睇風景',
+          '澳門嘅葡國菜好特別',
+          '我想去路氹城shopping',
+        ],
+        '香港': [
+          '維港嘅夜景好靚',
+          '我想去銅鑼灣shopping',
+          '香港嘅茶餐廳真係好好食',
+          '我想去尖沙咀睇夜景',
+          '香港嘅交通真係好方便',
+          '我想食蛋撻',
+          '我想去中環行街',
+          '香港嘅叮叮車好有特色',
+          '我想去旺角食嘢',
+          '香港嘅夜景真係好靚',
+        ],
         '台北': [
           '101大樓今天好美，但人好多',
           '捷運又誤點了，台北人的日常',
@@ -293,6 +343,30 @@ class EnhancedAIService {
 
   // 多語言訊息模板
   Map<String, List<String>> get _multiLanguageMessages => {
+        '澳門': [
+          '你好！有人喺度嗎？', // 粵語：你好！有人在這裡嗎？
+          '今日天氣好好啊', // 粵語：今天天氣很好
+          '我想食嘢啊', // 粵語：我想吃東西
+          '呢度好多人啊', // 粵語：這裡很多人
+          '有冇人想傾偈？', // 粵語：有人想聊天嗎？
+          '澳門嘅葡撻真係好好食', // 粵語：澳門的葡撻真的很好吃
+          '大三巴好多人影相', // 粵語：大三巴很多人拍照
+          '澳門嘅夜景真係好靚', // 粵語：澳門的夜景真的很美
+          '我想去威尼斯人', // 粵語：我想去威尼斯人
+          '澳門嘅豬扒包好出名', // 粵語：澳門的豬扒包很有名
+        ],
+        '香港': [
+          '你好！有人喺度嗎？', // 粵語：你好！有人在這裡嗎？
+          '今日天氣好好啊', // 粵語：今天天氣很好
+          '我想食嘢啊', // 粵語：我想吃東西
+          '呢度好多人啊', // 粵語：這裡很多人
+          '有冇人想傾偈？', // 粵語：有人想聊天嗎？
+          '香港嘅茶餐廳真係好好食', // 粵語：香港的茶餐廳真的很好吃
+          '維港嘅夜景好靚', // 粵語：維港的夜景很美
+          '我想去銅鑼灣shopping', // 粵語：我想去銅鑼灣購物
+          '香港嘅交通真係好方便', // 粵語：香港的交通真的很方便
+          '我想食蛋撻', // 粵語：我想吃蛋撻
+        ],
         '柬埔寨': [
           'សួស្តី! តើអ្នកនៅទីនេះដែរឬ?', // 你好！你也在這裡嗎？
           'ថ្ងៃនេះអាកាសធាតុល្អណាស់', // 今天天氣很好
