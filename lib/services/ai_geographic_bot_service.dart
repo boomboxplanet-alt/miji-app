@@ -28,6 +28,9 @@ class AIGeographicBotService {
   
   // 回調函數
   Function(String content, double lat, double lng, double radius, Duration duration)? _onMessageGenerated;
+  
+  // 用戶範圍信息
+  double _userRadius = 1000.0; // 默認1公里
 
   // 啟動機器人服務
   void startService() {
@@ -61,6 +64,17 @@ class AIGeographicBotService {
     
     // 更新環境信息
     _updateEnvironmentInfo();
+  }
+  
+  // 更新用戶範圍
+  void updateUserRadius(double radius) {
+    _userRadius = radius;
+    print('📏 用戶範圍更新: ${radius.toStringAsFixed(0)}米');
+  }
+  
+  // 獲取用戶範圍
+  double _getUserRadius() {
+    return _userRadius;
   }
 
   // 更新地理位置信息
@@ -174,9 +188,10 @@ class AIGeographicBotService {
       return (latitude: 22.1667, longitude: 113.5500); // 默認澳門
     }
     
-    // 在用戶周圍 500 米範圍內生成隨機位置
-    const maxDistance = 500.0; // 500米
-    const radiusInDegrees = maxDistance / 111000; // 轉換為度數
+    // 在用戶周圍的實際範圍內生成隨機位置
+    final userRadius = _getUserRadius(); // 獲取用戶實際範圍
+    final maxDistance = userRadius * 0.8; // 使用用戶範圍的80%，確保在範圍內
+    final radiusInDegrees = maxDistance / 111000; // 轉換為度數
     
     final angle = _random.nextDouble() * 2 * pi;
     final distance = _random.nextDouble() * radiusInDegrees;

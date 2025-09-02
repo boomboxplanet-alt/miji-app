@@ -215,6 +215,10 @@ class _MapScreenState extends State<MapScreen> {
         position.longitude,
       );
       
+      // 設置用戶範圍（基礎範圍 + 獎勵範圍）
+      final userRadius = _getUserTotalRange();
+      aiBotService.updateUserRadius(userRadius);
+      
       // 配置回調函數，將生成的訊息添加到地圖
       aiBotService.setOnMessageGenerated((content, lat, lng, radius, duration) {
         final messageProvider = context.read<MessageProvider>();
@@ -248,6 +252,7 @@ class _MapScreenState extends State<MapScreen> {
       }
       
       print('🤖 AI 機器人服務已啟動，將自動生成訊息');
+      print('📏 用戶範圍: ${userRadius.toStringAsFixed(0)}米');
     } catch (e) {
       print('❌ 啟動 AI 機器人服務失敗: $e');
     }
