@@ -9,8 +9,6 @@ import 'providers/task_provider.dart';
 import 'providers/auth_provider.dart';
 import 'services/auth_service.dart';
 import 'utils/app_colors.dart';
-import 'screens/ai_bot_control_screen.dart';
-import 'screens/ai_bot_test_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,8 +64,9 @@ class MijiApp extends StatelessWidget {
             brightness: Brightness.dark,
           ),
         ),
-        home: const AuthWrapper(),
+        initialRoute: '/',
         routes: {
+          '/': (context) => const MapScreen(),
           '/login': (context) => const LoginScreen(),
           '/home': (context) => const MapScreen(),
         },
@@ -76,13 +75,4 @@ class MijiApp extends StatelessWidget {
   }
 }
 
-// 認證包裝器，直接顯示主界面
-class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    // 直接顯示主界面，登入功能改為按鈕形式
-    return const MapScreen();
-  }
-}

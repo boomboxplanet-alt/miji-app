@@ -16,6 +16,7 @@ import '../utils/app_strings.dart';
 import '../widgets/quick_send_widget.dart';
 import '../widgets/message_bubble_overlay.dart';
 import '../config/ai_bot_config.dart';
+import '../services/ai_geographic_bot_service.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
