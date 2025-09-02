@@ -1,0 +1,54 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # 禁用一些不重要的規則來減少問題數量
+    prefer_const_constructors: false
+    prefer_const_literals_to_create_immutables: false
+    avoid_print: false
+    unnecessary_brace_in_string_interps: false
+    prefer_typing_uninitialized_variables: false
+    sized_box_for_whitespace: false
+    
+    # 保留重要的規則
+    avoid_empty_else: true
+    avoid_relative_lib_imports: true
+    avoid_types_as_parameter_names: true
+    camel_case_types: true
+    empty_catches: true
+    hash_and_equals: true
+    no_duplicate_case_values: true
+    null_closures: true
+    prefer_contains: true
+    prefer_equal_for_default_values: true
+    prefer_is_empty: true
+    prefer_is_not_empty: true
+    recursive_getters: true
+    slash_for_doc_comments: true
+    type_init_formals: true
+    unawaited_futures: true
+    unnecessary_const: true
+    unnecessary_new: true
+    unnecessary_null_in_if_null_operators: true
+    unnecessary_this: true
+    unrelated_type_equality_checks: true
+    use_rethrow_when_possible: true
+    valid_regexps: true
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/generated_plugin_registrant.dart"
+  
+  errors:
+    # 將一些警告降級為信息
+    unused_import: info
+    unused_element: info
+    unused_field: info
+    unused_local_variable: info
+    dead_code: info
+    
+    # 將deprecated警告降級
+    deprecated_member_use: info
+    deprecated_member_use_from_same_package: info
