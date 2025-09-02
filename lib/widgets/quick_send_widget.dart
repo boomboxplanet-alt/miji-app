@@ -118,6 +118,12 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
                       ),
                       child: TextField(
                         controller: _nameController,
+                        keyboardType: TextInputType.text,
+                        textInputAction: TextInputAction.done,
+                        enableInteractiveSelection: true,
+                        autocorrect: true,
+                        enableSuggestions: true,
+                        textCapitalization: TextCapitalization.words,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -192,6 +198,10 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
                         minLines: 2,
                         keyboardType: TextInputType.multiline,
                         textInputAction: TextInputAction.newline,
+                        enableInteractiveSelection: true,
+                        autocorrect: true,
+                        enableSuggestions: true,
+                        textCapitalization: TextCapitalization.sentences,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -1016,6 +1026,12 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
             const SizedBox(height: 16),
             TextField(
               controller: _nameController,
+              keyboardType: TextInputType.text,
+              textInputAction: TextInputAction.done,
+              enableInteractiveSelection: true,
+              autocorrect: true,
+              enableSuggestions: true,
+              textCapitalization: TextCapitalization.words,
               decoration: const InputDecoration(
                 labelText: '顯示名稱',
                 hintText: '請輸入您的名稱',
