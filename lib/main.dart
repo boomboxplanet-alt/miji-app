@@ -7,7 +7,7 @@ import 'providers/message_provider.dart';
 import 'providers/location_provider.dart';
 import 'providers/task_provider.dart';
 import 'providers/auth_provider.dart';
-import 'services/auth_service.dart';
+import 'services/firebase_service.dart';
 import 'utils/app_colors.dart';
 
 void main() async {
@@ -17,7 +17,7 @@ void main() async {
   await Hive.initFlutter();
   
   // 初始化 Firebase
-  await AuthService.initializeFirebase();
+  await FirebaseService.instance.initialize();
   
   runApp(const MijiApp());
 }
