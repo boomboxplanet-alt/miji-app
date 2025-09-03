@@ -66,8 +66,13 @@ flutter build web
 ```xml
 <meta-data
     android:name="com.google.android.geo.API_KEY"
-    android:value="YOUR_API_KEY"/>
+    android:value="AIzaSyB5EIX3h6jLAF7C_5_fsE_lOQUjTMr7J58"/>
 ```
+
+**注意**: 請確保您已啟用以下API服務：
+- Maps SDK for Android
+- Maps SDK for iOS  
+- Maps JavaScript API
 
 ### Firebase 配置
 1. 在 Firebase Console 創建新項目

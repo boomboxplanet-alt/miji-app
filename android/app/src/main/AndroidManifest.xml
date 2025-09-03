@@ -3,6 +3,12 @@
         android:label="miji_app"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        
+        <!-- Google Maps API Key -->
+        <meta-data 
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyB5EIX3h6jLAF7C_5_fsE_lOQUjTMr7J58"/>
+        
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -20,11 +26,6 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
-            <manifest ...>
-              <application ...>
-                <meta-data android:name="com.google.android.geo.API_KEY"
-                           android:value="YOUR_API_KEY_HERE"/>
-            </manifest>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
