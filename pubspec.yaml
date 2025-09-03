@@ -15,14 +15,14 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   
-  # Firebase 核心功能
+  # Firebase 核心功能 - 兼容 Dart SDK 3.4.0
   firebase_core: ^2.24.2
   firebase_auth: ^4.15.3
   
-  # Google 登入 (已存在)
-  google_sign_in: ^6.2.1
+  # Google 登入 - 降級到兼容版本
+  google_sign_in: ^6.1.6
   
-  # Cloud Firestore 數據庫
+  # Cloud Firestore 數據庫 - 兼容版本
   cloud_firestore: ^4.13.6
   
   # 地圖和位置服務
