@@ -111,7 +111,7 @@ flutter pub get
       "client_info": {
         "mobilesdk_app_id": "YOUR_MOBILE_SDK_APP_ID",
         "android_client_info": {
-          "package_name": "com.example.mijiApp"
+          "package_name": "com.example.miji_app"
         }
       },
       "oauth_client": [
