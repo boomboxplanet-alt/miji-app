@@ -52,7 +52,23 @@
     // Google Maps 加載錯誤處理
     window.gm_authFailure = function() {
       console.error('Google Maps API 認證失敗，請檢查 API 金鑰');
+      alert('Google Maps API 認證失敗，請檢查 API 金鑰配置');
     };
+    
+    // Google Maps 加載成功處理
+    window.initMap = function() {
+      console.log('Google Maps API 加載成功');
+    };
+    
+    // 檢查 Google Maps API 是否加載
+    window.addEventListener('load', function() {
+      if (typeof google === 'undefined' || !google.maps) {
+        console.error('Google Maps API 未正確加載');
+        alert('Google Maps API 未正確加載，請檢查網絡連接和 API 金鑰');
+      } else {
+        console.log('Google Maps API 已加載');
+      }
+    });
   </script>
   
   <!-- 隱藏Google地圖版權資訊和界面元素 -->
