@@ -17,6 +17,7 @@ dependencies:
   # 地圖和位置服務
   google_maps_flutter: ^2.5.3
   geolocator: ^10.1.0
+  geolocator_web: ^2.1.6
   
   # 本地存儲
   hive: ^2.2.3
