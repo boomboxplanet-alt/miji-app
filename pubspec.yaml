@@ -40,6 +40,9 @@ dependencies:
   
   # HTTP 請求
   http: ^1.1.0
+  
+  # Web 地圖事件攔截
+  pointer_interceptor: ^0.9.0
 
 dev_dependencies:
   flutter_test:

@@ -64,12 +64,14 @@ class IntroScreen extends StatelessWidget {
                       onPressed: () async {
                         // 請求位置權限
                         final hasPermission = await appState.requestLocationPermission();
-                        if (hasPermission) {
+                        if (hasPermission && context.mounted) {
                           // 獲取位置
                           await appState.getCurrentLocation();
                           // 導航到地圖屏幕
-                          Navigator.pushReplacementNamed(context, '/map');
-                        } else {
+                          if (context.mounted) {
+                            await Navigator.pushReplacementNamed(context, '/map');
+                          }
+                        } else if (context.mounted) {
                           // 顯示權限被拒絕的提示
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(

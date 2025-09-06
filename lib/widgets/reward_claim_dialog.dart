@@ -72,9 +72,9 @@ class _RewardClaimDialogState extends State<RewardClaimDialog>
     }
     
     // 開始動畫
-    _fadeController.forward();
+    await _fadeController.forward();
     await Future.delayed(const Duration(milliseconds: 200));
-    _scaleController.forward();
+    await _scaleController.forward();
     
     // 延遲一點再開始彩帶
     await Future.delayed(const Duration(milliseconds: 400));

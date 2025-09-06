@@ -65,7 +65,7 @@ class AIBotService {
     
     // 如果訊息太長，截斷
     if (message.length > maxLength) {
-      message = message.substring(0, maxLength - 3) + '...';
+      message = '${message.substring(0, maxLength - 3)}...';
     }
     
     return message;

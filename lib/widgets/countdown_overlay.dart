@@ -58,8 +58,8 @@ class _CountdownOverlayState extends State<CountdownOverlay>
 
   void _startCountdown() async {
     // 顯示動畫
-    _fadeController.forward();
-    _scaleController.forward();
+    await _fadeController.forward();
+    await _scaleController.forward();
 
     // 倒數計時
     for (int i = 5; i > 0; i--) {

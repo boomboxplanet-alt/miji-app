@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 import '../models/message.dart';
 import '../providers/message_provider.dart';
 import '../providers/location_provider.dart';
@@ -272,14 +273,15 @@ class _MapScreenState extends State<MapScreen> {
                   Container(
                     width: double.infinity,
                     height: double.infinity,
-                    child: GoogleMap(
-                      key: _mapKey,
-                      mapType: MapType.normal,
-                      initialCameraPosition: _kInitialPosition,
-                      minMaxZoomPreference: MinMaxZoomPreference(
-                        _getMinZoomLevel(), // 限制最小縮放（最大顯示範圍為用戶範圍的2倍）
-                        _getMaxZoomLevel(), // 限制最大縮放到街道級別
-                      ),
+                    child: PointerInterceptor(
+                      child: GoogleMap(
+                        key: _mapKey,
+                        mapType: MapType.normal,
+                        initialCameraPosition: _kInitialPosition,
+                        minMaxZoomPreference: MinMaxZoomPreference(
+                          _getMinZoomLevel(), // 限制最小縮放（最大顯示範圍為用戶範圍的2倍）
+                          _getMaxZoomLevel(), // 限制最大縮放到街道級別
+                        ),
                     onMapCreated: (GoogleMapController controller) {
                       print('GoogleMap created successfully');
                       if (!_controller.isCompleted) {
@@ -388,6 +390,7 @@ class _MapScreenState extends State<MapScreen> {
                       // 地圖停止移動時更新泡泡位置
                       _updateBubblePositions();
                     },
+                      ),
                     ),
                   ),
                   ..._bubbleOverlays,
@@ -884,7 +887,7 @@ class _MapScreenState extends State<MapScreen> {
       );
 
       // 平滑動畫到最佳視角
-      controller.animateCamera(
+      await controller.animateCamera(
         CameraUpdate.newCameraPosition(newPosition),
         // 使用較慢的動畫讓用戶看到縮放過程
       );

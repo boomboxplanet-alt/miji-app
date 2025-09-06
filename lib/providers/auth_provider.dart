@@ -104,6 +104,30 @@ class AuthProvider extends ChangeNotifier {
     return await _authService.checkNetworkConnection();
   }
 
+  // Google 登入（暫時使用訪客模式）
+  Future<bool> signInWithGoogle() async {
+    try {
+      _setLoading(true);
+      _clearError();
+      
+      // 暫時使用訪客登入代替 Google 登入
+      final user = await _authService.signInAsGuest();
+      
+      if (user != null) {
+        _user = user;
+        notifyListeners();
+        return true;
+      }
+      
+      return false;
+    } catch (e) {
+      _setError('登入失敗: ${e.toString()}');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   // 重新載入用戶資訊
   Future<void> reloadUser() async {
     try {
