@@ -399,6 +399,9 @@ class _MapScreenState extends State<MapScreen> {
               _buildTopBar(),
               _buildStatusIndicators(locationProvider, messageProvider),
               _buildBottomWidgets(locationProvider),
+              // 位置權限請求提示
+              if (locationProvider.isLoading && locationProvider.currentPosition == null)
+                _buildLocationPermissionPrompt(locationProvider),
               // 添加美觀的覆蓋層遮擋底部版權信息
               Positioned(
                 bottom: 0,
@@ -1602,6 +1605,75 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                     textAlign: TextAlign.center,
                   ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 位置權限請求提示
+  Widget _buildLocationPermissionPrompt(LocationProvider locationProvider) {
+    return Positioned(
+      top: 100,
+      left: 20,
+      right: 20,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.location_on,
+              color: Colors.blue,
+              size: 32,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '正在請求位置權限',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              '請允許應用訪問您的位置，以便提供更好的服務',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.black54,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            if (locationProvider.errorMessage != null)
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Text(
+                  locationProvider.errorMessage!,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.red.shade700,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ),
           ],

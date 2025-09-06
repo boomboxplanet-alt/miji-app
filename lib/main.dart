@@ -12,7 +12,6 @@ import 'providers/location_provider.dart';
 import 'providers/message_provider.dart';
 import 'providers/task_provider.dart';
 import 'providers/auth_provider.dart';
-import 'screens/intro_screen.dart';
 import 'screens/map_screen.dart';
 import 'screens/map_test_screen.dart';
 
@@ -59,7 +58,7 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        home: const IntroScreen(),
+        home: const MapScreen(),
         routes: {
           '/map': (context) => const MapScreen(),
           '/map-test': (context) => const MapTestScreen(),
