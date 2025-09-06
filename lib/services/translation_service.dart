@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 
@@ -98,7 +99,21 @@ class TranslationService {
     if (isMockApi) {
       // 模擬：根據座標判斷國家
       try {
-        Position position = await Geolocator.getCurrentPosition();
+        Position position;
+        if (kIsWeb) {
+          // Web 平台的特殊處理
+          try {
+            position = await Geolocator.getCurrentPosition(
+              desiredAccuracy: LocationAccuracy.medium,
+              timeLimit: const Duration(seconds: 5),
+            );
+          } catch (e) {
+            print('Web 位置獲取失敗，返回默認值: $e');
+            return 'TW';
+          }
+        } else {
+          position = await Geolocator.getCurrentPosition();
+        }
         return await _getCountryCodeFromCoordinates(position.latitude, position.longitude);
       } catch (e) {
         // 如果無法獲取位置，返回默認值
@@ -107,7 +122,21 @@ class TranslationService {
     }
     
     try {
-      Position position = await Geolocator.getCurrentPosition();
+      Position position;
+      if (kIsWeb) {
+        // Web 平台的特殊處理
+        try {
+          position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.medium,
+            timeLimit: const Duration(seconds: 5),
+          );
+        } catch (e) {
+          print('Web 位置獲取失敗，返回默認值: $e');
+          return 'TW';
+        }
+      } else {
+        position = await Geolocator.getCurrentPosition();
+      }
       // 使用反向地理編碼獲取國家代碼
       // 這裡需要實際的地理編碼API
       return await _getCountryCodeFromCoordinates(position.latitude, position.longitude);

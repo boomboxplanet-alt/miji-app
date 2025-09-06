@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:geolocator/geolocator.dart';
 
 class AppState extends ChangeNotifier {
@@ -48,9 +49,38 @@ class AppState extends ChangeNotifier {
   Future<Position?> getCurrentLocation() async {
     try {
       setLoading(true);
-      final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+      Position? position;
+      
+      if (kIsWeb) {
+        // Web 平台的特殊處理
+        try {
+          position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.medium,
+            timeLimit: const Duration(seconds: 10),
+          );
+        } catch (e) {
+          print('Web 位置獲取失敗，使用預設位置: $e');
+          // 使用預設位置（澳門）
+          position = Position(
+            latitude: 22.1987,
+            longitude: 113.5439,
+            timestamp: DateTime.now(),
+            accuracy: 100.0,
+            altitude: 0.0,
+            heading: 0.0,
+            speed: 0.0,
+            speedAccuracy: 0.0,
+            altitudeAccuracy: 0.0,
+            headingAccuracy: 0.0,
+          );
+        }
+      } else {
+        // 移動平台的處理
+        position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        );
+      }
+      
       setCurrentLocation(position);
       return position;
     } catch (e) {
