@@ -22,7 +22,7 @@ void main() async {
   // 初始化 Hive
   await Hive.initFlutter();
   await Hive.openBox('messages');
-  await Hive.openBox('settings');
+  await Hive.openBox('tasks');
   
   // 暫時註釋掉 Firebase 初始化
   // await FirebaseService.instance.initialize();
