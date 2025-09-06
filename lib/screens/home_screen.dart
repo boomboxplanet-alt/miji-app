@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:math';
-import 'chat_screen.dart';
 import '../providers/location_provider.dart';
 import '../providers/message_provider.dart';
 import '../providers/task_provider.dart';
 import '../providers/auth_provider.dart';
+import 'chat_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -64,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8E8F0),
+      backgroundColor: const Color(0xFFF8E8F0), // 淺粉色背景
       body: MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => LocationProvider()),
@@ -124,20 +124,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              '6:41',
+              '9:41',
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
-                color: Colors.black,
+                color: Colors.black87,
               ),
             ),
             Row(
               children: [
-                const Icon(Icons.signal_cellular_4_bar, size: 16, color: Colors.black),
+                const Icon(Icons.signal_cellular_4_bar, size: 16, color: Colors.black87),
                 const SizedBox(width: 4),
-                const Icon(Icons.wifi, size: 16, color: Colors.black),
+                const Icon(Icons.wifi, size: 16, color: Colors.black87),
                 const SizedBox(width: 4),
-                const Icon(Icons.battery_full, size: 16, color: Colors.black),
+                const Icon(Icons.battery_full, size: 16, color: Colors.black87),
               ],
             ),
           ],
@@ -149,187 +149,162 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildTopHeader() {
     return Positioned(
       top: 60,
-      left: 20,
-      right: 20,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Miji 標題氣泡
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFE4B5), // 淺桃色
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Text(
-              'Miji',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF8B4513), // 深棕色
-                fontStyle: FontStyle.italic,
-              ),
-            ),
+      left: 0,
+      right: 0,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: const Text(
+          'Miji',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
           ),
-          // 笑臉圖標
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8E8F0),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Center(
-              child: Text(
-                ':)',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-          ),
-        ],
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }
 
   Widget _buildCentralArea() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+    return Positioned(
+      top: 120,
+      left: 0,
+      right: 0,
+      bottom: 200,
+      child: Stack(
         children: [
           // 中央笑臉按鈕
-          AnimatedBuilder(
-            animation: _pulseAnimation,
-            builder: (context, child) {
-              return Transform.scale(
-                scale: _pulseAnimation.value,
-                child: GestureDetector(
-                  onTap: () {
-                    // 點擊中央按鈕的動作
-                    _showMessageDialog();
-                  },
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFB6C1), // 粉色
-                      borderRadius: BorderRadius.circular(40),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.pink.withOpacity(0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: const Center(
-                      child: Text(
-                        ':)',
-                        style: TextStyle(
-                          fontSize: 32,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-          
-          const SizedBox(height: 40),
+          _buildCentralSmileyButton(),
           
           // 周圍功能按鈕
-          _buildSurroundingButtons(),
+          _buildFunctionalButtons(),
         ],
       ),
     );
   }
 
-  Widget _buildSurroundingButtons() {
+  Widget _buildCentralSmileyButton() {
+    return Center(
+      child: AnimatedBuilder(
+        animation: _pulseAnimation,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _pulseAnimation.value,
+            child: GestureDetector(
+              onTap: _showMessageDialog,
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF69B4), // 粉色
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFF69B4).withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.sentiment_very_satisfied,
+                  size: 60,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildFunctionalButtons() {
     return AnimatedBuilder(
       animation: _rotationAnimation,
       builder: (context, child) {
-        return Transform.rotate(
-          angle: _rotationAnimation.value,
-          child: SizedBox(
-            width: 200,
-            height: 200,
-            child: Stack(
-              children: [
-                // Message 按鈕 (上方)
-                _buildFunctionButton(
-                  'Message',
-                  Icons.chat_bubble,
-                  const Color(0xFFFFB6C1),
-                  const Color(0xFFE91E63),
-                  const Offset(0, -80),
-                ),
-                
-                // AI suggestion 按鈕 (左中)
-                _buildFunctionButton(
-                  'AI suggestion',
-                  Icons.auto_awesome,
-                  const Color(0xFFDDA0DD),
-                  const Color(0xFF9C27B0),
-                  const Offset(-80, 0),
-                ),
-                
-                // 30 min 按鈕 (右中)
-                _buildFunctionButton(
-                  '30 min',
-                  Icons.access_time,
-                  const Color(0xFFFFE4B5),
-                  const Color(0xFFFF9800),
-                  const Offset(80, 0),
-                ),
-                
-                // Anonymous 按鈕 (左下)
-                _buildFunctionButton(
-                  'Anonymous',
-                  Icons.visibility_off,
-                  const Color(0xFFDDA0DD),
-                  const Color(0xFF9C27B0),
-                  const Offset(-60, 60),
-                ),
-                
-                // Distance 按鈕 (右下)
-                _buildFunctionButton(
-                  'Distance',
-                  Icons.location_on,
-                  const Color(0xFFFFE4B5),
-                  const Color(0xFFFF9800),
-                  const Offset(60, 60),
-                ),
-              ],
+        return Stack(
+          children: [
+            // Message 按鈕 (上方)
+            _buildRotatingButton(
+              angle: _rotationAnimation.value,
+              radius: 80,
+              icon: Icons.message,
+              label: 'Message',
+              onTap: () => _showFunctionDialog('Message'),
             ),
-          ),
+            
+            // AI suggestion 按鈕 (右上方)
+            _buildRotatingButton(
+              angle: _rotationAnimation.value + pi / 2.5,
+              radius: 80,
+              icon: Icons.psychology,
+              label: 'AI suggestion',
+              onTap: () => _showFunctionDialog('AI suggestion'),
+            ),
+            
+            // 30 min 按鈕 (右下方)
+            _buildRotatingButton(
+              angle: _rotationAnimation.value + pi,
+              radius: 80,
+              icon: Icons.access_time,
+              label: '30 min',
+              onTap: () => _showFunctionDialog('30 min'),
+            ),
+            
+            // Anonymous 按鈕 (左下方)
+            _buildRotatingButton(
+              angle: _rotationAnimation.value + pi * 1.5,
+              radius: 80,
+              icon: Icons.visibility_off,
+              label: 'Anonymous',
+              onTap: () => _showFunctionDialog('Anonymous'),
+            ),
+            
+            // Distance 按鈕 (左上方)
+            _buildRotatingButton(
+              angle: _rotationAnimation.value + pi * 2,
+              radius: 80,
+              icon: Icons.location_on,
+              label: 'Distance',
+              onTap: () => _showFunctionDialog('Distance'),
+            ),
+          ],
         );
       },
     );
   }
 
-  Widget _buildFunctionButton(String label, IconData icon, Color bgColor, Color iconColor, Offset offset) {
+  Widget _buildRotatingButton({
+    required double angle,
+    required double radius,
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    final centerX = MediaQuery.of(context).size.width / 2;
+    final centerY = MediaQuery.of(context).size.height / 2 - 50;
+    
+    final x = centerX + radius * cos(angle);
+    final y = centerY + radius * sin(angle);
+    
     return Positioned(
-      left: 100 + offset.dx - 30,
-      top: 100 + offset.dy - 30,
+      left: x - 25,
+      top: y - 25,
       child: GestureDetector(
-        onTap: () {
-          _showFunctionDialog(label);
-        },
+        onTap: onTap,
         child: Container(
-          width: 60,
-          height: 60,
+          width: 50,
+          height: 50,
           decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(30),
+            color: Colors.white,
+            shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: bgColor.withOpacity(0.3),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -338,16 +313,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             children: [
               Icon(
                 icon,
-                color: iconColor,
                 size: 20,
+                color: const Color(0xFFFF69B4),
               ),
-              const SizedBox(height: 2),
               Text(
                 label,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 8,
-                  color: iconColor,
-                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFFF69B4),
+                  fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -360,64 +334,145 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildBottomArea() {
     return Positioned(
-      bottom: 40,
-      left: 20,
-      right: 20,
+      bottom: 0,
+      left: 0,
+      right: 0,
       child: Column(
         children: [
-          // Hello there 按鈕
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFB6C1),
-              borderRadius: BorderRadius.circular(25),
+          // Hello there! 按鈕
+          _buildHelloThereButton(),
+          
+          // 加號按鈕
+          _buildPlusButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHelloThereButton() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: ElevatedButton(
+        onPressed: _showHelloDialog,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: const Color(0xFFFF69B4),
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
+          elevation: 4,
+        ),
+        child: const Text(
+          'Hello there!',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlusButton() {
+    return Positioned(
+      bottom: 20,
+      right: 20,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ChatScreen()),
+          );
+        },
+        child: Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            color: const Color(0xFFFF69B4),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFFF69B4).withOpacity(0.3),
+                blurRadius: 15,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: const Icon(
+            Icons.add,
+            size: 30,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLocationPermissionPrompt(LocationProvider locationProvider) {
+    return Positioned(
+      top: 100,
+      left: 20,
+      right: 20,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
             ),
-            child: const Text(
-              'Hello there!',
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.location_on,
+              color: Colors.blue,
+              size: 32,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '正在請求位置權限',
               style: TextStyle(
                 fontSize: 16,
+                fontWeight: FontWeight.bold,
                 color: Colors.black87,
-                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              '請允許應用訪問您的位置，以便提供更好的服務',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.black54,
               ),
               textAlign: TextAlign.center,
             ),
-          ),
-          
-          const SizedBox(height: 20),
-          
-          // 加號按鈕
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ChatScreen(),
+            const SizedBox(height: 12),
+            if (locationProvider.errorMessage != null)
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.shade200),
                 ),
-              );
-            },
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade800,
-                borderRadius: BorderRadius.circular(30),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
+                child: Text(
+                  locationProvider.errorMessage!,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.red.shade700,
                   ),
-                ],
+                  textAlign: TextAlign.center,
+                ),
               ),
-              child: const Icon(
-                Icons.add,
-                color: Colors.white,
-                size: 30,
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -503,6 +558,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
+  void _showHelloDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hello there!'),
+        content: const Text('歡迎使用 Miji！這是一個基於位置的匿名聊天應用。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('確定'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showAISuggestionDialog() {
     showDialog(
       context: context,
@@ -577,74 +648,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
   }
-
-  Widget _buildLocationPermissionPrompt(LocationProvider locationProvider) {
-    return Positioned(
-      top: 100,
-      left: 20,
-      right: 20,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.location_on,
-              color: Colors.blue,
-              size: 32,
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              '正在請求位置權限',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              '請允許應用訪問您的位置，以便提供更好的服務',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.black54,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            if (locationProvider.errorMessage != null)
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.shade200),
-                ),
-                child: Text(
-                  locationProvider.errorMessage!,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.red.shade700,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 // 背景圖案繪製器
@@ -652,50 +655,40 @@ class BackgroundPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFFF0E6F0).withOpacity(0.3)
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
+      ..color = const Color(0xFFFF69B4).withOpacity(0.1)
+      ..style = PaintingStyle.fill;
 
-    // 繪製網格線
-    const gridSize = 40.0;
-    for (double x = 0; x < size.width; x += gridSize) {
-      canvas.drawLine(
-        Offset(x, 0),
-        Offset(x, size.height),
-        paint,
-      );
-    }
-    for (double y = 0; y < size.height; y += gridSize) {
-      canvas.drawLine(
-        Offset(0, y),
-        Offset(size.width, y),
-        paint,
-      );
+    // 繪製網格圖案
+    for (int i = 0; i < size.width; i += 40) {
+      for (int j = 0; j < size.height; j += 40) {
+        canvas.drawCircle(
+          Offset(i.toDouble(), j.toDouble()),
+          2,
+          paint,
+        );
+      }
     }
 
-    // 繪製波浪線
+    // 繪製波浪圖案
     final wavePaint = Paint()
-      ..color = const Color(0xFFE8B4D1).withOpacity(0.2)
-      ..strokeWidth = 2.0
-      ..style = PaintingStyle.stroke;
+      ..color = const Color(0xFFFF69B4).withOpacity(0.05)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
 
-    final path = Path();
-    path.moveTo(0, size.height * 0.3);
-    for (double x = 0; x < size.width; x += 10) {
-      final y = size.height * 0.3 + 20 * sin(x / size.width * 2 * pi);
-      path.lineTo(x, y);
+    for (int i = 0; i < 5; i++) {
+      final path = Path();
+      final y = size.height * 0.2 + i * size.height * 0.15;
+      
+      path.moveTo(0, y);
+      for (double x = 0; x <= size.width; x += 5) {
+        final waveY = y + sin(x * 0.01 + i) * 10;
+        path.lineTo(x, waveY);
+      }
+      
+      canvas.drawPath(path, wavePaint);
     }
-    canvas.drawPath(path, wavePaint);
-
-    final path2 = Path();
-    path2.moveTo(0, size.height * 0.7);
-    for (double x = 0; x < size.width; x += 10) {
-      final y = size.height * 0.7 + 15 * cos(x / size.width * 2 * pi);
-      path2.lineTo(x, y);
-    }
-    canvas.drawPath(path2, wavePaint);
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

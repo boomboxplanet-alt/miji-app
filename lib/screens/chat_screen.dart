@@ -5,6 +5,7 @@ import '../providers/location_provider.dart';
 import '../providers/message_provider.dart';
 import '../providers/task_provider.dart';
 import '../providers/auth_provider.dart';
+import 'home_screen.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -14,46 +15,32 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
   final List<ChatMessage> _messages = [];
-  int _currentBytes = 0;
 
   @override
   void initState() {
     super.initState();
-    _messageController.addListener(_updateByteCount);
     _loadSampleMessages();
   }
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _messageController.dispose();
-    super.dispose();
-  }
-
-  void _updateByteCount() {
-    setState(() {
-      _currentBytes = _messageController.text.length;
-    });
-  }
-
   void _loadSampleMessages() {
-    _messages.addAll([
-      ChatMessage('Hello there!', true, const Color(0xFFFFB6C1)),
-      ChatMessage('Don\'t forget to have fun!', false, const Color(0xFF87CEEB)),
-      ChatMessage('Have a great day!', true, const Color(0xFFDDA0DD)),
-      ChatMessage(':)', true, const Color(0xFFF8E8F0)),
-      ChatMessage('Have a great day!', false, const Color(0xFFFFE4B5)),
-      ChatMessage('Hello there!\nSuggest a reply', true, const Color(0xFFF5DEB3)),
-    ]);
+    setState(() {
+      _messages.addAll([
+        ChatMessage('Hello! How are you?', false, const Color(0xFF4A90E2)),
+        ChatMessage('I\'m doing great, thanks!', true, const Color(0xFF50C878)),
+        ChatMessage('What are you up to today?', false, const Color(0xFF4A90E2)),
+        ChatMessage('Just exploring the city. It\'s beautiful here!', true, const Color(0xFF50C878)),
+        ChatMessage('Have a great day!', false, const Color(0xFF4A90E2)),
+        ChatMessage('Hello there!\nSuggest a reply', true, const Color(0xFFF5DEB3)),
+      ]);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8E8F0),
+      backgroundColor: const Color(0xFFF8E8F0), // 淺粉色背景
       body: MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => LocationProvider()),
@@ -71,11 +58,18 @@ class _ChatScreenState extends State<ChatScreen> {
                 // 狀態欄
                 _buildStatusBar(),
                 
-                // 聊天內容
-                _buildChatContent(messageProvider),
+                // 聊天標題
+                _buildChatHeader(),
+                
+                // 訊息列表
+                _buildMessageList(messageProvider),
+                
+                // 輸入區域
+                _buildInputArea(),
                 
                 // 錯誤提示（如果有）
-                _buildErrorOverlay(locationProvider),
+                if (locationProvider.errorMessage != null)
+                  _buildErrorOverlay(locationProvider),
                 
                 // 底部加號按鈕
                 _buildBottomPlusButton(),
@@ -109,20 +103,20 @@ class _ChatScreenState extends State<ChatScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              '6:41',
+              '9:41',
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
-                color: Colors.black,
+                color: Colors.black87,
               ),
             ),
             Row(
               children: [
-                const Icon(Icons.signal_cellular_4_bar, size: 16, color: Colors.black),
+                const Icon(Icons.signal_cellular_4_bar, size: 16, color: Colors.black87),
                 const SizedBox(width: 4),
-                const Icon(Icons.wifi, size: 16, color: Colors.black),
+                const Icon(Icons.wifi, size: 16, color: Colors.black87),
                 const SizedBox(width: 4),
-                const Icon(Icons.battery_full, size: 16, color: Colors.black),
+                const Icon(Icons.battery_full, size: 16, color: Colors.black87),
               ],
             ),
           ],
@@ -131,71 +125,48 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildChatContent(MessageProvider messageProvider) {
+  Widget _buildChatHeader() {
     return Positioned(
       top: 60,
       left: 0,
       right: 0,
-      bottom: 120,
-      child: Column(
-        children: [
-          // 聊天標題
-          _buildChatHeader(),
-          
-          // 訊息列表
-          Expanded(
-            child: _buildMessageList(messageProvider),
-          ),
-          
-          // 輸入區域
-          _buildInputArea(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChatHeader() {
-    return Container(
-      margin: const EdgeInsets.only(top: 20, bottom: 20, left: 20, right: 20),
-      child: Row(
-        children: [
-          // Miji 標題氣泡
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFE4B5), // 淺桃色
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Text(
-              'Miji',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF8B4513), // 深棕色
-                fontStyle: FontStyle.italic,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Row(
+          children: [
+            // Miji 氣泡
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF69B4),
+                borderRadius: BorderRadius.circular(20),
               ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          // 笑臉圖標
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8E8F0),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Center(
-              child: Text(
-                ':)',
+              child: const Text(
+                'Miji',
                 style: TextStyle(
+                  color: Colors.white,
                   fontSize: 16,
-                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+            // 笑臉圖標
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF69B4),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.sentiment_very_satisfied,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -213,13 +184,19 @@ class _ChatScreenState extends State<ChatScreen> {
       }
     }
     
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      itemCount: allMessages.length,
-      itemBuilder: (context, index) {
-        final message = allMessages[index];
-        return _buildMessageBubble(message, index);
-      },
+    return Positioned(
+      top: 120,
+      left: 0,
+      right: 0,
+      bottom: 120,
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        itemCount: allMessages.length,
+        itemBuilder: (context, index) {
+          final message = allMessages[index];
+          return _buildMessageBubble(message, index);
+        },
+      ),
     );
   }
 
@@ -229,25 +206,8 @@ class _ChatScreenState extends State<ChatScreen> {
       child: Row(
         mainAxisAlignment: message.isLeft ? MainAxisAlignment.start : MainAxisAlignment.end,
         children: [
-          if (message.isLeft) ...[
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8E8F0),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Center(
-                child: Text(
-                  ':)',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
+          if (!message.isLeft) ...[
+            const SizedBox(width: 50),
           ],
           Flexible(
             child: Container(
@@ -255,57 +215,26 @@ class _ChatScreenState extends State<ChatScreen> {
               decoration: BoxDecoration(
                 color: message.color,
                 borderRadius: BorderRadius.circular(20),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    message.content,
-                    style: const TextStyle(
-                      color: Colors.black87,
-                      fontSize: 14,
-                    ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
                   ),
-                  if (message.content.contains('Suggest a reply')) ...[
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Text(
-                        'Suggest a reply',
-                        style: TextStyle(
-                          color: Colors.black54,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ],
                 ],
               ),
-            ),
-          ),
-          if (!message.isLeft) ...[
-            const SizedBox(width: 8),
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8E8F0),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Center(
-                child: Text(
-                  ':)',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
+              child: Text(
+                message.content,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
+          ),
+          if (message.isLeft) ...[
+            const SizedBox(width: 50),
           ],
         ],
       ),
@@ -313,147 +242,74 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildInputArea() {
-    return Container(
-      margin: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          // 顯示名稱輸入
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(25),
-              border: Border.all(color: Colors.grey.shade300),
-            ),
-            child: Row(
-              children: [
-                const Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: '輸入您的顯示名稱',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE8B4D1),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: const Text(
-                    '匿名',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          const SizedBox(height: 12),
-          
-          // 訊息輸入
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(25),
-              border: Border.all(color: Colors.grey.shade300),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.edit, color: Colors.grey, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: const InputDecoration(
-                      hintText: '說點什麼...(最多200字節)',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                ),
-                Text(
-                  '$_currentBytes/200 字節',
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          const SizedBox(height: 12),
-          
-          // 按鈕區域
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE8B4D1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Text(
-                  '泡泡設置',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: _sendMessage,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF4A90E2),
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '發送',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(width: 4),
-                      Icon(
-                        Icons.play_arrow,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorOverlay(LocationProvider locationProvider) {
-    if (locationProvider.errorMessage == null) return const SizedBox.shrink();
-    
     return Positioned(
       bottom: 80,
       left: 0,
       right: 0,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(25),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: TextField(
+                  controller: _messageController,
+                  decoration: const InputDecoration(
+                    hintText: 'Type a message...',
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  ),
+                  onSubmitted: (text) => _sendMessage(),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            GestureDetector(
+              onTap: _sendMessage,
+              child: Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF69B4),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFF69B4).withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.send,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorOverlay(LocationProvider locationProvider) {
+    return Positioned(
+      bottom: 140,
+      left: 20,
+      right: 20,
+      child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.black.withOpacity(0.8),
@@ -477,19 +333,29 @@ class _ChatScreenState extends State<ChatScreen> {
       right: 20,
       child: GestureDetector(
         onTap: () {
-          Navigator.pop(context);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
         },
         child: Container(
-          width: 56,
-          height: 56,
+          width: 60,
+          height: 60,
           decoration: BoxDecoration(
-            color: Colors.grey.shade800,
-            borderRadius: BorderRadius.circular(28),
+            color: const Color(0xFFFF69B4),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFFF69B4).withOpacity(0.3),
+                blurRadius: 15,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
           child: const Icon(
             Icons.add,
+            size: 30,
             color: Colors.white,
-            size: 24,
           ),
         ),
       ),
@@ -536,50 +402,40 @@ class BackgroundPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFFF0E6F0).withOpacity(0.3)
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
+      ..color = const Color(0xFFFF69B4).withOpacity(0.1)
+      ..style = PaintingStyle.fill;
 
-    // 繪製網格線
-    const gridSize = 40.0;
-    for (double x = 0; x < size.width; x += gridSize) {
-      canvas.drawLine(
-        Offset(x, 0),
-        Offset(x, size.height),
-        paint,
-      );
-    }
-    for (double y = 0; y < size.height; y += gridSize) {
-      canvas.drawLine(
-        Offset(0, y),
-        Offset(size.width, y),
-        paint,
-      );
+    // 繪製網格圖案
+    for (int i = 0; i < size.width; i += 40) {
+      for (int j = 0; j < size.height; j += 40) {
+        canvas.drawCircle(
+          Offset(i.toDouble(), j.toDouble()),
+          2,
+          paint,
+        );
+      }
     }
 
-    // 繪製波浪線
+    // 繪製波浪圖案
     final wavePaint = Paint()
-      ..color = const Color(0xFFE8B4D1).withOpacity(0.2)
-      ..strokeWidth = 2.0
-      ..style = PaintingStyle.stroke;
+      ..color = const Color(0xFFFF69B4).withOpacity(0.05)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
 
-    final path = Path();
-    path.moveTo(0, size.height * 0.3);
-    for (double x = 0; x < size.width; x += 10) {
-      final y = size.height * 0.3 + 20 * sin(x / size.width * 2 * pi);
-      path.lineTo(x, y);
+    for (int i = 0; i < 5; i++) {
+      final path = Path();
+      final y = size.height * 0.2 + i * size.height * 0.15;
+      
+      path.moveTo(0, y);
+      for (double x = 0; x <= size.width; x += 5) {
+        final waveY = y + sin(x * 0.01 + i) * 10;
+        path.lineTo(x, waveY);
+      }
+      
+      canvas.drawPath(path, wavePaint);
     }
-    canvas.drawPath(path, wavePaint);
-
-    final path2 = Path();
-    path2.moveTo(0, size.height * 0.7);
-    for (double x = 0; x < size.width; x += 10) {
-      final y = size.height * 0.7 + 15 * cos(x / size.width * 2 * pi);
-      path2.lineTo(x, y);
-    }
-    canvas.drawPath(path2, wavePaint);
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
