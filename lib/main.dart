@@ -12,9 +12,9 @@ import 'providers/location_provider.dart';
 import 'providers/message_provider.dart';
 import 'providers/task_provider.dart';
 import 'providers/auth_provider.dart';
+import 'screens/home_screen.dart';
 import 'screens/map_screen.dart';
 import 'screens/map_test_screen.dart';
-import 'screens/chat_map_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        home: const ChatMapScreen(),
+        home: const HomeScreen(),
         routes: {
           '/map': (context) => const MapScreen(),
           '/map-test': (context) => const MapTestScreen(),
