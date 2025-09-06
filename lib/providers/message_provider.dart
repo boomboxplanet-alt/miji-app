@@ -57,6 +57,12 @@ class MessageProvider extends ChangeNotifier {
     _botService.setOnBotMessageGenerated((content, lat, lng, radius, duration) {
       _addBotMessage(content, lat, lng, radius, duration);
     });
+    
+    // 設置獲取訊息數量的回調函數
+    _botService.setOnGetMessageCount(() {
+      return _messages.length;
+    });
+    
     // 確保機器人服務預設為啟用狀態
     _botService.setEnabled(true);
   }

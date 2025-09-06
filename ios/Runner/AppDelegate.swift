@@ -13,8 +13,8 @@ import FirebaseCore
     // 配置 Firebase
     FirebaseApp.configure()
     
-    // 配置 Google Maps
-    GMSServices.provideAPIKey("AIzaSyB5EIX3h6jLAF7C_5_fsE_lOQUjTMr7J58")
+            // 配置 Google Maps
+        GMSServices.provideAPIKey("AIzaSyAx0HpzU9SSQHKba8wsl-i_z-Gid5Sa9kQ")
     
     // 註冊 Flutter 插件
     GeneratedPluginRegistrant.register(with: self)

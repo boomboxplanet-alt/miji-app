@@ -66,7 +66,7 @@ flutter build web
 ```xml
 <meta-data
     android:name="com.google.android.geo.API_KEY"
-    android:value="AIzaSyB5EIX3h6jLAF7C_5_fsE_lOQUjTMr7J58"/>
+    android:value="AIzaSyAx0HpzU9SSQHKba8wsl-i_z-Gid5Sa9kQ"/>
 ```
 
 **注意**: 請確保您已啟用以下API服務：

@@ -32,13 +32,13 @@ class AuthProvider extends ChangeNotifier {
     _user = _authService.currentUser;
   }
 
-  // Google登入
-  Future<bool> signInWithGoogle() async {
+  // 訪客登入
+  Future<bool> signInAsGuest() async {
     try {
       _setLoading(true);
       _clearError();
       
-      final user = await _authService.signInWithGoogle();
+      final user = await _authService.signInAsGuest();
       
       if (user != null) {
         _user = user;
@@ -48,7 +48,7 @@ class AuthProvider extends ChangeNotifier {
       
       return false;
     } catch (e) {
-      _setError('Google登入失敗: ${e.toString()}');
+      _setError('訪客登入失敗: ${e.toString()}');
       return false;
     } finally {
       _setLoading(false);

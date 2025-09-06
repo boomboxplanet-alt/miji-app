@@ -1,58 +1,54 @@
 name: miji_app
-description: "秘跡 - 限時限地的隱密訊息應用"
+description: "A new Flutter project."
 publish_to: 'none'
-
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.2.0 <4.0.0'
+  sdk: '>=3.4.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   
-  # Firebase 核心功能 - 兼容 Dart SDK 3.4.0
-  firebase_core: ^2.24.2
-  firebase_auth: ^4.15.3
-  
-  # Google 登入 - 降級到兼容版本
-  google_sign_in: ^6.1.6
-  
-  # Cloud Firestore 數據庫 - 兼容版本
-  cloud_firestore: ^4.13.6
+  # 狀態管理
+  provider: ^6.1.1
   
   # 地圖和位置服務
-  google_maps_flutter: ^2.5.0
+  google_maps_flutter: ^2.5.3
   geolocator: ^10.1.0
-  
-  # 狀態管理和UI
-  provider: ^6.1.1
-  google_fonts: ^6.1.0
   
   # 本地存儲
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   
-  # 其他功能
-  http: ^1.2.0
-  audioplayers: ^5.2.1
+  # Firebase 服務 - 暫時註釋掉以解決依賴問題
+  # firebase_core: ^2.24.2
+  # firebase_auth: ^4.15.3
+  # cloud_firestore: ^4.13.6
+  
+  # Google 登入 - 暫時註釋掉以解決依賴問題
+  # google_sign_in: ^6.1.6
+  
+  # UI 組件
+  google_fonts: ^6.3.0
   confetti: ^0.7.0
+  
+  # 音頻播放
+  audioplayers: ^5.2.1
+  
+  # HTTP 請求
+  http: ^1.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
-  hive_generator: ^2.0.1
   build_runner: ^2.4.7
+  hive_generator: ^2.0.1
 
 flutter:
   uses-material-design: true
   
   assets:
     - assets/images/
-    - assets/animations/
-    - assets/fonts/

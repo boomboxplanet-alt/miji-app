@@ -264,6 +264,11 @@ class BotService {
   }
 
   void _generateBotMessage() {
+    // 檢查當前訊息數量，如果超過10則則不生成機器人訊息
+    if (_getCurrentMessageCount() >= 10) {
+      return;
+    }
+    
     final message = _selectRandomMessage();
     
     // 如果訊息為空（真實用戶數量達到3個以上），則不生成
@@ -388,10 +393,17 @@ class BotService {
   // 回調函數，用於通知外部有新的機器人訊息
   Function(String content, double lat, double lng, double radius, Duration duration)? _onBotMessageGenerated;
   
+  // 回調函數，用於獲取當前訊息數量
+  Function()? _onGetMessageCount;
+  
   void setOnBotMessageGenerated(
     Function(String content, double lat, double lng, double radius, Duration duration) callback
   ) {
     _onBotMessageGenerated = callback;
+  }
+
+  void setOnGetMessageCount(Function() callback) {
+    _onGetMessageCount = callback;
   }
 
   void setEnabled(bool enabled) {
@@ -455,5 +467,12 @@ class BotService {
       'isEnabled': _isEnabled,
       'nextMessageIn': _botTimer?.isActive == true ? 'scheduled' : 'not scheduled',
     };
+  }
+
+  // 獲取當前訊息數量（需要通過回調從MessageProvider獲取）
+  int _getCurrentMessageCount() {
+    // 這裡需要從MessageProvider獲取當前訊息數量
+    // 由於循環依賴問題，我們通過回調來獲取
+    return _onGetMessageCount?.call() ?? 0;
   }
 }

@@ -1,5 +1,3 @@
-import 'package:google_sign_in/google_sign_in.dart';
-
 class AuthUser {
   final String id;
   final String? email;
@@ -19,13 +17,6 @@ class AuthService {
   factory AuthService() => _instance;
   AuthService._internal();
 
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: [
-      'email',
-      'profile',
-    ],
-  );
-
   AuthUser? _currentUser;
 
   // 獲取當前用戶
@@ -34,40 +25,27 @@ class AuthService {
   // 檢查是否已登入
   bool get isSignedIn => _currentUser != null;
 
-  // Google登入
-  Future<AuthUser?> signInWithGoogle() async {
+  // 簡化登入（暫時使用訪客模式）
+  Future<AuthUser?> signInAsGuest() async {
     try {
-      // 觸發Google登入流程
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      
-      if (googleUser == null) {
-        // 用戶取消登入
-        return null;
-      }
-
-      // 創建AuthUser對象
+      // 創建訪客用戶
       _currentUser = AuthUser(
-        id: googleUser.id,
-        email: googleUser.email,
-        displayName: googleUser.displayName,
-        photoURL: googleUser.photoUrl,
+        id: 'guest_${DateTime.now().millisecondsSinceEpoch}',
+        email: null,
+        displayName: '訪客',
+        photoURL: null,
       );
       
       return _currentUser;
     } catch (e) {
-      print('Google登入錯誤: $e');
-      // 檢查是否為Client ID相關錯誤
-      if (e.toString().contains('invalid_client') || e.toString().contains('401')) {
-        throw Exception('Google登入配置錯誤：請聯繫開發者配置正確的Client ID');
-      }
-      rethrow;
+      print('訪客登入錯誤: $e');
+      return null;
     }
   }
 
   // 登出
   Future<void> signOut() async {
     try {
-      await _googleSignIn.signOut();
       _currentUser = null;
     } catch (e) {
       print('登出錯誤: $e');

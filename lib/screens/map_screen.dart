@@ -454,8 +454,10 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ],
         ),
-        child: Row(
-          children: [
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
             // Logo
             Container(
               width: 36,
@@ -635,9 +637,12 @@ class _MapScreenState extends State<MapScreen> {
             ),
             const Spacer(),
             // 右側按鈕區域
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+            Flexible(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                 // 登入按鈕
                 Consumer<AuthProvider>(
                   builder: (context, authProvider, child) {
@@ -726,9 +731,12 @@ class _MapScreenState extends State<MapScreen> {
                   },
                 ),
               ],
+                ),
+              ),
             ),
           ],
-        ),
+            ),
+          ),
       ),
     );
   }
@@ -1436,7 +1444,7 @@ class _MapScreenState extends State<MapScreen> {
                 return;
               }
 
-              final success = await authProvider.signInWithGoogle();
+              final success = await authProvider.signInAsGuest();
               if (success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('登入成功！')),
