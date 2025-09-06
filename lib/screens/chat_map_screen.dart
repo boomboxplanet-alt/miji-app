@@ -202,58 +202,62 @@ class _ChatMapScreenState extends State<ChatMapScreen> {
   }
 
   Widget _buildChatInterface(LocationProvider locationProvider) {
-    return Column(
+    return Stack(
       children: [
-        // 狀態欄
-        Container(
-          height: 44,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                '6:41',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
-              ),
-              Row(
+        Column(
+          children: [
+            // 狀態欄
+            Container(
+              height: 44,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Icon(Icons.signal_cellular_4_bar, size: 16, color: Colors.black),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.wifi, size: 16, color: Colors.black),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.battery_full, size: 16, color: Colors.black),
+                  const Text(
+                    '6:41',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      const Icon(Icons.signal_cellular_4_bar, size: 16, color: Colors.black),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.wifi, size: 16, color: Colors.black),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.battery_full, size: 16, color: Colors.black),
+                    ],
+                  ),
                 ],
               ),
-            ],
-          ),
-        ),
-        
-        // 聊天內容區域
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              children: [
-                // 聊天標題
-                _buildChatHeader(),
-                
-                // 訊息列表
-                Expanded(
-                  child: _buildMessageList(),
-                ),
-                
-                // 輸入區域
-                _buildInputArea(),
-                
-                // 底部安全區域
-                const SizedBox(height: 34),
-              ],
             ),
-          ),
+            
+            // 聊天內容區域
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    // 聊天標題
+                    _buildChatHeader(),
+                    
+                    // 訊息列表
+                    Expanded(
+                      child: _buildMessageList(),
+                    ),
+                    
+                    // 輸入區域
+                    _buildInputArea(),
+                    
+                    // 底部安全區域
+                    const SizedBox(height: 34),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
         
         // 底部加號按鈕
