@@ -34,7 +34,7 @@ jobs:
         run: flutter pub get
         
       - name: Build web
-        run: flutter build web
+        run: flutter build web --base-href "/miji-app/"
         
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
