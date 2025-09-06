@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'dart:math';
+import '../providers/location_provider.dart';
+import '../providers/message_provider.dart';
+import '../providers/task_provider.dart';
+import '../providers/auth_provider.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -49,23 +54,35 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8E8F0),
-      body: Stack(
-        children: [
-          // 背景圖案
-          _buildBackgroundPattern(),
-          
-          // 狀態欄
-          _buildStatusBar(),
-          
-          // 聊天內容
-          _buildChatContent(),
-          
-          // 錯誤提示（如果有）
-          _buildErrorOverlay(),
-          
-          // 底部加號按鈕
-          _buildBottomPlusButton(),
+      body: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => LocationProvider()),
+          ChangeNotifierProvider(create: (_) => MessageProvider()),
+          ChangeNotifierProvider(create: (_) => TaskProvider()),
+          ChangeNotifierProvider(create: (_) => AuthProvider()),
         ],
+        child: Consumer2<MessageProvider, LocationProvider>(
+          builder: (context, messageProvider, locationProvider, child) {
+            return Stack(
+              children: [
+                // 背景圖案
+                _buildBackgroundPattern(),
+                
+                // 狀態欄
+                _buildStatusBar(),
+                
+                // 聊天內容
+                _buildChatContent(messageProvider),
+                
+                // 錯誤提示（如果有）
+                _buildErrorOverlay(locationProvider),
+                
+                // 底部加號按鈕
+                _buildBottomPlusButton(),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -114,7 +131,7 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildChatContent() {
+  Widget _buildChatContent(MessageProvider messageProvider) {
     return Positioned(
       top: 60,
       left: 0,
@@ -127,7 +144,7 @@ class _ChatScreenState extends State<ChatScreen> {
           
           // 訊息列表
           Expanded(
-            child: _buildMessageList(),
+            child: _buildMessageList(messageProvider),
           ),
           
           // 輸入區域
@@ -183,12 +200,24 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildMessageList() {
+  Widget _buildMessageList(MessageProvider messageProvider) {
+    // 合併示例訊息和實際訊息
+    final allMessages = [..._messages];
+    if (messageProvider.messages.isNotEmpty) {
+      for (final msg in messageProvider.messages) {
+        allMessages.add(ChatMessage(
+          msg.content,
+          false, // 用戶發送的訊息
+          const Color(0xFF4A90E2),
+        ));
+      }
+    }
+    
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      itemCount: _messages.length,
+      itemCount: allMessages.length,
       itemBuilder: (context, index) {
-        final message = _messages[index];
+        final message = allMessages[index];
         return _buildMessageBubble(message, index);
       },
     );
@@ -416,7 +445,9 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildErrorOverlay() {
+  Widget _buildErrorOverlay(LocationProvider locationProvider) {
+    if (locationProvider.errorMessage == null) return const SizedBox.shrink();
+    
     return Positioned(
       bottom: 80,
       left: 0,
@@ -428,9 +459,9 @@ class _ChatScreenState extends State<ChatScreen> {
           color: Colors.black.withOpacity(0.8),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Text(
-          'Something went wrong while listening for position updates',
-          style: TextStyle(
+        child: Text(
+          locationProvider.errorMessage!,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 14,
           ),
@@ -467,14 +498,27 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _sendMessage() {
     if (_messageController.text.trim().isNotEmpty) {
-      setState(() {
-        _messages.add(ChatMessage(
-          _messageController.text.trim(),
-          false,
-          const Color(0xFF4A90E2),
-        ));
+      final messageProvider = context.read<MessageProvider>();
+      final locationProvider = context.read<LocationProvider>();
+      
+      if (locationProvider.currentPosition != null) {
+        messageProvider.sendMessage(
+          content: _messageController.text.trim(),
+          latitude: locationProvider.currentPosition!.latitude,
+          longitude: locationProvider.currentPosition!.longitude,
+          radius: 1000.0,
+          duration: const Duration(minutes: 30),
+          isAnonymous: true,
+        );
         _messageController.clear();
-      });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('訊息已發送！')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('無法獲取位置，請稍後再試')),
+        );
+      }
     }
   }
 }

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'dart:math';
 import 'chat_screen.dart';
+import '../providers/location_provider.dart';
+import '../providers/message_provider.dart';
+import '../providers/task_provider.dart';
+import '../providers/auth_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -60,23 +65,39 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8E8F0),
-      body: Stack(
-        children: [
-          // 背景圖案
-          _buildBackgroundPattern(),
-          
-          // 狀態欄
-          _buildStatusBar(),
-          
-          // 頂部標題
-          _buildTopHeader(),
-          
-          // 中央功能區域
-          _buildCentralArea(),
-          
-          // 底部區域
-          _buildBottomArea(),
+      body: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => LocationProvider()),
+          ChangeNotifierProvider(create: (_) => MessageProvider()),
+          ChangeNotifierProvider(create: (_) => TaskProvider()),
+          ChangeNotifierProvider(create: (_) => AuthProvider()),
         ],
+        child: Consumer<LocationProvider>(
+          builder: (context, locationProvider, child) {
+            return Stack(
+              children: [
+                // 背景圖案
+                _buildBackgroundPattern(),
+                
+                // 狀態欄
+                _buildStatusBar(),
+                
+                // 頂部標題
+                _buildTopHeader(),
+                
+                // 中央功能區域
+                _buildCentralArea(),
+                
+                // 底部區域
+                _buildBottomArea(),
+                
+                // 位置權限請求提示
+                if (locationProvider.isLoading && locationProvider.currentPosition == null)
+                  _buildLocationPermissionPrompt(locationProvider),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -402,11 +423,92 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _showMessageDialog() {
+    final messageProvider = context.read<MessageProvider>();
+    final locationProvider = context.read<LocationProvider>();
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('中央按鈕'),
-        content: const Text('您點擊了中央的笑臉按鈕！'),
+        title: const Text('發送訊息'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('您想要發送什麼訊息？'),
+            const SizedBox(height: 16),
+            TextField(
+              decoration: const InputDecoration(
+                hintText: '輸入訊息內容',
+                border: OutlineInputBorder(),
+              ),
+              onSubmitted: (text) {
+                if (text.trim().isNotEmpty && locationProvider.currentPosition != null) {
+                  messageProvider.sendMessage(
+                    content: text.trim(),
+                    latitude: locationProvider.currentPosition!.latitude,
+                    longitude: locationProvider.currentPosition!.longitude,
+                    radius: 1000.0,
+                    duration: const Duration(minutes: 30),
+                    isAnonymous: true,
+                  );
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('訊息已發送！')),
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('取消'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showFunctionDialog(String function) {
+    switch (function) {
+      case 'Message':
+        _showMessageDialog();
+        break;
+      case 'AI suggestion':
+        _showAISuggestionDialog();
+        break;
+      case '30 min':
+        _showTimeSettingsDialog();
+        break;
+      case 'Anonymous':
+        _showAnonymousSettingsDialog();
+        break;
+      case 'Distance':
+        _showDistanceSettingsDialog();
+        break;
+      default:
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(function),
+            content: Text('$function 功能正在開發中...'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('確定'),
+              ),
+            ],
+          ),
+        );
+    }
+  }
+
+  void _showAISuggestionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('AI 建議'),
+        content: const Text('AI 會根據您的位置和時間提供個性化的訊息建議。'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -417,18 +519,129 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  void _showFunctionDialog(String function) {
+  void _showTimeSettingsDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(function),
-        content: Text('您點擊了 $function 功能！'),
+        title: const Text('時間設置'),
+        content: const Text('設置訊息的存在時間，預設為30分鐘。'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('確定'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showAnonymousSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('匿名設置'),
+        content: const Text('選擇是否以匿名方式發送訊息。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('確定'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDistanceSettingsDialog() {
+    final locationProvider = context.read<LocationProvider>();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('距離設置'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('設置訊息的顯示範圍。'),
+            const SizedBox(height: 16),
+            if (locationProvider.currentPosition != null)
+              Text('當前位置: ${locationProvider.currentPosition!.latitude.toStringAsFixed(4)}, ${locationProvider.currentPosition!.longitude.toStringAsFixed(4)}')
+            else
+              const Text('正在獲取位置...'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('確定'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocationPermissionPrompt(LocationProvider locationProvider) {
+    return Positioned(
+      top: 100,
+      left: 20,
+      right: 20,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.location_on,
+              color: Colors.blue,
+              size: 32,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '正在請求位置權限',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              '請允許應用訪問您的位置，以便提供更好的服務',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.black54,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            if (locationProvider.errorMessage != null)
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Text(
+                  locationProvider.errorMessage!,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.red.shade700,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
