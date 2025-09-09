@@ -10,7 +10,7 @@ void main() {
     await Hive.initFlutter();
     
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MijiApp());
+    await tester.pumpWidget(MyApp());
 
     // Verify that the app loads without crashing
     expect(find.byType(MaterialApp), findsOneWidget);

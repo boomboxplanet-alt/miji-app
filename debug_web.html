@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flutter Web 調試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        .info { background-color: #e3f2fd; border-left-color: #2196f3; }
+        .success { background-color: #e8f5e8; border-left-color: #4caf50; }
+        .error { background-color: #ffebee; border-left-color: #f44336; }
+        .warning { background-color: #fff3e0; border-left-color: #ff9800; }
+        
+        #log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Flutter Web 調試工具</h1>
+        
+        <div id="status"></div>
+        
+        <div class="test-section">
+            <h3>🧪 功能測試</h3>
+            <button onclick="testGoogleMaps()">測試 Google Maps</button>
+            <button onclick="testFlutterWeb()">測試 Flutter Web</button>
+            <button onclick="clearLog()">清除日誌</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>📊 系統信息</h3>
+            <div id="systemInfo"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📝 日誌</h3>
+            <div id="log"></div>
+        </div>
+    </div>
+    
+    <script>
+        let logElement;
+        
+        function log(message, type = 'info') {
+            if (!logElement) logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.style.color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'black';
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logElement.appendChild(logEntry);
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+            log(message, type);
+        }
+        
+        function testGoogleMaps() {
+            log('🧪 開始測試 Google Maps...');
+            
+            if (typeof google !== 'undefined' && google.maps) {
+                log('✅ Google Maps API 已加載', 'success');
+                try {
+                    const map = new google.maps.Map(document.createElement('div'), {
+                        center: { lat: 22.1987, lng: 113.5439 },
+                        zoom: 12
+                    });
+                    log('✅ Google Maps 初始化成功', 'success');
+                    updateStatus('✅ Google Maps 測試通過！', 'success');
+                } catch (error) {
+                    log(`❌ Google Maps 初始化失敗: ${error.message}`, 'error');
+                    updateStatus(`❌ Google Maps 測試失敗: ${error.message}`, 'error');
+                }
+            } else {
+                log('❌ Google Maps API 未加載', 'error');
+                updateStatus('❌ Google Maps API 未加載，請檢查 API 金鑰', 'error');
+            }
+        }
+        
+        function testFlutterWeb() {
+            log('🧪 開始測試 Flutter Web...');
+            
+            // 檢查 Flutter 相關文件
+            const flutterFiles = [
+                'flutter_bootstrap.js',
+                'main.dart.js',
+                'index.html'
+            ];
+            
+            let allFilesExist = true;
+            flutterFiles.forEach(file => {
+                fetch(file)
+                    .then(response => {
+                        if (response.ok) {
+                            log(`✅ ${file} 存在`, 'success');
+                        } else {
+                            log(`❌ ${file} 不存在 (${response.status})`, 'error');
+                            allFilesExist = false;
+                        }
+                    })
+                    .catch(error => {
+                        log(`❌ ${file} 檢查失敗: ${error.message}`, 'error');
+                        allFilesExist = false;
+                    });
+            });
+            
+            // 檢查 Flutter 對象
+            setTimeout(() => {
+                if (typeof flutter !== 'undefined') {
+                    log('✅ Flutter 對象已加載', 'success');
+                } else {
+                    log('❌ Flutter 對象未加載', 'error');
+                }
+            }, 2000);
+        }
+        
+        function clearLog() {
+            if (logElement) logElement.innerHTML = '';
+        }
+        
+        function showSystemInfo() {
+            const infoDiv = document.getElementById('systemInfo');
+            infoDiv.innerHTML = `
+                <p><strong>用戶代理:</strong> ${navigator.userAgent}</p>
+                <p><strong>平台:</strong> ${navigator.platform}</p>
+                <p><strong>語言:</strong> ${navigator.language}</p>
+                <p><strong>Cookie 啟用:</strong> ${navigator.cookieEnabled}</p>
+                <p><strong>在線狀態:</strong> ${navigator.onLine ? '在線' : '離線'}</p>
+            `;
+        }
+        
+        // 頁面加載完成後初始化
+        window.onload = function() {
+            log('🚀 頁面加載完成');
+            showSystemInfo();
+            updateStatus('🔍 調試工具已準備就緒，請點擊測試按鈕', 'info');
+            
+            // 自動測試 Google Maps
+            setTimeout(() => {
+                if (typeof google !== 'undefined' && google.maps) {
+                    log('✅ Google Maps API 自動檢測成功', 'success');
+                } else {
+                    log('⚠️ Google Maps API 自動檢測失敗', 'warning');
+                }
+            }, 1000);
+        };
+        
+        // 錯誤捕獲
+        window.onerror = function(message, source, lineno, colno, error) {
+            log(`❌ JavaScript 錯誤: ${message} (${source}:${lineno}:${colno})`, 'error');
+        };
+        
+        // 未處理的 Promise 拒絕
+        window.addEventListener('unhandledrejection', function(event) {
+            log(`❌ 未處理的 Promise 拒絕: ${event.reason}`, 'error');
+        });
+    </script>
+    
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB5EIX3h6jLAF7C_5_fsE_lOQUjTMr7J58"></script>
+</body>
+</html>

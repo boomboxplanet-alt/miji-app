@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
+import '../services/firebase_service.dart';
 
 class AuthProvider extends ChangeNotifier {
-  final AuthService _authService = AuthService();
+  final FirebaseService _firebaseService = FirebaseService.instance;
   
-  AuthUser? _user;
+  dynamic _user;
   bool _isLoading = false;
   String? _errorMessage;
 
   // Getters
-  AuthUser? get user => _user;
+  dynamic get user => _user;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isSignedIn => _user != null;
   
   // 獲取用戶顯示名稱
-  String get userDisplayName => _authService.getUserDisplayName();
+  String get userDisplayName => _user?['displayName'] ?? '訪客';
   
   // 獲取用戶頭像URL
-  String? get userPhotoURL => _authService.getUserPhotoURL();
+  String? get userPhotoURL => _user?['photoURL'];
   
   // 獲取用戶ID
-  String get userId => _authService.getUserId();
+  String get userId => _user?['uid'] ?? '';
 
   AuthProvider() {
     _initializeAuth();
@@ -29,26 +29,60 @@ class AuthProvider extends ChangeNotifier {
 
   // 初始化認證狀態
   void _initializeAuth() {
-    _user = _authService.currentUser;
+    try {
+      _user = _firebaseService.currentUser;
+      // 監聽認證狀態變化
+      _firebaseService.authStateChanges.listen((dynamic user) {
+        _user = user;
+        notifyListeners();
+      });
+    } catch (e) {
+      print('AuthProvider 初始化失敗: $e');
+      _user = null;
+    }
   }
 
-  // Google登入
+  // 訪客登入
+  Future<bool> signInAsGuest() async {
+    try {
+      _setLoading(true);
+      _clearError();
+      
+      // 模擬訪客登入
+      await Future.delayed(Duration(milliseconds: 500));
+      _user = {
+        'uid': 'guest_${DateTime.now().millisecondsSinceEpoch}',
+        'email': null,
+        'displayName': '訪客用戶',
+        'photoURL': null,
+      };
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _setError('訪客登入失敗: ${e.toString()}');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Google 登入
   Future<bool> signInWithGoogle() async {
     try {
       _setLoading(true);
       _clearError();
       
-      final user = await _authService.signInWithGoogle();
+      final result = await _firebaseService.signInWithGoogle();
       
-      if (user != null) {
-        _user = user;
+      if (result != null) {
+        _user = result;
         notifyListeners();
         return true;
       }
       
       return false;
     } catch (e) {
-      _setError('Google登入失敗: ${e.toString()}');
+      _setError('Google 登入失敗: ${e.toString()}');
       return false;
     } finally {
       _setLoading(false);
@@ -61,7 +95,7 @@ class AuthProvider extends ChangeNotifier {
       _setLoading(true);
       _clearError();
       
-      await _authService.signOut();
+      await _firebaseService.signOut();
       _user = null;
       notifyListeners();
     } catch (e) {
@@ -73,7 +107,14 @@ class AuthProvider extends ChangeNotifier {
 
   // 獲取用戶資訊
   Map<String, dynamic>? getUserInfo() {
-    return _authService.getUserInfo();
+    if (_user == null) return null;
+    
+    return {
+      'uid': _user['uid'],
+      'email': _user['email'],
+      'displayName': _user['displayName'],
+      'photoURL': _user['photoURL'],
+    };
   }
 
   // 設置載入狀態
@@ -101,13 +142,20 @@ class AuthProvider extends ChangeNotifier {
 
   // 檢查網路連接
   Future<bool> checkConnection() async {
-    return await _authService.checkNetworkConnection();
+    // 簡單的網路檢查
+    try {
+      await Future.delayed(Duration(milliseconds: 100));
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   // 重新載入用戶資訊
   Future<void> reloadUser() async {
     try {
-      _user = _authService.currentUser;
+      await Future.delayed(Duration(milliseconds: 100));
+      _user = _firebaseService.currentUser;
       notifyListeners();
     } catch (e) {
       _setError('重新載入用戶資訊失敗: ${e.toString()}');

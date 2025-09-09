@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'dart:math' as math;
+import '../services/location_service.dart';
 
 class LocationProvider extends ChangeNotifier {
   Position? _currentPosition;
@@ -16,29 +17,9 @@ class LocationProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 檢查位置服務是否啟用
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        throw Exception('位置服務未啟用');
-      }
-
-      // 檢查位置權限
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          throw Exception('位置權限被拒絕');
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        throw Exception('位置權限被永久拒絕');
-      }
-
-      // 獲取當前位置
-      _currentPosition = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+      // 使用簡化的位置服務
+      final locationService = LocationService();
+      _currentPosition = await locationService.getCurrentPosition();
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -48,7 +29,25 @@ class LocationProvider extends ChangeNotifier {
   }
 
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-    return Geolocator.distanceBetween(lat1, lon1, lat2, lon2);
+    // 使用簡化的距離計算
+    return _calculateDistance(lat1, lon1, lat2, lon2);
+  }
+  
+  // 簡化的距離計算方法
+  double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    const double earthRadius = 6371000; // 地球半徑（米）
+    
+    double lat1Rad = lat1 * 3.14159265359 / 180;
+    double lat2Rad = lat2 * 3.14159265359 / 180;
+    double deltaLatRad = (lat2 - lat1) * 3.14159265359 / 180;
+    double deltaLonRad = (lon2 - lon1) * 3.14159265359 / 180;
+    
+    double a = math.sin(deltaLatRad / 2) * math.sin(deltaLatRad / 2) +
+               math.cos(lat1Rad) * math.cos(lat2Rad) *
+               math.sin(deltaLonRad / 2) * math.sin(deltaLonRad / 2);
+    double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+    
+    return earthRadius * c;
   }
 
   void clearError() {

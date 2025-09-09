@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+// import 'package:geolocator/geolocator.dart';  // 暫時註釋掉
 import '../models/message.dart';
 import '../services/message_service.dart';
 import '../services/bot_service.dart';
@@ -355,7 +355,25 @@ class MessageProvider extends ChangeNotifier {
   }
 
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-    return Geolocator.distanceBetween(lat1, lon1, lat2, lon2);
+    // 使用簡化的距離計算
+    return _calculateDistance(lat1, lon1, lat2, lon2);
+  }
+  
+  // 簡化的距離計算方法
+  double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    const double earthRadius = 6371000; // 地球半徑（米）
+    
+    double lat1Rad = lat1 * math.pi / 180;
+    double lat2Rad = lat2 * math.pi / 180;
+    double deltaLatRad = (lat2 - lat1) * math.pi / 180;
+    double deltaLonRad = (lon2 - lon1) * math.pi / 180;
+    
+    double a = math.sin(deltaLatRad / 2) * math.sin(deltaLatRad / 2) +
+               math.cos(lat1Rad) * math.cos(lat2Rad) *
+               math.sin(deltaLonRad / 2) * math.sin(deltaLonRad / 2);
+    double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+    
+    return earthRadius * c;
   }
   
   // 機器人相關方法

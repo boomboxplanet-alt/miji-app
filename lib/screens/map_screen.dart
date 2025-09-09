@@ -10,10 +10,9 @@ import '../providers/task_provider.dart';
 import '../providers/auth_provider.dart';
 import '../screens/settings_screen.dart';
 import '../screens/task_screen.dart';
-import '../screens/ai_bot_control_screen.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_strings.dart';
-import '../widgets/quick_send_widget.dart';
+import '../widgets/simple_floating_fab.dart';
 import '../widgets/message_bubble_overlay.dart';
 import '../config/ai_bot_config.dart';
 import '../services/ai_geographic_bot_service.dart';
@@ -47,9 +46,10 @@ class _MapScreenState extends State<MapScreen> {
 
 
 
+  // 靜態初始位置 - 使用默認位置，避免在 build 過程中調用 context.read
   static const CameraPosition _kInitialPosition = CameraPosition(
-    target: LatLng(25.0330, 121.5654), // Default location: Taipei 101
-    zoom: 15.0, // 調整為適合查看附近訊息的縮放級別，顯示街道和建築細節
+    target: LatLng(25.0330, 121.5654), // 台北101
+    zoom: 15.0,
   );
 
   // 根據用戶範圍計算適合的縮放級別（進一步最小化到用戶範圍）
@@ -78,7 +78,6 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  // 計算最小縮放級別（顯示用戶範圍的2倍區域，這是最大可放大的限制）
   double _getMinZoomLevel() {
     // 根據用戶範圍計算最小縮放級別
     // 範圍越大，縮放級別越小（顯示更大區域）
@@ -139,6 +138,25 @@ class _MapScreenState extends State<MapScreen> {
       });
     }
   }
+
+
+  // 計算兩點之間的距離（米）
+  double _calculateDistance(double lat1, double lng1, double lat2, double lng2) {
+    const double earthRadius = 6371000; // 地球半徑（米）
+    
+    final double dLat = (lat2 - lat1) * (3.14159265359 / 180);
+    final double dLng = (lng2 - lng1) * (3.14159265359 / 180);
+    
+    final double a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(lat1 * (3.14159265359 / 180)) *
+        math.cos(lat2 * (3.14159265359 / 180)) *
+        math.sin(dLng / 2) * math.sin(dLng / 2);
+    
+    final double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+    
+    return earthRadius * c;
+  }
+
 
   @override
   void dispose() {
@@ -700,19 +718,6 @@ class _MapScreenState extends State<MapScreen> {
                   },
                 ),
                 const SizedBox(width: 8),
-                // AI 機器人按鈕
-                _buildTopBarButton(
-                  icon: Icons.smart_toy,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AIBotControlScreen(),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(width: 8),
                 // 設定按鈕
                 _buildTopBarButton(
                   icon: Icons.tune_rounded,
@@ -755,15 +760,13 @@ class _MapScreenState extends State<MapScreen> {
   Widget _buildBottomWidgets(LocationProvider locationProvider) {
     return Stack(
       children: [
+        // 新的浮動發送按鈕
+        SimpleFloatingFAB(onSend: _handleSendMessage),
+        
+        // 定位按鈕
         Positioned(
-          bottom: MediaQuery.of(context).padding.bottom + 16,
-          left: 16,
-          right: 16,
-          child: QuickSendWidget(onSend: _handleSendMessage),
-        ),
-        Positioned(
-          bottom: MediaQuery.of(context).padding.bottom + 200,
-          right: 20,
+          bottom: 30,
+          left: 20,
           child: Container(
             decoration: BoxDecoration(
               gradient: const LinearGradient(
@@ -987,23 +990,7 @@ class _MapScreenState extends State<MapScreen> {
     _startBubbleRotation();
   }
 
-  double _calculateDistance(
-      double lat1, double lon1, double lat2, double lon2) {
-    const double earthRadius = 6371000; // 地球半徑（米）
-    final double dLat = _degreesToRadians(lat2 - lat1);
-    final double dLon = _degreesToRadians(lon2 - lon1);
-    final double a = math.sin(dLat / 2) * math.sin(dLat / 2) +
-        math.cos(_degreesToRadians(lat1)) *
-            math.cos(_degreesToRadians(lat2)) *
-            math.sin(dLon / 2) *
-            math.sin(dLon / 2);
-    final double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
-    return earthRadius * c;
-  }
 
-  double _degreesToRadians(double degrees) {
-    return degrees * (math.pi / 180);
-  }
 
   void _startBubbleRotation() {
     // 如果已有定時器在運行，先取消
@@ -1436,7 +1423,7 @@ class _MapScreenState extends State<MapScreen> {
                 return;
               }
 
-              final success = await authProvider.signInWithGoogle();
+              final success = await authProvider.signInAsGuest();
               if (success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('登入成功！')),
