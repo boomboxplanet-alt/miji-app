@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
@@ -35,6 +37,8 @@ class _MapScreenState extends State<MapScreen> {
   final GlobalKey _mapKey = GlobalKey();
   Timer? _bubbleRotationTimer;
   int _currentTopBubbleIndex = 0;
+  bool _isCentering = false; // 防止置中循環的標誌
+  bool _isMenuExpanded = false; // 追蹤選單展開狀態
 
   // 獲取用戶的實際範圍權限（基礎+獎勵）
   double _getUserTotalRange() {
@@ -46,10 +50,10 @@ class _MapScreenState extends State<MapScreen> {
 
 
 
-  // 靜態初始位置 - 使用默認位置，避免在 build 過程中調用 context.read
+  // 靜態初始位置 - 使用世界中心位置，避免顯示特定城市
   static const CameraPosition _kInitialPosition = CameraPosition(
-    target: LatLng(25.0330, 121.5654), // 台北101
-    zoom: 15.0,
+    target: LatLng(0.0, 0.0), // 世界中心
+    zoom: 2.0,
   );
 
   // 根據用戶範圍計算適合的縮放級別（進一步最小化到用戶範圍）
@@ -96,6 +100,57 @@ class _MapScreenState extends State<MapScreen> {
   // 計算最大縮放級別
   double _getMaxZoomLevel() {
     return 18.0; // 允許放大到街道級別
+  }
+
+  // 置中到用戶位置
+  void _centerOnUser() {
+    if (_isCentering) return; // 防止重複置中
+    
+    final locationProvider = context.read<LocationProvider>();
+    if (locationProvider.currentPosition == null) return;
+
+    _isCentering = true;
+    final userLat = locationProvider.currentPosition!.latitude;
+    final userLng = locationProvider.currentPosition!.longitude;
+    final currentZoom = (_mapController?.getZoomLevel() as double?) ?? 15.0;
+
+    _mapController?.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: LatLng(userLat, userLng),
+          zoom: currentZoom,
+        ),
+      ),
+    ).then((_) {
+      // 置中完成後重置標誌
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        _isCentering = false;
+      });
+    });
+  }
+
+  // 檢查是否需要置中到用戶位置
+  void _checkCenterOnUser(CameraPosition position) {
+    if (_isCentering) return; // 如果正在置中，不執行檢查
+    
+    final locationProvider = context.read<LocationProvider>();
+    if (locationProvider.currentPosition == null) return;
+
+    final userLat = locationProvider.currentPosition!.latitude;
+    final userLng = locationProvider.currentPosition!.longitude;
+    
+    // 計算當前地圖中心與用戶位置的距離
+    final distance = _calculateDistance(
+      position.target.latitude,
+      position.target.longitude,
+      userLat,
+      userLng,
+    );
+    
+    // 如果距離超過50米，自動置中
+    if (distance > 50) {
+      _centerOnUser();
+    }
   }
 
   // 更新縮放限制
@@ -199,6 +254,12 @@ class _MapScreenState extends State<MapScreen> {
         // 使用 addPostFrameCallback 來避免在 build 過程中調用 setState
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _updateUserLocationAndRadius(locationProvider);
+          // 延遲置中，避免啟動時抖動
+          Future.delayed(const Duration(milliseconds: 1500), () {
+            if (!_isCentering) {
+              _centerOnUser();
+            }
+          });
         });
       }
     });
@@ -241,16 +302,8 @@ class _MapScreenState extends State<MapScreen> {
       aiBotService.setOnMessageGenerated((content, lat, lng, radius, duration) {
         final messageProvider = context.read<MessageProvider>();
         
-        // 創建機器人訊息
-        messageProvider.sendMessage(
-          content: content,
-          latitude: lat,
-          longitude: lng,
-          radius: radius,
-          duration: duration,
-          isAnonymous: true,
-          customSenderName: null, // 機器人訊息不需要自定義名稱
-        );
+        // 直接添加機器人訊息，不觸發發送狀態
+        messageProvider.addBotMessage(content, lat, lng, radius, duration);
       });
       
       // 啟動機器人服務
@@ -397,6 +450,8 @@ class _MapScreenState extends State<MapScreen> {
                       _updateBubblePositions();
                       // 檢查縮放限制
                       _checkZoomLimits(position);
+                      // 檢查是否需要置中
+                      _checkCenterOnUser(position);
                     },
                     onCameraIdle: () {
                       // 地圖停止移動時更新泡泡位置
@@ -749,7 +804,7 @@ class _MapScreenState extends State<MapScreen> {
           if (lp.errorMessage != null)
             _buildErrorIndicator(
                 lp.errorMessage!, () => lp.getCurrentLocation()),
-          if (mp.isLoading) _buildStatusIndicator('正在發送訊息...'),
+          if (mp.isUserSending) _buildStatusIndicator('正在發送訊息...'),
           if (mp.errorMessage != null)
             _buildErrorIndicator(mp.errorMessage!, () => mp.clearError()),
         ],
@@ -760,54 +815,36 @@ class _MapScreenState extends State<MapScreen> {
   Widget _buildBottomWidgets(LocationProvider locationProvider) {
     return Stack(
       children: [
-        // 新的浮動發送按鈕
-        SimpleFloatingFAB(onSend: _handleSendMessage),
-        
-        // 定位按鈕
-        Positioned(
-          bottom: 30,
-          left: 20,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  AppColors.primaryColor,
-                  AppColors.secondaryColor,
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: const [
-                BoxShadow(
-                  color: AppColors.primaryColor,
-                  blurRadius: 15,
-                  offset: Offset(0, 6),
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: FloatingActionButton(
-              onPressed: () {
-                if (locationProvider.currentPosition != null) {
-                  _goToCurrentLocation(locationProvider.currentPosition!);
-                } else {
-                  locationProvider.getCurrentLocation();
-                }
-              },
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              child: const Icon(
-                Icons.my_location_rounded,
-                color: Colors.white,
-                size: 28,
+        // 當選單展開時，添加手勢攔截層（在選單下方）
+        if (_isMenuExpanded)
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 200, // 只攔截選單上方的區域
+            child: GestureDetector(
+              onPanStart: (_) {}, // 攔截滑動手勢，防止地圖移動
+              onPanUpdate: (_) {},
+              onPanEnd: (_) {},
+              onTap: () {}, // 攔截點擊，防止地圖響應
+              child: Container(
+                color: Colors.transparent,
               ),
             ),
           ),
+        // 新的浮動發送按鈕（在手勢攔截層之上）
+        SimpleFloatingFAB(
+          onSend: _handleSendMessage,
+          onExpansionChanged: (isExpanded) {
+            setState(() {
+              _isMenuExpanded = isExpanded;
+            });
+          },
         ),
       ],
     );
   }
+
 
   Set<Marker> _getAllMarkers() {
     final allMarkers = <Marker>{};
@@ -970,6 +1007,7 @@ class _MapScreenState extends State<MapScreen> {
             expiresAt: message.expiresAt,
             bubbleColor: _getBubbleColor(message),
             gender: message.gender,
+            isBotMessage: message.senderId == 'bot' || message.isBotGenerated == true,
             onTap: () => _showMessageBubble(message),
           ),
         );
@@ -1092,8 +1130,8 @@ class _MapScreenState extends State<MapScreen> {
       zoom: optimalZoom,
     );
 
-    // 平滑動畫到新位置
-    await controller.animateCamera(CameraUpdate.newCameraPosition(newPosition));
+    // 立即跳轉到新位置，避免動畫
+    await controller.moveCamera(CameraUpdate.newCameraPosition(newPosition));
 
     // 更新範圍圓圈以確保正確顯示
     _updateCircles(LatLng(position.latitude, position.longitude));
@@ -1154,9 +1192,17 @@ class _MapScreenState extends State<MapScreen> {
       builder: (context) => Dialog(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 80),
+        insetPadding: EdgeInsets.symmetric(
+          horizontal: MediaQuery.of(context).size.width * 0.15,
+          vertical: MediaQuery.of(context).size.height * 0.2,
+        ),
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 320, maxHeight: 280),
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.7,
+            maxHeight: MediaQuery.of(context).size.height * 0.4,
+            minWidth: 280,
+            minHeight: 200,
+          ),
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
@@ -1225,9 +1271,9 @@ class _MapScreenState extends State<MapScreen> {
                       return Text(
                         messageProvider.getMessageDisplayContent(message),
                         style: const TextStyle(
-                          fontSize: 16,
+                          fontSize: 18,
                           color: Colors.white,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.bold,
                           height: 1.4,
                         ),
                         textAlign: TextAlign.center,
@@ -1330,17 +1376,18 @@ class _MapScreenState extends State<MapScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: const Color(0xFF6366F1),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    elevation: 0,
+                    elevation: 2,
+                    shadowColor: Colors.black.withOpacity(0.1),
                   ),
                   child: const Text(
                     '關閉',
                     style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
                   ),
                 ),

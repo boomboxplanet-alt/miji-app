@@ -11,6 +11,7 @@ class MessageBubbleOverlay extends StatefulWidget {
   final DateTime expiresAt;
   final Color bubbleColor;
   final Gender gender;
+  final bool isBotMessage; // 添加機器人訊息標識
 
   const MessageBubbleOverlay({
     super.key,
@@ -22,6 +23,7 @@ class MessageBubbleOverlay extends StatefulWidget {
     required this.expiresAt,
     required this.bubbleColor,
     required this.gender,
+    this.isBotMessage = false, // 默認為非機器人訊息
   });
 
   @override
@@ -84,7 +86,13 @@ class _MessageBubbleOverlayState extends State<MessageBubbleOverlay>
     ));
     
     _pulseController.repeat(reverse: true);
-    _scaleController.forward();
+    
+    // 機器人訊息沒有彈性縮放動畫，直接設置為1.0
+    if (widget.isBotMessage) {
+      _scaleController.value = 1.0;
+    } else {
+      _scaleController.forward();
+    }
     
     _updateRemainingTime();
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {

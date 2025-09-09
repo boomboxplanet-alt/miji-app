@@ -3,10 +3,12 @@ import '../utils/app_colors.dart';
 
 class SimpleFloatingFAB extends StatefulWidget {
   final Function(String message, double radius, Duration duration, bool isAnonymous, [String? customSenderName]) onSend;
+  final Function(bool isExpanded)? onExpansionChanged;
   
   const SimpleFloatingFAB({
     super.key,
     required this.onSend,
+    this.onExpansionChanged,
   });
 
   @override
@@ -32,6 +34,8 @@ class _SimpleFloatingFABState extends State<SimpleFloatingFAB> {
     setState(() {
       _isExpanded = !_isExpanded;
     });
+    // 通知父組件選單狀態變化
+    widget.onExpansionChanged?.call(_isExpanded);
   }
 
   void _sendMessage() {
@@ -57,6 +61,9 @@ class _SimpleFloatingFABState extends State<SimpleFloatingFAB> {
   }) {
     return GestureDetector(
       onTap: onTap,
+      onPanStart: (_) {}, // 攔截滑動手勢，防止穿透到地圖
+      onPanUpdate: (_) {},
+      onPanEnd: (_) {},
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         decoration: BoxDecoration(
@@ -213,7 +220,10 @@ class _SimpleFloatingFABState extends State<SimpleFloatingFAB> {
             bottom: 100,
             left: 20,
             right: 20,
-            child: _buildExpandedPanel(),
+            child: Material(
+              color: Colors.transparent,
+              child: _buildExpandedPanel(),
+            ),
           ),
         
         // 主浮動按鈕
@@ -257,37 +267,44 @@ class _SimpleFloatingFABState extends State<SimpleFloatingFAB> {
   }
 
   Widget _buildExpandedPanel() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            const Color(0xFF1A1A2E).withOpacity(0.98),
-            const Color(0xFF16213E).withOpacity(0.95),
-            const Color(0xFF0F3460).withOpacity(0.92),
+    return AbsorbPointer(
+      absorbing: false, // 允許內部交互，但阻止事件穿透
+      child: GestureDetector(
+        onTap: () {}, // 攔截點擊事件，防止穿透到地圖
+        onPanStart: (_) {}, // 攔截滑動手勢開始事件
+        onPanUpdate: (_) {}, // 攔截滑動手勢更新事件
+        onPanEnd: (_) {}, // 攔截滑動手勢結束事件
+        child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              const Color(0xFF1A1A2E).withOpacity(0.98),
+              const Color(0xFF16213E).withOpacity(0.95),
+              const Color(0xFF0F3460).withOpacity(0.92),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: AppColors.primaryColor.withOpacity(0.6),
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryColor.withOpacity(0.3),
+              blurRadius: 30,
+              offset: const Offset(0, 15),
+              spreadRadius: 8,
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.4),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+              spreadRadius: 2,
+            ),
           ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: AppColors.primaryColor.withOpacity(0.6),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryColor.withOpacity(0.3),
-            blurRadius: 30,
-            offset: const Offset(0, 15),
-            spreadRadius: 8,
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.4),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-            spreadRadius: 2,
-          ),
-        ],
-      ),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -330,6 +347,9 @@ class _SimpleFloatingFABState extends State<SimpleFloatingFAB> {
             // 匿名選項
             GestureDetector(
               onTap: () => setState(() => _isAnonymous = !_isAnonymous),
+              onPanStart: (_) {}, // 攔截滑動手勢，防止穿透到地圖
+              onPanUpdate: (_) {},
+              onPanEnd: (_) {},
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                 decoration: BoxDecoration(
@@ -436,10 +456,14 @@ class _SimpleFloatingFABState extends State<SimpleFloatingFAB> {
               ),
               child: Material(
                 color: Colors.transparent,
-                child: InkWell(
-                  onTap: _messageController.text.trim().isNotEmpty ? _sendMessage : null,
-                  borderRadius: BorderRadius.circular(16),
-                  child: Container(
+                child: GestureDetector(
+                  onPanStart: (_) {}, // 攔截滑動手勢，防止穿透到地圖
+                  onPanUpdate: (_) {},
+                  onPanEnd: (_) {},
+                  child: InkWell(
+                    onTap: _messageController.text.trim().isNotEmpty ? _sendMessage : null,
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 24),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -470,10 +494,13 @@ class _SimpleFloatingFABState extends State<SimpleFloatingFAB> {
                     ),
                   ),
                 ),
+                ),
               ),
             ),
           ],
         ),
+      ),
+      ),
       ),
     );
   }

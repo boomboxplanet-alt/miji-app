@@ -18,6 +18,7 @@ class MessageProvider extends ChangeNotifier {
   final BotMessageService _botMessageService = BotMessageService();
   final List<Message> _messages = [];
   bool _isLoading = false;
+  bool _isUserSending = false; // 新增：區分用戶發送和機器人訊息
   String? _errorMessage;
   Timer? _refreshTimer;
   
@@ -33,6 +34,7 @@ class MessageProvider extends ChangeNotifier {
 
   List<Message> get messages => _messages;
   bool get isLoading => _isLoading;
+  bool get isUserSending => _isUserSending; // 新增：供UI使用
   String? get errorMessage => _errorMessage;
   bool get isBotEnabled => _botService.isEnabled;
   String get currentUserId => _currentUserId;
@@ -55,7 +57,7 @@ class MessageProvider extends ChangeNotifier {
   
   void _initializeBotService() {
     _botService.setOnBotMessageGenerated((content, lat, lng, radius, duration) {
-      _addBotMessage(content, lat, lng, radius, duration);
+      addBotMessage(content, lat, lng, radius, duration);
     });
     // 確保機器人服務預設為啟用狀態
     _botService.setEnabled(true);
@@ -255,6 +257,7 @@ class MessageProvider extends ChangeNotifier {
     String? customSenderName, // 添加自定義發送者名稱參數
   }) async {
     _isLoading = true;
+    _isUserSending = true; // 設置用戶發送狀態
     _errorMessage = null;
     notifyListeners();
 
@@ -303,6 +306,7 @@ class MessageProvider extends ChangeNotifier {
       rethrow;
     } finally {
       _isLoading = false;
+      _isUserSending = false; // 重置用戶發送狀態
       notifyListeners();
     }
   }
@@ -377,7 +381,7 @@ class MessageProvider extends ChangeNotifier {
   }
   
   // 機器人相關方法
-  void _addBotMessage(String content, double lat, double lng, double radius, Duration duration) {
+  void addBotMessage(String content, double lat, double lng, double radius, Duration duration) {
     // 隨機生成性別（排除unknown，只在male和female中選擇）
     final random = math.Random();
     final gender = random.nextBool() ? Gender.male : Gender.female;

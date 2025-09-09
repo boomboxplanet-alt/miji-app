@@ -235,70 +235,82 @@ class _RewardClaimDialogState extends State<RewardClaimDialog>
           ),
         ),
         
-        // 彩帶效果
+        // 頂部左側彩帶
         Align(
-          alignment: Alignment.topCenter,
+          alignment: Alignment.topLeft,
           child: ConfettiWidget(
             confettiController: _confettiController,
-            blastDirection: pi / 2, // 向下
+            blastDirection: pi / 3, // 右下方向
             maxBlastForce: 5,
             minBlastForce: 2,
-            emissionFrequency: 0.05,
-            numberOfParticles: 50,
-            gravity: 0.1,
+            emissionFrequency: 0.04,
+            numberOfParticles: 8,
+            gravity: 0.2,
             shouldLoop: false,
             colors: const [
               Colors.red,
+              Colors.orange,
+              Colors.yellow,
+            ],
+          ),
+        ),
+        
+        // 頂部右側彩帶
+        Align(
+          alignment: Alignment.topRight,
+          child: ConfettiWidget(
+            confettiController: _confettiController,
+            blastDirection: 2 * pi / 3, // 左下方向
+            maxBlastForce: 5,
+            minBlastForce: 2,
+            emissionFrequency: 0.04,
+            numberOfParticles: 8,
+            gravity: 0.2,
+            shouldLoop: false,
+            colors: const [
               Colors.blue,
               Colors.green,
-              Colors.yellow,
-              Colors.pink,
-              Colors.orange,
               Colors.purple,
             ],
           ),
         ),
         
-        // 左側彩帶
+        // 底部左側彩帶
         Align(
-          alignment: Alignment.centerLeft,
+          alignment: Alignment.bottomLeft,
           child: ConfettiWidget(
             confettiController: _confettiController,
-            blastDirection: 0, // 向右
-            maxBlastForce: 3,
-            minBlastForce: 1,
-            emissionFrequency: 0.03,
-            numberOfParticles: 30,
-            gravity: 0.1,
+            blastDirection: -pi / 3, // 右上方向
+            maxBlastForce: 5,
+            minBlastForce: 2,
+            emissionFrequency: 0.04,
+            numberOfParticles: 8,
+            gravity: 0.2,
             shouldLoop: false,
             colors: const [
-              Colors.red,
-              Colors.blue,
-              Colors.green,
-              Colors.yellow,
               Colors.pink,
+              Colors.orange,
+              Colors.yellow,
             ],
           ),
         ),
         
-        // 右側彩帶
+        // 底部右側彩帶
         Align(
-          alignment: Alignment.centerRight,
+          alignment: Alignment.bottomRight,
           child: ConfettiWidget(
             confettiController: _confettiController,
-            blastDirection: pi, // 向左
-            maxBlastForce: 3,
-            minBlastForce: 1,
-            emissionFrequency: 0.03,
-            numberOfParticles: 30,
-            gravity: 0.1,
+            blastDirection: -2 * pi / 3, // 左上方向
+            maxBlastForce: 5,
+            minBlastForce: 2,
+            emissionFrequency: 0.04,
+            numberOfParticles: 8,
+            gravity: 0.2,
             shouldLoop: false,
             colors: const [
-              Colors.red,
-              Colors.blue,
               Colors.green,
-              Colors.yellow,
-              Colors.pink,
+              Colors.blue,
+              Colors.purple,
             ],
           ),
         ),
