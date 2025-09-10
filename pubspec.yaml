@@ -22,13 +22,8 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   
-  # Firebase 服務 - 暫時註釋掉以解決兼容性問題
-  # firebase_core: ^1.24.0
-  # firebase_auth: ^3.11.2
-  # cloud_firestore: ^3.5.1
-  
-  # Google 登入 - 暫時註釋掉以解決兼容性問題
-  # google_sign_in: ^5.4.4
+  # Google 登入
+  google_sign_in: ^6.1.5
   
   # UI 組件
   google_fonts: ^6.3.0

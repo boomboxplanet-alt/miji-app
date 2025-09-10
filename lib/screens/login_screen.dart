@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/app_colors.dart';
+import '../widgets/google_signin_button.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -139,49 +140,11 @@ class LoginScreen extends StatelessWidget {
                         // Google登入按鈕
                         Consumer<AuthProvider>(
                           builder: (context, authProvider, child) {
-                            return SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton.icon(
-                                onPressed: authProvider.isLoading
-                                    ? null
-                                    : () => _handleGoogleSignIn(
-                                        context, authProvider),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  foregroundColor: Colors.black87,
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  elevation: 2,
-                                ),
-                                icon: authProvider.isLoading
-                                    ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  Colors.black54),
-                                        ),
-                                      )
-                                    : const Icon(
-                                        Icons.login,
-                                        size: 20,
-                                        color: Colors.black54,
-                                      ),
-                                label: Text(
-                                  authProvider.isLoading
-                                      ? '登入中...'
-                                      : '使用 Google 登入',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
+                            return GoogleSignInButton(
+                              onPressed: () => _handleGoogleSignIn(
+                                  context, authProvider),
+                              isLoading: authProvider.isLoading,
+                              text: '使用 Google 登入',
                             );
                           },
                         ),
@@ -278,13 +241,7 @@ class LoginScreen extends StatelessWidget {
   // 處理Google登入
   Future<void> _handleGoogleSignIn(
       BuildContext context, AuthProvider authProvider) async {
-    // 檢查是否使用佔位符Client ID
-    if (_isPlaceholderClientId()) {
-      // 顯示配置提示對話框
-      _showConfigurationDialog(context);
-      return;
-    }
-
+    // 直接執行Google登入，不再檢查Client ID
     final success = await authProvider.signInWithGoogle();
 
     if (success && context.mounted) {
@@ -295,8 +252,10 @@ class LoginScreen extends StatelessWidget {
 
   // 檢查是否為佔位符Client ID
   bool _isPlaceholderClientId() {
-    // 這裡可以檢查當前配置的Client ID是否為佔位符
-    return true; // 目前總是返回true，因為我們使用的是佔位符
+    // 檢查當前配置的Client ID是否為佔位符
+    const clientId = '508695711441-r97p5ql81s4u77sirfc04dni20hu53u0.apps.googleusercontent.com';
+    // 現在使用真實的Client ID，所以返回false
+    return false;
   }
 
   // 顯示配置提示對話框

@@ -4,7 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 // import 'package:geolocator/geolocator.dart';  // 暫時註釋掉
 import 'package:hive_flutter/hive_flutter.dart';
 
-// import 'services/firebase_service.dart';  // 暫時註釋掉
+import 'services/simple_firebase_service.dart';
 import 'services/location_service.dart';
 import 'services/message_service.dart';
 import 'services/ai_bot_service.dart';
@@ -24,10 +24,10 @@ void main() async {
   await Hive.openBox('messages');
   await Hive.openBox('settings');
   
-  // 初始化 Firebase - 暫時註釋掉
-  // await FirebaseService.instance.initialize();
+  // 初始化簡化 Firebase 服務
+  await SimpleFirebaseService.instance.initialize();
   
-  // 等待一下確保 Firebase 完全初始化 - 暫時註釋掉
+  // 等待一下確保服務完全初始化
   // await Future.delayed(Duration(milliseconds: 500));
   
   runApp(MyApp());

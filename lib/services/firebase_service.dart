@@ -1,4 +1,7 @@
-// 模擬 Firebase 服務，不依賴實際的 Firebase 包
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
 class FirebaseService {
   static FirebaseService? _instance;
   static FirebaseService get instance => _instance ??= FirebaseService._();
@@ -6,60 +9,115 @@ class FirebaseService {
   FirebaseService._();
   
   bool _isInitialized = false;
+  FirebaseAuth? _auth;
+  GoogleSignIn? _googleSignIn;
   
-  /// 初始化 Firebase（模擬）
+  /// 初始化 Firebase
   Future<void> initialize() async {
     try {
-      // 模擬初始化過程
-      await Future.delayed(Duration(milliseconds: 100));
-      _isInitialized = true;
-      print('Firebase 初始化成功 - 秘跡miji 項目（模擬模式）');
+      if (!_isInitialized) {
+        await Firebase.initializeApp();
+        _auth = FirebaseAuth.instance;
+        _googleSignIn = GoogleSignIn(
+          clientId: '508695711441-r97p5ql81s4u77sirfc04dni20hu53u0.apps.googleusercontent.com',
+        );
+        _isInitialized = true;
+        print('Firebase 初始化成功 - 秘跡miji 項目 (miji-61985)');
+      }
     } catch (e) {
       print('Firebase 初始化失敗: $e');
       _isInitialized = false;
     }
   }
   
-  /// Google 登入（模擬）
+  /// Google 登入
   Future<Map<String, dynamic>?> signInWithGoogle() async {
     try {
-      // 模擬登入過程
-      await Future.delayed(Duration(milliseconds: 500));
+      if (!_isInitialized) {
+        await initialize();
+      }
       
-      return {
-        'uid': 'mock_user_123',
-        'email': 'user@example.com',
-        'displayName': '測試用戶',
-        'photoURL': null,
-      };
+      // 觸發 Google 登入流程
+      final GoogleSignInAccount? googleUser = await _googleSignIn!.signIn();
+      if (googleUser == null) {
+        print('Google 登入被取消');
+        return null;
+      }
+      
+      // 獲取認證詳情
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      
+      // 創建新的認證憑證
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      
+      // 使用憑證登入 Firebase
+      final UserCredential userCredential = await _auth!.signInWithCredential(credential);
+      final User? user = userCredential.user;
+      
+      if (user != null) {
+        return {
+          'uid': user.uid,
+          'email': user.email,
+          'displayName': user.displayName,
+          'photoURL': user.photoURL,
+        };
+      }
+      
+      return null;
     } catch (e) {
       print('Google 登入失敗: $e');
       return null;
     }
   }
   
-  /// 登出（模擬）
+  /// 登出
   Future<void> signOut() async {
     try {
-      await Future.delayed(Duration(milliseconds: 100));
-      print('登出成功（模擬）');
+      if (_auth != null) {
+        await _auth!.signOut();
+      }
+      if (_googleSignIn != null) {
+        await _googleSignIn!.signOut();
+      }
+      print('登出成功');
     } catch (e) {
       print('登出失敗: $e');
     }
   }
   
-  /// 獲取當前用戶（模擬）
+  /// 獲取當前用戶
   dynamic get currentUser {
-    return _isInitialized ? {
-      'uid': 'mock_user_123',
-      'email': 'user@example.com',
-      'displayName': '測試用戶',
-      'photoURL': null,
-    } : null;
+    if (!_isInitialized || _auth?.currentUser == null) {
+      return null;
+    }
+    
+    final user = _auth!.currentUser!;
+    return {
+      'uid': user.uid,
+      'email': user.email,
+      'displayName': user.displayName,
+      'photoURL': user.photoURL,
+    };
   }
   
-  /// 監聽認證狀態變化（模擬）
+  /// 監聽認證狀態變化
   Stream<dynamic> get authStateChanges {
-    return Stream.value(currentUser);
+    if (!_isInitialized) {
+      return Stream.value(null);
+    }
+    
+    return _auth!.authStateChanges().map((User? user) {
+      if (user == null) return null;
+      
+      return {
+        'uid': user.uid,
+        'email': user.email,
+        'displayName': user.displayName,
+        'photoURL': user.photoURL,
+      };
+    });
   }
 }

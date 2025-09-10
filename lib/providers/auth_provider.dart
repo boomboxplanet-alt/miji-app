@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../services/firebase_service.dart';
+import '../services/simple_firebase_service.dart';
 
 class AuthProvider extends ChangeNotifier {
-  final FirebaseService _firebaseService = FirebaseService.instance;
+  final SimpleFirebaseService _firebaseService = SimpleFirebaseService.instance;
   
   dynamic _user;
   bool _isLoading = false;
@@ -28,9 +28,12 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // 初始化認證狀態
-  void _initializeAuth() {
+  void _initializeAuth() async {
     try {
-      _user = _firebaseService.currentUser;
+      // 初始化服務
+      await _firebaseService.initialize();
+      _user = await _firebaseService.getCurrentUser();
+      
       // 監聽認證狀態變化
       _firebaseService.authStateChanges.listen((dynamic user) {
         _user = user;
@@ -155,7 +158,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> reloadUser() async {
     try {
       await Future.delayed(Duration(milliseconds: 100));
-      _user = _firebaseService.currentUser;
+      _user = await _firebaseService.getCurrentUser();
       notifyListeners();
     } catch (e) {
       _setError('重新載入用戶資訊失敗: ${e.toString()}');
