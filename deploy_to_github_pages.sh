@@ -10,7 +10,7 @@ echo "📍 當前分支: $current_branch"
 echo "🔨 構建 Flutter Web 應用..."
 flutter clean
 flutter pub get
-flutter build web --release
+flutter build web --release --base-href /miji-app/
 
 if [ $? -ne 0 ]; then
     echo "❌ 構建失敗！"
