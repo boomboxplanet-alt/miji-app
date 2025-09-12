@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../utils/app_colors.dart';
@@ -15,10 +16,9 @@ class QuickSendWidget extends StatefulWidget {
 
 class _QuickSendWidgetState extends State<QuickSendWidget> {
   final TextEditingController _controller = TextEditingController();
-  final TextEditingController _nameController = TextEditingController(); // 用戶名稱控制器
   double _radius = 1000.0; // 1公里 = 1000米，將根據用戶權限動態更新
   Duration _destroyDuration = const Duration(hours: 1); // 預設1小時，將根據用戶權限動態更新
-  bool _isAnonymous = false; // 是否匿名發送
+  bool _isAnonymous = true; // 預設僅提供匿名發送
   int _currentBytes = 0;
   static const int _maxBytes = 200;
 
@@ -69,110 +69,68 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            const Color(0xFF667eea).withOpacity(0.85),
-            const Color(0xFF764ba2).withOpacity(0.85),
-            const Color(0xFFf093fb).withOpacity(0.85),
-          ],
-          stops: const [0.0, 0.5, 1.0],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryColor.withOpacity(0.15),
-            blurRadius: 12,
-            offset: const Offset(0, -3),
-            spreadRadius: 1,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                const Color(0xFF667eea).withOpacity(0.82),
+                const Color(0xFF764ba2).withOpacity(0.82),
+                const Color(0xFFf093fb).withOpacity(0.82),
+              ],
+              stops: const [0.0, 0.5, 1.0],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white.withOpacity(0.25), width: 1.2),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primaryColor.withOpacity(0.18),
+                blurRadius: 20,
+                offset: const Offset(0, 6),
+                spreadRadius: 2,
+              ),
+            ],
           ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Column(
+          child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 用戶名稱輸入區域（非匿名時顯示）
-          if (!_isAnonymous)
-            Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: TextField(
-                        controller: _nameController,
-                        keyboardType: TextInputType.text,
-                        textInputAction: TextInputAction.done,
-                        enableInteractiveSelection: true,
-                        autocorrect: true,
-                        enableSuggestions: true,
-                        textCapitalization: TextCapitalization.words,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: '輸入您的顯示名稱',
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          hintStyle: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
+          // 頂部列：標題與匿名切換
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Row(
+              children: [
+                const Icon(Icons.location_on, color: Colors.white, size: 18),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    '快速訊息',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  // 切換到匿名模式按鈕
-                  InkWell(
-                    onTap: () {
-                      setState(() {
-                        _isAnonymous = true;
-                        _nameController.clear();
-                      });
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Text(
-                        '匿名',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
+                ),
+                ChoiceChip(
+                  label: const Text('匿名'),
+                  selected: true,
+                  onSelected: null,
+                  labelStyle: const TextStyle(color: Colors.white, fontSize: 12),
+                  selectedColor: Colors.white.withOpacity(0.35),
+                  backgroundColor: Colors.white.withOpacity(0.18),
+                  shape: StadiumBorder(
+                    side: BorderSide(color: Colors.white.withOpacity(0.3)),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
           // 輸入框和發送按鈕區域
           Column(
             children: [
@@ -235,6 +193,8 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
                               const TextPosition(offset: _maxBytes),
                             );
                           }
+                          // 觸發重繪以更新按鈕可用狀態
+                          setState(() {});
                         },
                       ),
                     ),
@@ -242,116 +202,30 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
 
                   const SizedBox(width: 8),
 
-                  // 按鈕區域（設定和發送）
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // 泡泡設置按鈕
-                      InkWell(
-                        onTap: () => _showSettingsBottomSheet(context),
-                        borderRadius: BorderRadius.circular(10),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.white.withOpacity(0.3),
-                                Colors.white.withOpacity(0.2),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.white.withOpacity(0.2),
-                                blurRadius: 6,
-                                offset: const Offset(0, 1),
-                              ),
-                            ],
-                          ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.bubble_chart,
-                                size: 14,
-                                color: Colors.white,
-                              ),
-                              SizedBox(width: 3),
-                              Text(
-                                '泡泡設置',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
+                  // 右側操作區（等寬等高）
+                  SizedBox(
+                    width: 112,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildActionButton(
+                          icon: Icons.bubble_chart,
+                          label: '泡泡設置',
+                          onTap: () => _showSettingsBottomSheet(context),
+                          primary: false,
                         ),
-                      ),
-
-                      const SizedBox(height: 4),
-
-                      // 發送按鈕
-                      InkWell(
-                        onTap: _controller.text.trim().isEmpty
-                            ? null
-                            : () => _handleSendMessage(),
-                        borderRadius: BorderRadius.circular(10),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: _controller.text.trim().isEmpty
-                                  ? [
-                                      Colors.grey.shade400.withOpacity(0.6),
-                                      Colors.grey.shade500.withOpacity(0.6),
-                                    ]
-                                  : [
-                                      const Color(0xFF667eea),
-                                      const Color(0xFF764ba2),
-                                    ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: (_controller.text.trim().isEmpty
-                                        ? Colors.grey.shade400
-                                        : const Color(0xFF667eea))
-                                    .withOpacity(0.3),
-                                blurRadius: 6,
-                                offset: const Offset(0, 1),
-                              ),
-                            ],
-                          ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.send,
-                                size: 14,
-                                color: Colors.white,
-                              ),
-                              SizedBox(width: 3),
-                              Text(
-                                '發送',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
+                        const SizedBox(height: 8),
+                        _buildActionButton(
+                          icon: Icons.send,
+                          label: '發送',
+                          onTap: _controller.text.trim().isEmpty
+                              ? null
+                              : () => _handleSendMessage(),
+                          primary: true,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -379,6 +253,8 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
             ],
           ),
         ],
+      ),
+        ),
       ),
     );
   }
@@ -446,29 +322,12 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
                         // 匿名設定
                         _buildSwitchTile(
                           title: '匿名發送',
-                          subtitle: '隱藏您的身份信息',
+                          subtitle: '已固定匿名模式',
                           icon: Icons.visibility_off,
-                          value: _isAnonymous,
-                          onChanged: (value) {
-                            setState(() {
-                              _isAnonymous = value;
-                              if (!value) {
-                                // 切換到非匿名模式時，清空名稱
-                                _nameController.clear();
-                              }
-                            });
-                          },
+                          value: true,
+                          onChanged: (_) {},
                         ),
-                        // 非匿名模式下的名稱輸入提示
-                        if (!_isAnonymous)
-                          _buildInfoTile(
-                            title: '顯示名稱',
-                            subtitle: _nameController.text.isEmpty 
-                                ? '點擊輸入您的名稱' 
-                                : '當前: ${_nameController.text}',
-                            icon: Icons.person,
-                            onTap: () => _showNameInputDialog(''), // 空訊息，僅用於名稱輸入
-                          ),
+                        // 移除名稱輸入，等待後續登入系統提供
                         const Divider(color: Colors.white24, height: 1),
                         // 銷毀時間設定
                         _buildInfoTile(
@@ -815,6 +674,69 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
     );
   }
 
+  // 統一樣式的動作按鈕（等寬等高）
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    VoidCallback? onTap,
+    bool primary = false,
+  }) {
+    final bool disabled = onTap == null;
+    final Gradient gradient = primary
+        ? LinearGradient(
+            colors: disabled
+                ? [Colors.grey.shade500.withOpacity(0.6), Colors.grey.shade600.withOpacity(0.6)]
+                : [const Color(0xFF667eea), const Color(0xFF764ba2)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          )
+        : LinearGradient(
+            colors: [Colors.white.withOpacity(0.28), Colors.white.withOpacity(0.18)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          );
+
+    return Opacity(
+      opacity: disabled ? 0.7 : 1,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            gradient: gradient,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withOpacity(primary ? 0.25 : 0.2), width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: (primary ? const Color(0xFF667eea) : Colors.black)
+                    .withOpacity(primary ? 0.25 : 0.08),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: Colors.white, size: 16),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   // 顯示時間選擇器
   void _showTimeSelector() {
     showModalBottomSheet(
@@ -995,84 +917,16 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
   }
 
   void _sendMessage(String message) {
-    // 檢查是否需要用戶名稱
-    if (!_isAnonymous && (_nameController.text.trim().isEmpty)) {
-      // 顯示名稱輸入提示
-      _showNameInputDialog(message);
-      return;
-    }
-    
     widget.onSend(
       message,
       _radius,
       _destroyDuration,
       _isAnonymous,
-      _isAnonymous ? null : _nameController.text.trim(), // 傳遞用戶名稱
+      null,
     );
     _controller.clear();
   }
   
-  // 顯示名稱輸入對話框
-  void _showNameInputDialog(String message) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('輸入顯示名稱'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('您選擇了非匿名發送，請輸入您的顯示名稱：'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _nameController,
-              keyboardType: TextInputType.text,
-              textInputAction: TextInputAction.done,
-              enableInteractiveSelection: true,
-              autocorrect: true,
-              enableSuggestions: true,
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: '顯示名稱',
-                hintText: '請輸入您的名稱',
-                border: OutlineInputBorder(),
-              ),
-              autofocus: true,
-              maxLength: 20,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // 改為匿名發送
-              setState(() {
-                _isAnonymous = true;
-              });
-              // 只有在有訊息時才發送
-              if (message.isNotEmpty) {
-                _sendMessage(message);
-              }
-            },
-            child: const Text('改為匿名'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (_nameController.text.trim().isNotEmpty) {
-                Navigator.pop(context);
-                // 只有在有訊息時才發送
-                if (message.isNotEmpty) {
-                  _sendMessage(message);
-                }
-              }
-            },
-            child: const Text('確定'),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _showModerationDialog({
     required String title,

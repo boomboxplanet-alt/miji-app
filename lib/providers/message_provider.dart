@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+// import 'package:geolocator/geolocator.dart';  // 暫時註釋掉
 import '../models/message.dart';
 import '../services/message_service.dart';
 import '../services/bot_service.dart';
+import '../services/bot_message_service.dart';
 import '../services/task_service.dart';
 import '../services/translation_service.dart';
-import '../services/bot_message_service.dart';
 import '../utils/app_colors.dart';
 
 class MessageProvider extends ChangeNotifier {
@@ -55,7 +55,7 @@ class MessageProvider extends ChangeNotifier {
   
   void _initializeBotService() {
     _botService.setOnBotMessageGenerated((content, lat, lng, radius, duration) {
-      _addBotMessage(content, lat, lng, radius, duration);
+      addBotMessage(content, lat, lng, radius, duration);
     });
     // 確保機器人服務預設為啟用狀態
     _botService.setEnabled(true);
@@ -109,9 +109,11 @@ class MessageProvider extends ChangeNotifier {
         _messages.add(botMessage);
       }
       
-      notifyListeners();
+      // 靜默添加機器人訊息，不觸發 UI 更新
+      // notifyListeners();
     } catch (e) {
-      print('Error generating localized bot messages: $e');
+      // 靜默處理錯誤
+      // print('Error generating localized bot messages: $e');
     }
   }
   
@@ -129,9 +131,11 @@ class MessageProvider extends ChangeNotifier {
         _messages.add(botMessage);
       }
       
-      notifyListeners();
+      // 靜默添加機器人訊息，不觸發 UI 更新
+      // notifyListeners();
     } catch (e) {
-      print('Error generating first launch bot messages: $e');
+      // 靜默處理錯誤
+      // print('Error generating first launch bot messages: $e');
     }
   }
   
@@ -150,9 +154,11 @@ class MessageProvider extends ChangeNotifier {
         _messages.add(botMessage);
       }
       
-      notifyListeners();
+      // 靜默添加機器人訊息，不觸發 UI 更新
+      // notifyListeners();
     } catch (e) {
-      print('Error generating thematic bot messages: $e');
+      // 靜默處理錯誤
+      // print('Error generating thematic bot messages: $e');
     }
   }
   
@@ -253,10 +259,14 @@ class MessageProvider extends ChangeNotifier {
     required Duration duration,
     bool isAnonymous = true,
     String? customSenderName, // 添加自定義發送者名稱參數
+    bool systemGenerated = false, // 系統生成（不計入任務）
+    bool isBot = false, // 是否為機器人生成
   }) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+    if (!systemGenerated) {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+    }
 
     try {
       // 隨機生成性別
@@ -270,7 +280,6 @@ class MessageProvider extends ChangeNotifier {
       } else if (customSenderName != null && customSenderName.trim().isNotEmpty) {
         senderName = customSenderName.trim(); // 使用自定義名稱
       } else {
-        // 如果沒有自定義名稱，拋出異常提示用戶輸入
         throw Exception('請輸入您的顯示名稱或選擇匿名發送');
       }
       
@@ -283,18 +292,21 @@ class MessageProvider extends ChangeNotifier {
         createdAt: DateTime.now(),
         expiresAt: DateTime.now().add(duration),
         isAnonymous: isAnonymous,
-        senderId: _currentUserId,
+        senderId: isBot ? BotMessageService.botSenderId : _currentUserId,
         senderName: senderName,
         gender: gender,
+        isBotGenerated: isBot,
       );
       
       final sentMessage = await _messageService.sendMessage(message);
       _messages.add(sentMessage);
       
       // 更新任務進度
-       _taskService.updateTaskProgress('daily_mystery_messenger');
-       _taskService.updateTaskProgress('weekly_story_weaver');
-       _taskService.updateTaskProgress('achievement_first_whisper');
+      if (!systemGenerated) {
+        _taskService.updateTaskProgress('daily_mystery_messenger');
+        _taskService.updateTaskProgress('weekly_story_weaver');
+        _taskService.updateTaskProgress('achievement_first_whisper');
+      }
       
       return sentMessage;
       
@@ -302,8 +314,10 @@ class MessageProvider extends ChangeNotifier {
       _errorMessage = '發送失敗: $e';
       rethrow;
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (!systemGenerated) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -355,11 +369,29 @@ class MessageProvider extends ChangeNotifier {
   }
 
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-    return Geolocator.distanceBetween(lat1, lon1, lat2, lon2);
+    // 使用簡化的距離計算
+    return _calculateDistance(lat1, lon1, lat2, lon2);
+  }
+  
+  // 簡化的距離計算方法
+  double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    const double earthRadius = 6371000; // 地球半徑（米）
+    
+    double lat1Rad = lat1 * math.pi / 180;
+    double lat2Rad = lat2 * math.pi / 180;
+    double deltaLatRad = (lat2 - lat1) * math.pi / 180;
+    double deltaLonRad = (lon2 - lon1) * math.pi / 180;
+    
+    double a = math.sin(deltaLatRad / 2) * math.sin(deltaLatRad / 2) +
+               math.cos(lat1Rad) * math.cos(lat2Rad) *
+               math.sin(deltaLonRad / 2) * math.sin(deltaLonRad / 2);
+    double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+    
+    return earthRadius * c;
   }
   
   // 機器人相關方法
-  void _addBotMessage(String content, double lat, double lng, double radius, Duration duration) {
+  void addBotMessage(String content, double lat, double lng, double radius, Duration duration) {
     // 隨機生成性別（排除unknown，只在male和female中選擇）
     final random = math.Random();
     final gender = random.nextBool() ? Gender.male : Gender.female;
@@ -378,10 +410,12 @@ class MessageProvider extends ChangeNotifier {
       senderName: _generateRandomName(gender),
       gender: gender,
       bubbleColor: getRandomBubbleColor(), // 為機器人訊息分配固定顏色
+      isBotGenerated: true, // 標記為機器人生成
     );
     
     _messages.add(botMessage);
-    notifyListeners();
+    // 靜默添加機器人訊息，不觸發 UI 更新
+    // notifyListeners(); // 移除這行，讓機器人訊息靜默添加
     
     // 為機器人訊息生成隨機統計數據
     _generateBotMessageStats(messageId);
@@ -497,7 +531,8 @@ class MessageProvider extends ChangeNotifier {
           viewCount: initialViews,
           likeCount: initialLikes,
         );
-        notifyListeners();
+        // 靜默更新機器人訊息統計，不觸發 UI 更新
+        // notifyListeners();
         
         // 開始隨機增長
         _startRandomGrowth(messageId);
@@ -534,7 +569,8 @@ class MessageProvider extends ChangeNotifier {
           viewCount: message.viewCount + viewIncrease,
           likeCount: message.likeCount + likeIncrease,
         );
-        notifyListeners();
+        // 靜默更新機器人訊息統計，不觸發 UI 更新
+        // notifyListeners();
       }
       
       // 隨機決定是否停止增長（10%機率）

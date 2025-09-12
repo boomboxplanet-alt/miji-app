@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:http/http.dart' as http;
-import 'package:geolocator/geolocator.dart';
+// import 'package:geolocator/geolocator.dart';  // 暫時註釋掉
 
 class TranslationService {
   static const bool isMockApi = true;
@@ -34,6 +34,14 @@ class TranslationService {
     'AU': 'en', // 澳洲 -> 英語
     'NZ': 'en', // 紐西蘭 -> 英語
   };
+  
+  // 獲取模擬位置（澳門）
+  Map<String, double> _getMockPosition() {
+    return {
+      'latitude': 22.1987,
+      'longitude': 113.5439,
+    };
+  }
   
   // 根據國家代碼獲取當地常用問候語和短語
   static const Map<String, List<String>> countryToLocalPhrases = {
@@ -98,8 +106,9 @@ class TranslationService {
     if (isMockApi) {
       // 模擬：根據座標判斷國家
       try {
-        Position position = await Geolocator.getCurrentPosition();
-        return await _getCountryCodeFromCoordinates(position.latitude, position.longitude);
+        // 使用模擬位置
+        final mockPosition = _getMockPosition();
+        return await _getCountryCodeFromCoordinates(mockPosition['latitude']!, mockPosition['longitude']!);
       } catch (e) {
         // 如果無法獲取位置，返回默認值
         return 'TW';
@@ -107,10 +116,11 @@ class TranslationService {
     }
     
     try {
-      Position position = await Geolocator.getCurrentPosition();
+      // 使用模擬位置
+      final mockPosition = _getMockPosition();
       // 使用反向地理編碼獲取國家代碼
       // 這裡需要實際的地理編碼API
-      return await _getCountryCodeFromCoordinates(position.latitude, position.longitude);
+      return await _getCountryCodeFromCoordinates(mockPosition['latitude']!, mockPosition['longitude']!);
     } catch (e) {
       // 默認返回台灣
       return 'TW';

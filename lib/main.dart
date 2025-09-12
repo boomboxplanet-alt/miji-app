@@ -1,78 +1,81 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+// import 'package:google_maps_flutter/google_maps_flutter.dart';
+// import 'package:geolocator/geolocator.dart';  // 暫時註釋掉
 import 'package:hive_flutter/hive_flutter.dart';
-import 'screens/map_screen.dart';
-import 'screens/login_screen.dart';
-import 'providers/message_provider.dart';
-import 'providers/location_provider.dart';
-import 'providers/task_provider.dart';
+
+// import 'services/firebase_service.dart';  // 暫時註釋掉
+import 'services/location_service.dart';
+import 'services/message_service.dart';
+import 'services/ai_bot_service.dart';
+import 'services/performance_monitor.dart';
+import 'providers/app_state.dart';
 import 'providers/auth_provider.dart';
-import 'services/firebase_service.dart';
-import 'utils/app_colors.dart';
+import 'providers/location_provider.dart';
+import 'providers/message_provider.dart';
+import 'providers/task_provider.dart';
+// import 'screens/intro_screen.dart';
+import 'screens/map_screen.dart';
+import 'screens/performance_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // 初始化 Hive 本地資料庫
+  // 初始化 Hive
   await Hive.initFlutter();
+  await Hive.openBox('messages');
+  await Hive.openBox('settings');
   
-  // 初始化 Firebase
-  await FirebaseService.instance.initialize();
+  // 初始化 Firebase - 暫時註釋掉
+  // await FirebaseService.instance.initialize();
   
-  runApp(const MijiApp());
+  // 等待一下確保 Firebase 完全初始化 - 暫時註釋掉
+  // await Future.delayed(Duration(milliseconds: 500));
+  
+  // 初始化性能監控
+  final performanceMonitor = PerformanceMonitor();
+  performanceMonitor.startMonitoring();
+  
+  runApp(const MyApp());
 }
 
-class MijiApp extends StatelessWidget {
-  const MijiApp({super.key});
-
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+  
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => AuthProvider()),
-        ChangeNotifierProvider(create: (context) => MessageProvider()),
-        ChangeNotifierProvider(create: (context) => LocationProvider()),
-        ChangeNotifierProvider(create: (context) => TaskProvider()),
+        ChangeNotifierProvider(create: (_) => AppState()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => LocationProvider()),
+        ChangeNotifierProvider(create: (_) => MessageProvider()),
+        ChangeNotifierProvider(create: (_) => TaskProvider()),
+        Provider<LocationService>(create: (_) => LocationService()),
+        Provider<MessageService>(create: (_) => MessageService()),
+        Provider<AIBotService>(create: (_) => AIBotService()),
       ],
       child: MaterialApp(
         title: '秘跡 Miji',
-        debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          primarySwatch: Colors.deepPurple,
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: AppColors.primaryColor,
-            brightness: Brightness.light,
-          ),
-          // 針對手機介面的優化設定
+          primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,
-          appBarTheme: const AppBarTheme(
-            elevation: 0,
-            centerTitle: true,
-          ),
-          cardTheme: const CardTheme(
-            elevation: 2,
+          cardTheme: CardTheme(
+            elevation: 8,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
+              borderRadius: BorderRadius.circular(16),
             ),
           ),
         ),
-        darkTheme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: AppColors.primaryColor,
-            brightness: Brightness.dark,
-          ),
-        ),
-        initialRoute: '/',
+        home: MapScreen(),
         routes: {
-          '/': (context) => const MapScreen(),
-          '/login': (context) => const LoginScreen(),
-          '/home': (context) => const MapScreen(),
+          '/map': (context) => MapScreen(),
+          '/performance': (context) => PerformanceScreen(),
         },
       ),
     );
   }
 }
+
 
 

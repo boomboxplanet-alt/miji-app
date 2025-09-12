@@ -223,16 +223,8 @@ class _MapScreenState extends State<MapScreen> {
       aiBotService.setOnMessageGenerated((content, lat, lng, radius, duration) {
         final messageProvider = context.read<MessageProvider>();
         
-        // 創建機器人訊息
-        messageProvider.sendMessage(
-          content: content,
-          latitude: lat,
-          longitude: lng,
-          radius: radius,
-          duration: duration,
-          isAnonymous: true,
-          customSenderName: null, // 機器人訊息不需要自定義名稱
-        );
+        // 直接添加機器人訊息，不通過 sendMessage 方法
+        messageProvider.addBotMessage(content, lat, lng, radius, duration);
       });
       
       // 啟動機器人服務
@@ -252,8 +244,7 @@ class _MapScreenState extends State<MapScreen> {
         });
       }
       
-      print('🤖 AI 機器人服務已啟動，將自動生成訊息');
-      print('📏 用戶範圍: ${userRadius.toStringAsFixed(0)}米');
+      // 靜默啟動，不在控制台輸出任何機器人提示
     } catch (e) {
       print('❌ 啟動 AI 機器人服務失敗: $e');
     }
@@ -499,37 +490,44 @@ class _MapScreenState extends State<MapScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            // App名稱和標語
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppStrings.appName,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    letterSpacing: 0.5,
-                    shadows: [
-                      Shadow(
-                        offset: const Offset(0, 2),
-                        blurRadius: 8,
-                        color: Colors.black.withOpacity(0.3),
-                      ),
-                    ],
+            // App名稱和標語（可縮放避免溢出）
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    AppStrings.appName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                      shadows: [
+                        Shadow(
+                          offset: const Offset(0, 2),
+                          blurRadius: 8,
+                          color: Colors.black.withOpacity(0.3),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  AppStrings.tagline,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.white.withOpacity(0.85),
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.3,
+                  const SizedBox(height: 2),
+                  Text(
+                    AppStrings.tagline,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.white.withOpacity(0.85),
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.3,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             const Spacer(),
             // 中間：用戶權限顯示（兩排）
@@ -744,7 +742,6 @@ class _MapScreenState extends State<MapScreen> {
           if (lp.errorMessage != null)
             _buildErrorIndicator(
                 lp.errorMessage!, () => lp.getCurrentLocation()),
-          if (mp.isLoading) _buildStatusIndicator('正在發送訊息...'),
           if (mp.errorMessage != null)
             _buildErrorIndicator(mp.errorMessage!, () => mp.clearError()),
         ],
@@ -755,14 +752,9 @@ class _MapScreenState extends State<MapScreen> {
   Widget _buildBottomWidgets(LocationProvider locationProvider) {
     return Stack(
       children: [
+        // 定位按鈕（位於右下角，位於 + 按鈕上方避免重疊）
         Positioned(
-          bottom: MediaQuery.of(context).padding.bottom + 16,
-          left: 16,
-          right: 16,
-          child: QuickSendWidget(onSend: _handleSendMessage),
-        ),
-        Positioned(
-          bottom: MediaQuery.of(context).padding.bottom + 200,
+          bottom: MediaQuery.of(context).padding.bottom + 96,
           right: 20,
           child: Container(
             decoration: BoxDecoration(
@@ -802,7 +794,66 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ),
         ),
+
+        // 「+」主動作按鈕：展開下方功能區
+        Positioned(
+          bottom: MediaQuery.of(context).padding.bottom + 20,
+          right: 20,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [
+                  AppColors.primaryColor,
+                  AppColors.secondaryColor,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: const [
+                BoxShadow(
+                  color: AppColors.primaryColor,
+                  blurRadius: 16,
+                  offset: Offset(0, 8),
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: FloatingActionButton(
+              onPressed: _openQuickSendSheet,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              child: const Icon(
+                Icons.add,
+                color: Colors.white,
+                size: 30,
+              ),
+            ),
+          ),
+        ),
       ],
+    );
+  }
+
+  // 以底部彈出面板顯示原本的輸入與設定功能
+  void _openQuickSendSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: 12,
+              right: 12,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 12,
+            ),
+            child: QuickSendWidget(onSend: _handleSendMessage),
+          ),
+        );
+      },
     );
   }
 
@@ -1436,7 +1487,7 @@ class _MapScreenState extends State<MapScreen> {
                 return;
               }
 
-              final success = await authProvider.signInWithGoogle();
+              final success = await authProvider.signInAsGuest();
               if (success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('登入成功！')),

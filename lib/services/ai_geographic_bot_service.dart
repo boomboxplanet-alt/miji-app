@@ -69,7 +69,7 @@ class AIGeographicBotService {
   // 更新用戶範圍
   void updateUserRadius(double radius) {
     _userRadius = radius;
-    print('📏 用戶範圍更新: ${radius.toStringAsFixed(0)}米');
+    // 靜默更新（不打印任何機器人相關訊息）
   }
   
   // 獲取用戶範圍
@@ -81,14 +81,14 @@ class AIGeographicBotService {
   void _updateLocationInfo(double lat, double lng) {
     _currentLocation = _getLocationContext(lat, lng);
     _currentCountry = _getCountryContext(lat, lng);
-    print('📍 位置更新: $_currentLocation, $_currentCountry');
+    // 靜默更新位置
   }
 
   // 更新天氣信息
   void _updateWeatherInfo() {
     _currentWeather = _generateRandomWeather();
     _currentTemperature = 15 + _random.nextDouble() * 25; // 15-40°C
-    print('🌤️ 天氣更新: $_currentWeather, ${_currentTemperature!.toStringAsFixed(1)}°C');
+    // 靜默更新天氣
   }
 
   // 更新環境信息
@@ -121,7 +121,7 @@ class AIGeographicBotService {
       _currentTimeOfDay = '深夜';
     }
     
-    print('🌍 環境更新: $_currentSeason, $_currentTimeOfDay');
+    // 靜默更新環境
   }
 
   // 生成隨機天氣

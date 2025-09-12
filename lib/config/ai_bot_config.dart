@@ -28,10 +28,10 @@ class AIBotConfig {
   static const int botMessagePriority = 1;
   
   // 是否在控制台顯示機器人活動日誌
-  static const bool enableLogging = true;
+  static const bool enableLogging = false; // 禁用對外日誌，避免暴露機器人
   
   // 機器人訊息的標籤
-  static const String botMessageTag = '🤖 AI機器人';
+  static const String botMessageTag = ''; // 移除任何顯示上的機器人標籤
   
   // 機器人訊息的內容類型
   static const List<String> supportedContentTypes = [
