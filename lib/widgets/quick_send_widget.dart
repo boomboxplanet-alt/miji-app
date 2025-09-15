@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../utils/app_colors.dart';
 import '../services/content_moderation_service.dart';
 import '../providers/task_provider.dart';
+// 移除自定義圖示import，使用原始Material Design圖示
 
 class QuickSendWidget extends StatefulWidget {
   final Function(String, double, Duration, bool, String?) onSend;
@@ -654,11 +655,7 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              color: Colors.white,
-              size: 18,
-            ),
+            _buildButtonIcon(icon),
             const SizedBox(width: 8),
             Text(
               text,
@@ -675,6 +672,30 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
   }
 
   // 統一樣式的動作按鈕（等寬等高）
+  // 重新設計的按鈕圖示 - 使用原始Material Design圖示
+  Widget _buildButtonIcon(IconData icon, {double size = 18}) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(4),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Icon(
+        icon,
+        color: const Color(0xFF667eea),
+        size: size * 0.7,
+      ),
+    );
+  }
+
   Widget _buildActionButton({
     required IconData icon,
     required String label,
@@ -720,7 +741,7 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: Colors.white, size: 16),
+              _buildButtonIcon(icon, size: 16),
               const SizedBox(width: 6),
               Text(
                 label,

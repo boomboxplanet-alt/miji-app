@@ -14,7 +14,7 @@
     This is a placeholder for base href that will be replaced by the value of
     the `--base-href` argument provided to `flutter build`.
   -->
-  <base href="$FLUTTER_BASE_HREF">
+  <base href="/">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
@@ -37,102 +37,10 @@
   
       <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB5EIX3h6jLAF7C_5_fsE_lOQUjTMr7J58"></script>
   
-  <!-- 隱藏Google地圖版權資訊和界面元素 -->
   <style>
-    /* 隱藏Google標誌 */
-    .gmnoprint, .gm-style-cc, .gm-control-active, .gm-svpc, .gm-fullscreen-control {
-      display: none !important;
-    }
-    /* 隱藏版權資訊 */
-    .gm-style a[href^="https://maps.google.com/maps"] {
-      display: none !important;
-    }
-    /* 隱藏鍵盤快速鍵、地圖資料等信息 */
-    .gm-style-iw, .gm-style div[style*="background-color: rgba(0, 0, 0, 0.5)"], .gm-style div[style*="background-color: white"] {
-      display: none !important;
-    }
-    /* 隱藏所有Google相關的文字 */
-    .gm-style div, .gm-style span, .gm-style a {
-      font-size: 0 !important;
-    }
-    /* 隱藏底部版權信息 */
-    .gm-style-moc, .gm-style-pbc, .gm-style-pbt, .gm-style-mtc, .gm-style-cc {
-      display: none !important;
-    }
-    /* 隱藏底部的所有元素 */
-    .gm-style > div:last-child {
-      display: none !important;
-    }
-    
-    /* 隱藏底部所有可能的白色橫線和元素 */
-    div[style*="background-color: white"][style*="position: fixed"][style*="bottom"],
-    div[style*="background: white"][style*="position: fixed"][style*="bottom"],
-    div[style*="border-bottom"][style*="white"][style*="position: fixed"],
-    div[style*="background-color: rgba(255, 255, 255"][style*="position: fixed"][style*="bottom"],
-    div[style*="background: rgba(255, 255, 255"][style*="position: fixed"][style*="bottom"],
-    div[style*="border-bottom"][style*="rgba(255, 255, 255"][style*="position: fixed"],
-    div[style*="background-color: #ffffff"][style*="position: fixed"][style*="bottom"],
-    div[style*="background: #ffffff"][style*="position: fixed"][style*="bottom"],
-    div[style*="border-bottom"][style*="#ffffff"][style*="position: fixed"],
-    div[style*="background-color: #fff"][style*="position: fixed"][style*="bottom"],
-    div[style*="background: #fff"][style*="position: fixed"][style*="bottom"],
-    div[style*="border-bottom"][style*="#fff"][style*="position: fixed"],
-    /* 隱藏所有底部固定位置的元素 */
-    div[style*="position: fixed"][style*="bottom: 0"],
-    div[style*="position: fixed"][style*="bottom: 0px"],
-    div[style*="position: fixed"][style*="bottom: 0em"],
-    div[style*="position: fixed"][style*="bottom: 0rem"],
-    /* 隱藏可能的Flutter Web底部元素 */
-    div[style*="height: 1px"][style*="position: fixed"][style*="bottom"],
-    div[style*="height: 2px"][style*="position: fixed"][style*="bottom"],
-    div[style*="height: 3px"][style*="position: fixed"][style*="bottom"],
-    div[style*="height: 4px"][style*="position: fixed"][style*="bottom"],
-    div[style*="height: 5px"][style*="position: fixed"][style*="bottom"],
-    /* 隱藏可能的滾動條和邊框 */
-    div[style*="border-top"][style*="white"][style*="position: fixed"],
-    div[style*="border-top"][style*="rgba(255, 255, 255"][style*="position: fixed"],
-    div[style*="border-top"][style*="#ffffff"][style*="position: fixed"],
-    div[style*="border-top"][style*="#fff"][style*="position: fixed"],
-    /* 隱藏可能的調試條紋 */
-    div[style*="background-color: yellow"][style*="position: fixed"][style*="bottom"], 
-    div[style*="background: yellow"][style*="position: fixed"][style*="bottom"],
-    div[style*="border-bottom"][style*="yellow"][style*="position: fixed"] {
-      display: none !important;
-    }
-    
-    /* 確保body和html沒有底部邊距 */
-    body, html {
-      margin: 0 !important;
-      padding: 0 !important;
-      border: none !important;
-      outline: none !important;
-    }
-    
-    /* 隱藏所有可能的底部邊框 */
-    * {
-      border-bottom: none !important;
-    }
-    
-    /* 隱藏Flutter Web特有的底部元素 */
-    flt-glass-pane, flt-scene-host, flt-semantics-host {
-      border: none !important;
-      outline: none !important;
-    }
-    
-    /* 隱藏可能的底部滾動條 */
-    ::-webkit-scrollbar {
-      display: none !important;
-    }
-    
-    /* 隱藏所有底部固定位置的透明元素 */
-    div[style*="opacity"][style*="position: fixed"][style*="bottom"],
-    div[style*="opacity: 0"][style*="position: fixed"][style*="bottom"],
-    div[style*="opacity: 0.1"][style*="position: fixed"][style*="bottom"],
-    div[style*="opacity: 0.2"][style*="position: fixed"][style*="bottom"],
-    div[style*="opacity: 0.3"][style*="position: fixed"][style*="bottom"],
-    div[style*="opacity: 0.4"][style*="position: fixed"][style*="bottom"],
-    div[style*="opacity: 0.5"][style*="position: fixed"][style*="bottom"] {
-      display: none !important;
+    html, body {
+      height: 100%;
+      margin: 0;
     }
   </style>
 </head>

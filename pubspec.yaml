@@ -33,6 +33,7 @@ dependencies:
   # UI 組件
   google_fonts: ^6.3.0
   confetti: ^0.8.0
+  flutter_svg: ^2.0.9
   
   # 音頻播放
   audioplayers: ^5.2.1

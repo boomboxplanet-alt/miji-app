@@ -57,6 +57,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: '秘跡 Miji',
+        debugShowCheckedModeBanner: false, // 隱藏調試橫幅
         theme: ThemeData(
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,
