@@ -1,0 +1,29 @@
+on:
+  push:
+    branches:
+      - release/v1.6-2025-09-15
+
+name: Create GitHub Release v1.6
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build source zip artifact
+        run: |
+          zip -r miji_v1.6_2025-09-15.zip . -x ".git/*"
+
+      - name: Create/Update Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v1.6-2025-09-15
+          name: 秘跡 Miji v1.6 (2025-09-15)
+          bodyFile: RELEASE_NOTES_v1.6-2025-09-15.md
+          artifacts: miji_v1.6_2025-09-15.zip
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
