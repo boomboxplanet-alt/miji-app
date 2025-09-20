@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
@@ -13,8 +14,10 @@ import '../screens/task_screen.dart';
 import '../screens/ai_bot_control_screen.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_strings.dart';
+import '../utils/map_styles.dart';
 import '../widgets/quick_send_widget.dart';
 import '../widgets/message_bubble_overlay.dart';
+import '../widgets/night_fog_overlay.dart';
 // 移除自定義圖示import，使用原始Material Design圖示
 import '../config/ai_bot_config.dart';
 import '../services/ai_geographic_bot_service.dart';
@@ -29,14 +32,24 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   final Completer<GoogleMapController> _controller = Completer();
   final Set<Marker> _markers = {};
-  final Set<Circle> _circles = {};
+  final Set<Circle> _circles = {}; // 保留型別，但不再加入任何圓圈
   Marker? _userLocationMarker;
+  BitmapDescriptor? _cachedUserPinIcon;
   double _currentRadius = 1000.0; // 基礎範圍1公里，將根據用戶權限動態更新
   GoogleMapController? _mapController;
   final List<MessageBubbleOverlay> _bubbleOverlays = [];
   final GlobalKey _mapKey = GlobalKey();
   Timer? _bubbleRotationTimer;
   int _currentTopBubbleIndex = 0;
+  
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeProviders();
+      _prepareUserPinIcon();
+    });
+  }
 
   // 獲取用戶的實際範圍權限（基礎+獎勵）
   double _getUserTotalRange() {
@@ -50,7 +63,7 @@ class _MapScreenState extends State<MapScreen> {
 
   static const CameraPosition _kInitialPosition = CameraPosition(
     target: LatLng(25.0330, 121.5654), // Default location: Taipei 101
-    zoom: 15.0, // 調整為適合查看附近訊息的縮放級別，顯示街道和建築細節
+    zoom: 15.0, // 回復原本的街道級別視角
   );
 
   // 根據用戶範圍計算適合的縮放級別（進一步最小化到用戶範圍）
@@ -71,13 +84,7 @@ class _MapScreenState extends State<MapScreen> {
     return 18.0; // 最小範圍進一步縮小
   }
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeProviders();
-    });
-  }
+  
 
   // 計算最小縮放級別（顯示用戶範圍的2倍區域，這是最大可放大的限制）
   double _getMinZoomLevel() {
@@ -264,6 +271,7 @@ class _MapScreenState extends State<MapScreen> {
                   GoogleMap(
                     key: _mapKey,
                     mapType: MapType.normal,
+                    style: MapStyles.forPlatform(),
                     initialCameraPosition: _kInitialPosition,
                     minMaxZoomPreference: MinMaxZoomPreference(
                       _getMinZoomLevel(), // 限制最小縮放（最大顯示範圍為用戶範圍的2倍）
@@ -276,83 +284,6 @@ class _MapScreenState extends State<MapScreen> {
                       _mapController = controller;
                       // 設定縮放限制
                       _updateZoomLimits();
-                      // 設定美觀的地圖樣式，保留路名顯示
-                      // 注意：setMapStyle 已被棄用，使用 GoogleMap.style 屬性
-                      // controller.setMapStyle('''[{
-                      //   "featureType": "poi",
-                      //   "elementType": "labels",
-                      //   "stylers": [{"visibility": "off"}]
-                      // },
-                      // {
-                      //   "featureType": "administrative",
-                      //   "elementType": "labels",
-                      //   "stylers": [{"visibility": "simplified"}]
-                      // },
-                      // {
-                      //   "featureType": "transit",
-                      //   "elementType": "labels",
-                      //   "stylers": [{"visibility": "off"}]
-                      // },
-                      // {
-                      //   "featureType": "water",
-                      //   "elementType": "geometry",
-                      //   "stylers": [
-                      //     {"color": "#a3d8f7"}
-                      //   ]
-                      // },
-                      // {
-                      //   "featureType": "landscape",
-                      //   "elementType": "geometry",
-                      //   "stylers": [
-                      //     {"color": "#f5f5f5"}
-                      //   ]
-                      // },
-                      // {
-                      //   "featureType": "road.highway",
-                      //   "elementType": "geometry.fill",
-                      //   "stylers": [
-                      //     {"color": "#ffffff"}
-                      //   ]
-                      // },
-                      // {
-                      //   "featureType": "road",
-                      //   "elementType": "geometry",
-                      //   "stylers": [
-                      //     {"color": "#ffffff"}
-                      //   ]
-                      // },
-                      // {
-                      //   "featureType": "road",
-                      //   "elementType": "labels.text.fill",
-                      //   "stylers": [
-                      //     {"color": "#666666"}
-                      //   ]
-                      // },
-                      // {
-                      //   "featureType": "road",
-                      //   "elementType": "labels.text.stroke",
-                      //   "stylers": [
-                      //     {"color": "#ffffff"},
-                      //     {"weight": 2}
-                      //   ]
-                      // },
-                      // {
-                      //   "featureType": "transit",
-                      //   "stylers": [{"visibility": "off"}]
-                      // },
-                      // {
-                      //   "featureType": "administrative",
-                      //   "elementType": "geometry.stroke",
-                      //   "stylers": [
-                      //     {"color": "#efefe"},
-                      //     {"weight": 1}
-                      //   ]
-                      // },
-                      // {
-                      //   "featureType": "poi",
-                      //   "stylers": [{"visibility": "off"}]
-                      // }
-                      // ]''');
                     },
                     markers: _getAllMarkers(),
                     circles: _circles,
@@ -377,6 +308,7 @@ class _MapScreenState extends State<MapScreen> {
                       _updateBubblePositions();
                     },
                   ),
+                  const NightFogOverlay(opacity: 0.16, starDensity: 0.9),
                   ..._bubbleOverlays,
                 ],
               ),
@@ -852,10 +784,8 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Set<Marker> _getAllMarkers() {
+    // 不再顯示用戶位置標記
     final allMarkers = <Marker>{};
-    if (_userLocationMarker != null) {
-      allMarkers.add(_userLocationMarker!);
-    }
     allMarkers.addAll(_markers);
     return allMarkers;
   }
@@ -867,34 +797,10 @@ class _MapScreenState extends State<MapScreen> {
         locationProvider.currentPosition!.longitude,
       );
 
-      // 更新用戶位置標記，使用小小的位置點
-      final newUserMarker = Marker(
-        markerId: const MarkerId('user_location'),
-        position: userPosition,
-        infoWindow: const InfoWindow(),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-        zIndex: 2, // 確保用戶位置標記顯示在最上層
-        flat: true,
-        anchor: const Offset(0.5, 0.5),
-      );
-
-      // 更新範圍圓圈
-      final newCircle = Circle(
-        circleId: const CircleId('user_radius'),
-        center: userPosition,
-        radius: _currentRadius,
-        fillColor: AppColors.primaryColor.withOpacity(0.1),
-        strokeColor: AppColors.primaryColor,
-        strokeWidth: 2,
-      );
-
+      // 不再加入用戶位置標記
       setState(() {
-        _userLocationMarker = newUserMarker;
-        _circles.clear();
-        _circles.add(newCircle);
-        // 確保用戶位置標記顯示在地圖上
+        _userLocationMarker = null;
         _markers.clear();
-        _markers.add(_userLocationMarker!);
       });
 
       // 調整地圖縮放到最佳視角以最大化顯示用戶範圍
@@ -916,7 +822,7 @@ class _MapScreenState extends State<MapScreen> {
       );
 
       // 平滑動畫到最佳視角
-      controller.animateCamera(
+      await controller.animateCamera(
         CameraUpdate.newCameraPosition(newPosition),
         // 使用較慢的動畫讓用戶看到縮放過程
       );
@@ -1003,6 +909,18 @@ class _MapScreenState extends State<MapScreen> {
         // 最後一個（頂層）泡泡的zIndex為1，其他為0
         final zIndex = i == reorderedMessages.length - 1 ? 1 : 0;
 
+        // 距離顯示（以目前相機中心近似使用者位置計算）
+        final cameraPosition = await _mapController!.getLatLng(const ScreenCoordinate(x: 0, y: 0));
+        final distanceMeters = _calculateDistance(
+          cameraPosition.latitude,
+          cameraPosition.longitude,
+          message.latitude,
+          message.longitude,
+        );
+        final distanceText = distanceMeters >= 1000
+            ? '${(distanceMeters / 1000).toStringAsFixed(1)} km'
+            : '${distanceMeters.toStringAsFixed(0)} m';
+
         bubbles.add(
           MessageBubbleOverlay(
             content: message.content,
@@ -1013,6 +931,8 @@ class _MapScreenState extends State<MapScreen> {
             bubbleColor: _getBubbleColor(message),
             gender: message.gender,
             onTap: () => _showMessageBubble(message),
+            likeCount: message.likeCount,
+            distanceText: distanceText,
           ),
         );
       } catch (e) {
@@ -1075,6 +995,75 @@ class _MapScreenState extends State<MapScreen> {
   void _stopBubbleRotation() {
     _bubbleRotationTimer?.cancel();
     _bubbleRotationTimer = null;
+  }
+
+  Future<void> _prepareUserPinIcon() async {
+    final icon = await _createUserPinIcon(size: 80);
+    if (mounted) {
+      setState(() {
+        _cachedUserPinIcon = icon;
+        // 立即用新圖示替換既有的用戶標記
+        if (_userLocationMarker != null) {
+          _userLocationMarker = _userLocationMarker!.copyWith(iconParam: _cachedUserPinIcon);
+        }
+      });
+    }
+  }
+
+  Future<BitmapDescriptor> _createUserPinIcon({double size = 72}) async {
+    final double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+    final double canvasSize = size * devicePixelRatio;
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder, Rect.fromLTWH(0, 0, canvasSize, canvasSize));
+
+    final center = Offset(canvasSize / 2, canvasSize / 2);
+    final radius = canvasSize * 0.28;
+
+    // 外圍星光藍光暈
+    final glowPaint = Paint()
+      ..color = const Color(0xFF5FA8FF).withOpacity(0.55)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18);
+    canvas.drawCircle(center, radius * 1.35, glowPaint);
+
+    // 內部底圓（半透明白）
+    final basePaint = Paint()..color = const Color(0xFFFFFFFF).withOpacity(0.95);
+    canvas.drawCircle(center, radius, basePaint);
+
+    // 外框：品牌紫藍 (#8A7CCF)
+    final borderPaint = Paint()
+      ..color = const Color(0xFF8A7CCF)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = radius * 0.22;
+    canvas.drawCircle(center, radius - borderPaint.strokeWidth / 2, borderPaint);
+
+    // 中央白色星型
+    final starPath = Path();
+    final int points = 5;
+    final double outerR = radius * 0.58;
+    final double innerR = outerR * 0.48;
+    for (int i = 0; i < points * 2; i++) {
+      final double isOuter = i.isEven ? outerR : innerR;
+      final double angle = (math.pi / points) * i - math.pi / 2;
+      final Offset pos = Offset(
+        center.dx + isOuter * math.cos(angle),
+        center.dy + isOuter * math.sin(angle),
+      );
+      if (i == 0) {
+        starPath.moveTo(pos.dx, pos.dy);
+      } else {
+        starPath.lineTo(pos.dx, pos.dy);
+      }
+    }
+    starPath.close();
+    final starPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(starPath, starPaint);
+
+    final picture = recorder.endRecording();
+    final img = await picture.toImage(canvasSize.toInt(), canvasSize.toInt());
+    final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
+    return BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List());
   }
 
   Color _getBubbleColor(Message message) {
@@ -1153,26 +1142,11 @@ class _MapScreenState extends State<MapScreen> {
     // 平滑動畫到新位置
     await controller.animateCamera(CameraUpdate.newCameraPosition(newPosition));
 
-    // 更新範圍圓圈以確保正確顯示
-    _updateCircles(LatLng(position.latitude, position.longitude));
+    // 取消範圍圓圈顯示
   }
 
-  // 更新範圍圓圈顯示
-  void _updateCircles(LatLng center) {
-    setState(() {
-      _circles.clear();
-      _circles.add(
-        Circle(
-          circleId: const CircleId('user_range'),
-          center: center,
-          radius: _currentRadius,
-          fillColor: AppColors.primaryColor.withOpacity(0.1),
-          strokeColor: AppColors.primaryColor.withOpacity(0.5),
-          strokeWidth: 2,
-        ),
-      );
-    });
-  }
+  // 已移除範圍圓圈，保留空方法避免引用
+  void _updateCircles(LatLng center) {}
 
   void _showSnackBar(String text, {bool isError = false}) {
     if (!mounted) return;
@@ -1658,3 +1632,5 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 }
+
+// 已移除天空漸層繪製

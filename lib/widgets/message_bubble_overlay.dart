@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:ui' as ui;
 import '../models/message.dart';
 
 class MessageBubbleOverlay extends StatefulWidget {
@@ -11,6 +12,8 @@ class MessageBubbleOverlay extends StatefulWidget {
   final DateTime expiresAt;
   final Color bubbleColor;
   final Gender gender;
+  final int likeCount;
+  final String distanceText;
 
   const MessageBubbleOverlay({
     super.key,
@@ -22,6 +25,8 @@ class MessageBubbleOverlay extends StatefulWidget {
     required this.expiresAt,
     required this.bubbleColor,
     required this.gender,
+    required this.likeCount,
+    required this.distanceText,
   });
 
   @override
@@ -45,12 +50,12 @@ class _MessageBubbleOverlayState extends State<MessageBubbleOverlay>
     super.initState();
     
     _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
+      duration: const Duration(milliseconds: 2600),
       vsync: this,
     );
     
     _scaleController = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 420),
       vsync: this,
     );
     
@@ -61,18 +66,18 @@ class _MessageBubbleOverlayState extends State<MessageBubbleOverlay>
     
     _pulseAnimation = Tween<double>(
       begin: 1.0,
-      end: 1.1,
+      end: 1.06,
     ).animate(CurvedAnimation(
       parent: _pulseController,
-      curve: Curves.easeInOut,
+      curve: Curves.easeInOutCubic,
     ));
     
     _scaleAnimation = Tween<double>(
-      begin: 0.0,
+      begin: 0.9,
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: _scaleController,
-      curve: Curves.elasticOut,
+      curve: Curves.easeOutCubic,
     ));
     
     _fadeAnimation = Tween<double>(
@@ -202,31 +207,47 @@ class _MessageBubbleOverlayState extends State<MessageBubbleOverlay>
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    Container(
-                      constraints: const BoxConstraints(
-                        maxWidth: 160,
-                        minWidth: 100,
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(22),
+                      child: BackdropFilter(
+                        filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                        child: Container(
+                  constraints: const BoxConstraints(
+                    maxWidth: 240,
+                    minWidth: 110,
+                  ),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            widget.bubbleColor.withOpacity(isTopLayer ? 1.0 : 0.8),
-                            widget.bubbleColor.withOpacity(isTopLayer ? 0.8 : 0.6),
+                            const Color(0xFF8A7CCF).withOpacity(0.42), // 紫藍更明顯
+                            const Color(0xFFF29EDB).withOpacity(0.34), // 粉色更明顯
+                          ],
+                          stops: [0.1, 0.9],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(22),
+                        border: Border.all(color: Colors.white.withOpacity(0.28), width: 1),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.12),
+                            blurRadius: 18,
+                            offset: const Offset(0, 10),
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      foregroundDecoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(22),
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white.withOpacity(0.35),
+                            Colors.white.withOpacity(0.08),
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: isTopLayer 
-                                ? widget.bubbleColor.withOpacity(0.4)
-                                : Colors.black.withOpacity(0.2),
-                            blurRadius: isTopLayer ? 12 : 6,
-                            offset: Offset(0, isTopLayer ? 4 : 2),
-                          ),
-                        ],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,32 +265,45 @@ class _MessageBubbleOverlayState extends State<MessageBubbleOverlay>
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
+                          const SizedBox(height: 6),
+                          // 計量列：喜歡數、距離、時間（自適應防溢出）
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Wrap(
+                              spacing: 6,
+                              runSpacing: 2,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                const Icon(Icons.favorite, size: 12, color: Colors.white70),
+                                const SizedBox(width: 1),
+                                Text('${widget.likeCount}', style: const TextStyle(color: Colors.white70, fontSize: 10)),
+                                const SizedBox(width: 4),
+                                const Icon(Icons.place, size: 12, color: Colors.white70),
+                                const SizedBox(width: 1),
+                                Text(widget.distanceText, style: const TextStyle(color: Colors.white70, fontSize: 10), overflow: TextOverflow.ellipsis),
+                                const SizedBox(width: 4),
+                                const Icon(Icons.timer, size: 12, color: Colors.white70),
+                                const SizedBox(width: 1),
+                                Text(_formatRemainingTime(), style: const TextStyle(color: Colors.white70, fontSize: 10), overflow: TextOverflow.ellipsis),
+                              ],
+                            ),
+                          ),
                           const SizedBox(height: 2),
-                          // 性別和時間資訊（始終顯示）
+                          // 性別與型別圖示
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               _getGenderIcon(),
-                              const SizedBox(width: 4),
-                              const Icon(
-                                Icons.timer,
-                                color: Colors.white70,
-                                size: 12,
-                              ),
-                              const SizedBox(width: 2),
-                              Text(
-                                _formatRemainingTime(),
-                                style: const TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
+                              const SizedBox(width: 6),
+                              const Icon(Icons.chat_bubble, color: Colors.white70, size: 12),
                             ],
                           ),
                         ],
                       ),
                     ),
+                  ),
+                ),
                   ],
                 ),
               ),

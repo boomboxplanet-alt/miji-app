@@ -19,7 +19,7 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
   final TextEditingController _controller = TextEditingController();
   double _radius = 1000.0; // 1公里 = 1000米，將根據用戶權限動態更新
   Duration _destroyDuration = const Duration(hours: 1); // 預設1小時，將根據用戶權限動態更新
-  bool _isAnonymous = true; // 預設僅提供匿名發送
+  final bool _isAnonymous = true; // 預設僅提供匿名發送
   int _currentBytes = 0;
   static const int _maxBytes = 200;
 

@@ -69,7 +69,7 @@ class IntroScreen extends StatelessWidget {
                           await appState.getCurrentLocation();
                           // 導航到地圖屏幕
                           if (context.mounted) {
-                            Navigator.pushReplacementNamed(context, '/map');
+                            await Navigator.pushReplacementNamed(context, '/map');
                           }
                         } else {
                           // 顯示權限被拒絕的提示

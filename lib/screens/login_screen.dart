@@ -289,7 +289,7 @@ class LoginScreen extends StatelessWidget {
 
     if (success && context.mounted) {
       // 登入成功，導航到主界面
-      Navigator.of(context).pushReplacementNamed('/home');
+      await Navigator.of(context).pushReplacementNamed('/home');
     }
   }
 
