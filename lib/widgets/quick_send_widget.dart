@@ -79,19 +79,19 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                const Color(0xFF667eea).withOpacity(0.82),
-                const Color(0xFF764ba2).withOpacity(0.82),
-                const Color(0xFFf093fb).withOpacity(0.82),
+                const Color(0xFF667eea).withValues(alpha: 0.82),
+                const Color(0xFF764ba2).withValues(alpha: 0.82),
+                const Color(0xFFf093fb).withValues(alpha: 0.82),
               ],
               stops: const [0.0, 0.5, 1.0],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white.withOpacity(0.25), width: 1.2),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.25), width: 1.2),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primaryColor.withOpacity(0.18),
+                color: AppColors.primaryColor.withValues(alpha: 0.18),
                 blurRadius: 20,
                 offset: const Offset(0, 6),
                 spreadRadius: 2,
@@ -123,10 +123,10 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
                   selected: true,
                   onSelected: null,
                   labelStyle: const TextStyle(color: Colors.white, fontSize: 12),
-                  selectedColor: Colors.white.withOpacity(0.35),
-                  backgroundColor: Colors.white.withOpacity(0.18),
+                  selectedColor: Colors.white.withValues(alpha: 0.35),
+                  backgroundColor: Colors.white.withValues(alpha: 0.18),
                   shape: StadiumBorder(
-                    side: BorderSide(color: Colors.white.withOpacity(0.3)),
+                    side: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
                   ),
                 ),
               ],
@@ -143,10 +143,10 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.3),
+                          color: Colors.white.withValues(alpha: 0.3),
                           width: 1,
                         ),
                       ),
@@ -171,7 +171,7 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
                           border: InputBorder.none,
                           counterText: '',
                           hintStyle: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
+                            color: Colors.white.withValues(alpha: 0.7),
                             fontSize: 14,
                           ),
                           contentPadding: const EdgeInsets.symmetric(
@@ -182,7 +182,7 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
                             padding: const EdgeInsets.only(top: 12),
                             child: Icon(
                               Icons.edit_outlined,
-                              color: Colors.white.withOpacity(0.8),
+                              color: Colors.white.withValues(alpha: 0.8),
                               size: 20,
                             ),
                           ),
@@ -242,8 +242,8 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
                       '$_currentBytes/$_maxBytes 字節',
                       style: TextStyle(
                         color: _currentBytes > _maxBytes * 0.8
-                            ? Colors.orange.withOpacity(0.9)
-                            : Colors.white.withOpacity(0.6),
+                            ? Colors.orange.withValues(alpha: 0.9)
+                            : Colors.white.withValues(alpha: 0.6),
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
                       ),
@@ -645,10 +645,10 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
@@ -678,11 +678,11 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: Colors.white.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(4),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 2,
             offset: const Offset(0, 1),
           ),
@@ -706,13 +706,13 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
     final Gradient gradient = primary
         ? LinearGradient(
             colors: disabled
-                ? [Colors.grey.shade500.withOpacity(0.6), Colors.grey.shade600.withOpacity(0.6)]
+                ? [Colors.grey.shade500.withValues(alpha: 0.6), Colors.grey.shade600.withValues(alpha: 0.6)]
                 : [const Color(0xFF667eea), const Color(0xFF764ba2)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           )
         : LinearGradient(
-            colors: [Colors.white.withOpacity(0.28), Colors.white.withOpacity(0.18)],
+            colors: [Colors.white.withValues(alpha: 0.28), Colors.white.withValues(alpha: 0.18)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           );
@@ -728,11 +728,11 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
           decoration: BoxDecoration(
             gradient: gradient,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withOpacity(primary ? 0.25 : 0.2), width: 1),
+            border: Border.all(color: Colors.white.withValues(alpha: primary ? 0.25 : 0.2), width: 1),
             boxShadow: [
               BoxShadow(
                 color: (primary ? const Color(0xFF667eea) : Colors.black)
-                    .withOpacity(primary ? 0.25 : 0.08),
+                    .withValues(alpha: primary ? 0.25 : 0.08),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -1040,10 +1040,10 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -1058,7 +1058,7 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -1100,7 +1100,7 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
         children: [
           Icon(
             icon,
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             size: 24,
           ),
           const SizedBox(width: 12),
@@ -1121,7 +1121,7 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
                   subtitle,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -1134,11 +1134,11 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
               if (states.contains(WidgetState.selected)) {
                 return Colors.white;
               }
-              return Colors.white.withOpacity(0.5);
+              return Colors.white.withValues(alpha: 0.5);
             }),
-            activeTrackColor: Colors.white.withOpacity(0.3),
-            inactiveThumbColor: Colors.white.withOpacity(0.5),
-            inactiveTrackColor: Colors.white.withOpacity(0.1),
+            activeTrackColor: Colors.white.withValues(alpha: 0.3),
+            inactiveThumbColor: Colors.white.withValues(alpha: 0.5),
+            inactiveTrackColor: Colors.white.withValues(alpha: 0.1),
           ),
         ],
       ),
@@ -1161,7 +1161,7 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
           children: [
             Icon(
               icon,
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               size: 24,
             ),
             const SizedBox(width: 12),
@@ -1182,7 +1182,7 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
                     subtitle,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                     ),
                   ),
                 ],
@@ -1190,7 +1190,7 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
             ),
             Icon(
               Icons.arrow_forward_ios,
-              color: Colors.white.withOpacity(0.5),
+              color: Colors.white.withValues(alpha: 0.5),
               size: 16,
             ),
           ],
@@ -1208,13 +1208,13 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? Colors.white.withOpacity(0.4)
-              : Colors.white.withOpacity(0.2),
+              ? Colors.white.withValues(alpha: 0.4)
+              : Colors.white.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
-                ? Colors.white.withOpacity(0.8)
-                : Colors.white.withOpacity(0.3),
+                ? Colors.white.withValues(alpha: 0.8)
+                : Colors.white.withValues(alpha: 0.3),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -1257,12 +1257,12 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
           color: color,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: Colors.white.withOpacity(0.5),
+            color: Colors.white.withValues(alpha: 0.5),
             width: 2,
           ),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.3),
+              color: color.withValues(alpha: 0.3),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),

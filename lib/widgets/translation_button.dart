@@ -45,10 +45,10 @@ class TranslationButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Colors.white.withOpacity(0.3),
+              color: Colors.white.withValues(alpha: 0.3),
               width: 1,
             ),
           ),
@@ -58,14 +58,14 @@ class TranslationButton extends StatelessWidget {
               Icon(
                 Icons.translate,
                 size: 14,
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
               ),
               const SizedBox(width: 4),
               Text(
                 '翻譯',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -82,10 +82,10 @@ class TranslationButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.white.withOpacity(0.3),
+            color: Colors.white.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -98,7 +98,7 @@ class TranslationButton extends StatelessWidget {
               child: CircularProgressIndicator(
                 strokeWidth: 2,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  Colors.white.withOpacity(0.9),
+                  Colors.white.withValues(alpha: 0.9),
                 ),
               ),
             ),
@@ -107,7 +107,7 @@ class TranslationButton extends StatelessWidget {
               '翻譯中...',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -127,14 +127,14 @@ class TranslationButton extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
+              color: Colors.white.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               _getLanguageLabel(message.originalLanguage),
               style: TextStyle(
                 fontSize: 10,
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -144,10 +144,10 @@ class TranslationButton extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.2),
+              color: Colors.green.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Colors.green.withOpacity(0.3),
+                color: Colors.green.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -157,14 +157,14 @@ class TranslationButton extends StatelessWidget {
                 Icon(
                   Icons.check_circle,
                   size: 12,
-                  color: Colors.green.withOpacity(0.9),
+                  color: Colors.green.withValues(alpha: 0.9),
                 ),
                 const SizedBox(width: 4),
                 Text(
                   '已翻譯',
                   style: TextStyle(
                     fontSize: 10,
-                    color: Colors.green.withOpacity(0.9),
+                    color: Colors.green.withValues(alpha: 0.9),
                     fontWeight: FontWeight.w500,
                   ),
                 ),

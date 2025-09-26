@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:ui' as ui;
 import '../providers/task_provider.dart';
 import '../models/task.dart';
 import '../widgets/reward_claim_dialog.dart';
@@ -28,135 +29,77 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(100),
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: Colors.black.withValues(alpha: 0.7),
+        child: Center(
           child: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFF6366F1),
-                  Color(0xFF8B5CF6),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-              ),
-            ),
-            child: AppBar(
-              title: const Row(
-                children: [
-                  Icon(
-                    Icons.task_alt_rounded,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                  SizedBox(width: 12),
-                  Text(
-                    '任務中心',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                ],
-              ),
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              centerTitle: true,
-              leading: IconButton(
-                icon: const Icon(
-                  Icons.close_rounded,
-                  color: Colors.white,
-                  size: 24,
-                ),
-                onPressed: () => Navigator.of(context).pop(),
-                tooltip: '關閉',
-              ),
-              bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(56),
+            constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
+            margin: const EdgeInsets.all(20),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: BackdropFilter(
+                filter: ui.ImageFilter.blur(sigmaX: 25, sigmaY: 25),
                 child: Container(
-                  height: 48,
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: TabBar(
-                    controller: _tabController,
-                    indicator: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
+                    // 深藍漸層背景
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xFF0A0A1A).withValues(alpha: 0.95),
+                        const Color(0xFF1A1A2E).withValues(alpha: 0.95),
+                        const Color(0xFF16213E).withValues(alpha: 0.95),
+                        const Color(0xFF0F3460).withValues(alpha: 0.95),
                       ],
+                      stops: const [0.0, 0.3, 0.7, 1.0],
                     ),
-                    labelColor: const Color(0xFF6366F1),
-                    unselectedLabelColor: Colors.white,
-                    labelStyle: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                      letterSpacing: 0.2,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: const Color(0xFF00BFFF).withValues(alpha: 0.8),
+                      width: 1.5,
                     ),
-                    unselectedLabelStyle: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                      letterSpacing: 0.2,
-                    ),
-                    dividerColor: Colors.transparent,
-                    indicatorPadding: const EdgeInsets.all(4),
-                    labelPadding: EdgeInsets.zero,
-                    isScrollable: false,
-                    tabs: const [
-                      Tab(
-                        height: 40,
-                        child: Center(
-                          child: Text(
-                            '每日任務',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
+                    boxShadow: [
+                      // 外層陰影
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.8),
+                        blurRadius: 40,
+                        offset: const Offset(0, 15),
                       ),
-                      Tab(
-                        height: 40,
-                        child: Center(
-                          child: Text(
-                            '每週任務',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
+                      // 霓虹發光效果
+                      BoxShadow(
+                        color: const Color(0xFF00BFFF).withValues(alpha: 0.4),
+                        blurRadius: 30,
+                        offset: const Offset(0, 0),
                       ),
-                      Tab(
-                        height: 40,
-                        child: Center(
-                          child: Text(
-                            '成就',
-                            textAlign: TextAlign.center,
-                          ),
+                      // 內層高光
+                      BoxShadow(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        blurRadius: 10,
+                        offset: const Offset(0, -3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      // 標題區域
+                      _buildHeader(context),
+
+                      // Tab 選擇器
+                      _buildTabSelector(context),
+
+                      // 任務列表
+                      Expanded(
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: [
+                            _buildTaskList(context, TaskType.daily),
+                            _buildTaskList(context, TaskType.weekly),
+                            _buildTaskList(context, TaskType.achievement),
+                          ],
                         ),
                       ),
                     ],
@@ -166,275 +109,244 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
             ),
           ),
         ),
-        body: Column(
-          children: [
-            // 獎勵狀態卡片
-            Flexible(
-              flex: 0,
-              child: _buildRewardStatusCard(),
-            ),
-
-            // 任務列表
-            Expanded(
-              flex: 1,
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildTaskList(TaskType.daily),
-                  _buildTaskList(TaskType.weekly),
-                  _buildTaskList(TaskType.achievement),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
 
-  Widget _buildRewardStatusCard() {
-    return Consumer<TaskProvider>(
-      builder: (context, taskProvider, child) {
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.white,
-                Colors.grey.shade50,
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 20,
-                offset: const Offset(0, 4),
-                spreadRadius: 0,
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      child: Row(
+        children: [
+          // 關閉按鈕
+          GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFF8B5CF6).withValues(alpha: 0.8),
+                    const Color(0xFF3B82F6).withValues(alpha: 0.8),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: const Color(0xFF00BFFF).withValues(alpha: 0.6),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF8B5CF6).withValues(alpha: 0.4),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
-            ],
+              child: const Icon(
+                Icons.close_rounded,
+                color: Colors.white,
+                size: 18,
+              ),
+            ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
+
+          const SizedBox(width: 12),
+
+          // 標題
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      width: 28,
+                      height: 28,
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            const Color(0xFF8B5CF6),
+                            const Color(0xFF3B82F6),
+                            const Color(0xFF06B6D4),
+                          ],
                         ),
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(7),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(
+                              0xFF8B5CF6,
+                            ).withValues(alpha: 0.5),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: const Icon(
-                        Icons.stars_rounded,
+                        Icons.task_alt_rounded,
                         color: Colors.white,
-                        size: 24,
+                        size: 16,
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            '我的獎勵',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1F2937),
-                              letterSpacing: 0.3,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            taskProvider.getBonusDescription(),
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey.shade600,
-                              fontWeight: FontWeight.w400,
-                              letterSpacing: 0.2,
-                            ),
-                          ),
-                        ],
+                    const SizedBox(width: 10),
+                    const Text(
+                      'MIJI 秘跡',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        letterSpacing: 1.5,
                       ),
                     ),
-                    if (taskProvider.hasNewRewards)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFEF4444), Color(0xFFDC2626)],
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.notifications_active,
-                              color: Colors.white,
-                              size: 14,
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              '${taskProvider.claimableTasks.length}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                   ],
                 ),
-                if (taskProvider.hasNewRewards) ...[
-                  const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          const Color(0xFF10B981).withOpacity(0.1),
-                          const Color(0xFF059669).withOpacity(0.05),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: const Color(0xFF10B981).withOpacity(0.2),
-                        width: 1,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.celebration,
-                              color: Color(0xFF10B981),
-                              size: 18,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                '有 ${taskProvider.claimableTasks.length} 個任務獎勵可以領取！',
-                                style: const TextStyle(
-                                  color: Color(0xFF10B981),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12,
-                                  letterSpacing: 0.2,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              final claimableTasks =
-                                  taskProvider.claimableTasks;
-                              if (claimableTasks.isNotEmpty &&
-                                  context.mounted) {
-                                // 顯示第一個任務的獎勵彈窗
-                                await _showRewardDialog(claimableTasks.first);
-
-                                // 如果還有更多任務，繼續顯示
-                                for (int i = 1;
-                                    i < claimableTasks.length;
-                                    i++) {
-                                  if (context.mounted) {
-                                    await Future.delayed(
-                                        const Duration(milliseconds: 500));
-                                    await _showRewardDialog(claimableTasks[i]);
-                                  }
-                                }
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF10B981),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 0,
-                              minimumSize: const Size(0, 40),
-                            ),
-                            child: const Text(
-                              '立即領取所有獎勵',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                                letterSpacing: 0.3,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                const SizedBox(height: 2),
+                Text(
+                  '任務中心',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withValues(alpha: 0.8),
+                    letterSpacing: 0.8,
                   ),
-                ],
+                ),
               ],
             ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
-  Widget _buildTaskList(TaskType type) {
+  Widget _buildTabSelector(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withValues(alpha: 0.15),
+            Colors.white.withValues(alpha: 0.08),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFF00BFFF).withValues(alpha: 0.4),
+          width: 1.5,
+        ),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        indicator: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xFF8B5CF6).withValues(alpha: 0.9),
+              const Color(0xFF3B82F6).withValues(alpha: 0.9),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF8B5CF6).withValues(alpha: 0.4),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white.withValues(alpha: 0.7),
+        labelStyle: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 14,
+          letterSpacing: 0.5,
+        ),
+        unselectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 14,
+          letterSpacing: 0.5,
+        ),
+        dividerColor: Colors.transparent,
+        indicatorPadding: const EdgeInsets.all(4),
+        labelPadding: EdgeInsets.zero,
+        isScrollable: false,
+        tabs: const [
+          Tab(
+            height: 40,
+            child: Center(child: Text('每日任務', textAlign: TextAlign.center)),
+          ),
+          Tab(
+            height: 40,
+            child: Center(child: Text('每週任務', textAlign: TextAlign.center)),
+          ),
+          Tab(
+            height: 40,
+            child: Center(child: Text('成就', textAlign: TextAlign.center)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTaskList(BuildContext context, TaskType type) {
     return Consumer<TaskProvider>(
       builder: (context, taskProvider, child) {
         final tasks = taskProvider.getTasksByType(type);
 
         if (tasks.isEmpty) {
-          return SingleChildScrollView(
-            child: SizedBox(
-              height: 200,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.task_alt,
-                      size: 48,
-                      color: Colors.white.withOpacity(0.5),
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xFF8B5CF6).withValues(alpha: 0.3),
+                        const Color(0xFF3B82F6).withValues(alpha: 0.3),
+                      ],
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      '暫無${_getTypeDisplayName(type)}任務',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white.withOpacity(0.8),
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 0.3,
-                      ),
-                      textAlign: TextAlign.center,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: const Color(0xFF00BFFF).withValues(alpha: 0.4),
+                      width: 1.5,
                     ),
-                  ],
+                  ),
+                  child: Icon(
+                    Icons.task_alt_rounded,
+                    size: 40,
+                    color: Colors.white.withValues(alpha: 0.5),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 12),
+                Text(
+                  '暫無${_getTypeDisplayName(type)}任務',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.3,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           );
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(16),
           itemCount: tasks.length,
           itemBuilder: (context, index) {
             return _buildTaskCard(tasks[index]);
@@ -448,239 +360,113 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withValues(alpha: 0.15),
+            Colors.white.withValues(alpha: 0.08),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFF00BFFF).withValues(alpha: 0.4),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-            spreadRadius: 0,
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+          BoxShadow(
+            color: const Color(0xFF00BFFF).withValues(alpha: 0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 0),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: task.isCompleted
-              ? null
-              : () {
-                  // 處理任務點擊
-                },
+          borderRadius: BorderRadius.circular(20),
+          onTap: () => _handleTaskTap(task),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.all(16),
+            child: Row(
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 第一行：圖標 + 任務標題
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: task.isCompleted
-                                  ? [
-                                      const Color(0xFF10B981),
-                                      const Color(0xFF059669)
-                                    ]
-                                  : [
-                                      const Color(0xFF6366F1),
-                                      const Color(0xFF8B5CF6)
-                                    ],
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            task.isCompleted
-                                ? Icons.check_rounded
-                                : _getTaskIconData(task.type),
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            task.title,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: task.isCompleted
-                                  ? Colors.grey.shade600
-                                  : const Color(0xFF1F2937),
-                              decoration: task.isCompleted
-                                  ? TextDecoration.lineThrough
-                                  : null,
-                              letterSpacing: 0.2,
-                              height: 1.3,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
+                // 任務圖標
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xFF8B5CF6).withValues(alpha: 0.8),
+                        const Color(0xFF3B82F6).withValues(alpha: 0.8),
+                        const Color(0xFF06B6D4).withValues(alpha: 0.8),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    // 第二行：任務內容
-                    Padding(
-                      padding: const EdgeInsets.only(left: 52),
-                      child: Text(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF00BFFF).withValues(alpha: 0.6),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF8B5CF6).withValues(alpha: 0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    _getTaskIcon(task.type),
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+
+                const SizedBox(width: 16),
+
+                // 任務信息
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        task.title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
                         task.description,
                         style: TextStyle(
-                          fontSize: 13,
-                          color: task.isCompleted
-                              ? Colors.grey.shade500
-                              : Colors.grey.shade600,
-                          decoration: task.isCompleted
-                              ? TextDecoration.lineThrough
-                              : null,
-                          letterSpacing: 0.1,
-                          height: 1.4,
+                          fontSize: 14,
+                          color: Colors.white.withValues(alpha: 0.7),
+                          letterSpacing: 0.2,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    // 第三行：任務獎勵
-                    if (!task.isCompleted)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 52),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF6366F1).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            task.reward.description,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF6366F1),
-                              letterSpacing: 0.2,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ),
-                    const SizedBox(height: 8),
-                    // 進度條
-                    Padding(
-                      padding: const EdgeInsets.only(left: 52, right: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '進度',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.grey.shade600,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              Text(
-                                '${task.currentCount}/${task.targetCount}',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: task.isCompleted
-                                      ? const Color(0xFF10B981)
-                                      : Colors.grey.shade600,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Container(
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade200,
-                              borderRadius: BorderRadius.circular(3),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(3),
-                              child: LinearProgressIndicator(
-                                value: task.progress,
-                                backgroundColor: Colors.transparent,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  task.isCompleted
-                                      ? const Color(0xFF10B981)
-                                      : const Color(0xFF6366F1),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                if (!task.isCompleted) ...[
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: LinearProgressIndicator(
-                          value: task.progress,
-                          backgroundColor: Colors.grey.shade200,
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                              Color(0xFF6366F1)),
-                          minHeight: 6,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${(task.progress * 100).toInt()}%',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey.shade700,
-                          letterSpacing: 0.3,
-                          height: 1.3,
-                        ),
-                      ),
+                      const SizedBox(height: 8),
+                      // 進度條
+                      _buildProgressBar(task),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.schedule,
-                          size: 16,
-                          color: Colors.grey.shade500,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            _formatDeadline(task.deadline ?? DateTime.now()),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade600,
-                              fontWeight: FontWeight.w500,
-                              letterSpacing: 0.3,
-                              height: 1.4,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                ),
+
+                const SizedBox(width: 12),
+
+                // 狀態按鈕
+                _buildStatusButton(task),
               ],
             ),
           ),
@@ -689,14 +475,143 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
     );
   }
 
-  IconData _getTaskIconData(TaskType type) {
+  Widget _buildProgressBar(Task task) {
+    final progress = task.currentCount / task.targetCount;
+    return Container(
+      height: 6,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(3),
+      ),
+      child: FractionallySizedBox(
+        alignment: Alignment.centerLeft,
+        widthFactor: progress.clamp(0.0, 1.0),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                const Color(0xFF8B5CF6),
+                const Color(0xFF3B82F6),
+                const Color(0xFF06B6D4),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(3),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF8B5CF6).withValues(alpha: 0.6),
+                blurRadius: 4,
+                offset: const Offset(0, 0),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusButton(Task task) {
+    if (task.status == TaskStatus.completed) {
+      return GestureDetector(
+        onTap: () => _claimReward(task),
+        child: Container(
+          width: 80,
+          height: 36,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color(0xFFFF6B6B),
+                const Color(0xFFFF8E53),
+                const Color(0xFFFFD93D),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: Colors.white, width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFFF6B6B).withValues(alpha: 0.6),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: const Center(
+            child: Text(
+              '領取',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      );
+    } else if (task.status == TaskStatus.claimed) {
+      return Container(
+        width: 80,
+        height: 36,
+        decoration: BoxDecoration(
+          color: Colors.grey.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        child: const Center(
+          child: Text(
+            '已完成',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      );
+    } else {
+      return Container(
+        width: 80,
+        height: 36,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xFF8B5CF6).withValues(alpha: 0.6),
+              const Color(0xFF3B82F6).withValues(alpha: 0.6),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: const Color(0xFF00BFFF).withValues(alpha: 0.4),
+            width: 1,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            '${task.currentCount}/${task.targetCount}',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
+  IconData _getTaskIcon(TaskType type) {
     switch (type) {
       case TaskType.daily:
-        return Icons.today;
+        return Icons.today_rounded;
       case TaskType.weekly:
-        return Icons.calendar_view_week;
+        return Icons.date_range_rounded;
       case TaskType.achievement:
-        return Icons.emoji_events;
+        return Icons.emoji_events_rounded;
     }
   }
 
@@ -711,35 +626,15 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
     }
   }
 
-  // 顯示獎勵領取彈窗
-  Future<void> _showRewardDialog(Task task) async {
-    final taskProvider = Provider.of<TaskProvider>(context, listen: false);
-
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => RewardClaimDialog(
-        task: task,
-        onClaimed: () async {
-          // 領取獎勵
-          await taskProvider.claimTaskReward(task.id);
-        },
-      ),
-    );
+  void _handleTaskTap(Task task) {
+    // 任務點擊處理
   }
 
-  String _formatDeadline(DateTime deadline) {
-    final now = DateTime.now();
-    final difference = deadline.difference(now);
-
-    if (difference.isNegative) {
-      return '已過期';
-    } else if (difference.inDays > 0) {
-      return '${difference.inDays}天後';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}小時後';
-    } else {
-      return '${difference.inMinutes}分鐘後';
-    }
+  void _claimReward(Task task) {
+    // 領取獎勵處理
+    showDialog(
+      context: context,
+      builder: (context) => RewardClaimDialog(task: task),
+    );
   }
 }

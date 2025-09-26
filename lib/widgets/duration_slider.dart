@@ -89,7 +89,7 @@ class _DurationSliderState extends State<DurationSlider> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -126,15 +126,15 @@ class _DurationSliderState extends State<DurationSlider> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppColors.primaryColor.withOpacity(0.1),
-                  AppColors.secondaryColor.withOpacity(0.1),
+                  AppColors.primaryColor.withValues(alpha: 0.1),
+                  AppColors.secondaryColor.withValues(alpha: 0.1),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: AppColors.primaryColor.withOpacity(0.3),
+                color: AppColors.primaryColor.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -165,9 +165,9 @@ class _DurationSliderState extends State<DurationSlider> {
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: AppColors.primaryColor,
-              inactiveTrackColor: AppColors.primaryColor.withOpacity(0.3),
+              inactiveTrackColor: AppColors.primaryColor.withValues(alpha: 0.3),
               thumbColor: AppColors.primaryColor,
-              overlayColor: AppColors.primaryColor.withOpacity(0.2),
+              overlayColor: AppColors.primaryColor.withValues(alpha: 0.2),
               thumbShape: const RoundSliderThumbShape(
                 enabledThumbRadius: 12,
               ),

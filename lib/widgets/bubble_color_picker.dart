@@ -17,25 +17,25 @@ class BubbleColorPicker extends StatefulWidget {
 
 class _BubbleColorPickerState extends State<BubbleColorPicker> {
   late Color _selectedColor;
-  
+
   // 預設顏色選項
   final List<Color> _colorOptions = [
-    AppColors.primaryColor,      // 紫色
-    AppColors.secondaryColor,    // 粉紅色
-    AppColors.accentColor,       // 橙色
-    Colors.blue,                 // 藍色
-    Colors.green,                // 綠色
-    Colors.red,                  // 紅色
-    Colors.teal,                 // 青色
-    Colors.indigo,               // 靛色
-    Colors.amber,                // 琥珀色
-    Colors.deepPurple,           // 深紫色
-    Colors.cyan,                 // 青藍色
-    Colors.lime,                 // 萊姆色
-    Colors.pink,                 // 粉色
-    Colors.brown,                // 棕色
-    Colors.grey,                 // 灰色
-    Colors.blueGrey,             // 藍灰色
+    AppColors.primaryColor, // 紫色
+    AppColors.secondaryColor, // 粉紅色
+    AppColors.accentColor, // 橙色
+    Colors.blue, // 藍色
+    Colors.green, // 綠色
+    Colors.red, // 紅色
+    Colors.teal, // 青色
+    Colors.indigo, // 靛色
+    Colors.amber, // 琥珀色
+    Colors.deepPurple, // 深紫色
+    Colors.cyan, // 青藍色
+    Colors.lime, // 萊姆色
+    Colors.pink, // 粉色
+    Colors.brown, // 棕色
+    Colors.grey, // 灰色
+    Colors.blueGrey, // 藍灰色
   ];
 
   @override
@@ -53,7 +53,7 @@ class _BubbleColorPickerState extends State<BubbleColorPicker> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -81,9 +81,9 @@ class _BubbleColorPickerState extends State<BubbleColorPicker> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // 當前選擇的顏色預覽
           Container(
             width: double.infinity,
@@ -92,22 +92,23 @@ class _BubbleColorPickerState extends State<BubbleColorPicker> {
               gradient: LinearGradient(
                 colors: [
                   _selectedColor,
-                  _selectedColor.withOpacity(0.8),
+                  _selectedColor.withValues(alpha: 0.8),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: Colors.grey.withOpacity(0.3),
+                color: Colors.grey.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
             child: Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
@@ -121,9 +122,9 @@ class _BubbleColorPickerState extends State<BubbleColorPicker> {
               ),
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // 顏色選擇網格
           GridView.builder(
             shrinkWrap: true,
@@ -137,8 +138,8 @@ class _BubbleColorPickerState extends State<BubbleColorPicker> {
             itemCount: _colorOptions.length,
             itemBuilder: (context, index) {
               final color = _colorOptions[index];
-              final isSelected = color.value == _selectedColor.value;
-              
+              final isSelected = color.toARGB32() == _selectedColor.toARGB32();
+
               return GestureDetector(
                 onTap: () {
                   setState(() {
@@ -156,7 +157,7 @@ class _BubbleColorPickerState extends State<BubbleColorPicker> {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: color.withOpacity(0.3),
+                        color: color.withValues(alpha: 0.3),
                         blurRadius: isSelected ? 8 : 4,
                         offset: const Offset(0, 2),
                       ),
@@ -173,9 +174,9 @@ class _BubbleColorPickerState extends State<BubbleColorPicker> {
               );
             },
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // 說明文字
           const Text(
             '選擇您喜歡的泡泡顏色',
