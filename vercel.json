@@ -12,13 +12,11 @@
       "dest": "/index.html"
     }
   ],
-  "functions": {
-    "app/api/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "env": {
     "SUPABASE_URL": "https://btmfruykvyncefdbaqyz.supabase.co",
     "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0bWZydXlrdnluY2VmZGJhcXl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3NzYyNzgsImV4cCI6MjA3NDM1MjI3OH0.lezj2jl5Hy-TEV-ZqxbN7VzRLJtcwohs5tOhzqAFuQs"
-  }
+  },
+  "buildCommand": "flutter build web --release",
+  "outputDirectory": "build/web",
+  "installCommand": "flutter pub get"
 }
