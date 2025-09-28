@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'dart:ui' as ui;
 import '../providers/auth_provider.dart';
 import '../utils/app_colors.dart';
+import '../services/supabase_test.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -298,6 +299,11 @@ class _LoginScreenState extends State<LoginScreen>
 
           const SizedBox(height: 32),
 
+          // Supabase 狀態指示器
+          _buildSupabaseStatus(context),
+
+          const SizedBox(height: 24),
+
           // 登入按鈕
           _buildLoginButton(context),
 
@@ -361,7 +367,7 @@ class _LoginScreenState extends State<LoginScreen>
                 ),
                 const SizedBox(width: 12),
                 const Text(
-                  '使用 Google 登入',
+                  '使用訪客模式登入',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -443,15 +449,110 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  void _handleGoogleLogin(BuildContext context) {
+  void _handleGoogleLogin(BuildContext context) async {
     // Google 登入邏輯
     final authProvider = context.read<AuthProvider>();
-    authProvider.signInWithGoogle();
+
+    // 暫時使用訪客模式，因為 Google OAuth 需要額外配置
+    print('Google 登入暫時使用訪客模式');
+    await authProvider.signInAsGuest();
     Navigator.of(context).pop();
   }
 
-  void _handleGuestMode(BuildContext context) {
+  Widget _buildSupabaseStatus(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xFF00BFFF).withValues(alpha: 0.1),
+            const Color(0xFF8B5CF6).withValues(alpha: 0.1),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFF00BFFF).withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: const Color(0xFF00BFFF),
+              borderRadius: BorderRadius.circular(4),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF00BFFF).withValues(alpha: 0.5),
+                  blurRadius: 4,
+                  offset: const Offset(0, 0),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Supabase 已整合',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '雲端認證與資料同步',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white.withValues(alpha: 0.7),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          GestureDetector(
+            onTap: () => _testSupabaseConnection(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFF00BFFF).withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: const Color(0xFF00BFFF).withValues(alpha: 0.4),
+                  width: 1,
+                ),
+              ),
+              child: const Text(
+                '測試',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _testSupabaseConnection() async {
+    await SupabaseTestService.testConnection();
+  }
+
+  void _handleGuestMode(BuildContext context) async {
     // 訪客模式邏輯
+    final authProvider = context.read<AuthProvider>();
+    await authProvider.signInAsGuest();
     Navigator.of(context).pop();
   }
 }

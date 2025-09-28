@@ -25,7 +25,7 @@ class TaskProvider with ChangeNotifier {
       _tasks = tasks;
       notifyListeners();
     });
-    
+
     // 立即獲取當前任務
     _tasks = _taskService.tasks;
     print('TaskProvider initialized with ${_tasks.length} tasks');
@@ -48,23 +48,27 @@ class TaskProvider with ChangeNotifier {
 
   // 獲取可領取的任務
   List<Task> get claimableTasks {
-    return _tasks.where((task) => 
-      task.status == TaskStatus.completed && task.claimedAt == null
-    ).toList();
+    return _tasks
+        .where((task) =>
+            task.status == TaskStatus.completed && task.claimedAt == null)
+        .toList();
   }
 
   // 獲取已完成的任務數量（包括已領取的）
   int get completedTasksCount {
-    return _tasks.where((task) => 
-      task.status == TaskStatus.completed || task.status == TaskStatus.claimed
-    ).length;
+    return _tasks
+        .where((task) =>
+            task.status == TaskStatus.completed ||
+            task.status == TaskStatus.claimed)
+        .length;
   }
-  
+
   // 獲取已完成但未領取的任務數量
   int get unclaimedCompletedTasksCount {
-    return _tasks.where((task) => 
-      task.status == TaskStatus.completed && task.claimedAt == null
-    ).length;
+    return _tasks
+        .where((task) =>
+            task.status == TaskStatus.completed && task.claimedAt == null)
+        .length;
   }
 
   // 獲取總任務數量
@@ -86,10 +90,15 @@ class TaskProvider with ChangeNotifier {
     try {
       _isLoading = true;
       notifyListeners();
-      
+
       final success = _taskService.claimTaskReward(taskId);
       _errorMessage = null;
-      
+
+      // 如果領取成功，立即通知監聽器更新UI
+      if (success) {
+        notifyListeners();
+      }
+
       return success;
     } catch (e) {
       _errorMessage = '領取獎勵失敗: $e';
@@ -104,14 +113,14 @@ class TaskProvider with ChangeNotifier {
   Future<int> claimAllRewards() async {
     int claimedCount = 0;
     final claimableTasks = this.claimableTasks;
-    
+
     for (final task in claimableTasks) {
       final success = await claimTaskReward(task.id);
       if (success) {
         claimedCount++;
       }
     }
-    
+
     return claimedCount;
   }
 
@@ -129,23 +138,26 @@ class TaskProvider with ChangeNotifier {
   double getTaskCompletionRate(TaskType type) {
     final typeTasks = getTasksByType(type);
     if (typeTasks.isEmpty) return 0.0;
-    
-    final completedTasks = typeTasks.where((task) => 
-      task.status == TaskStatus.completed || task.status == TaskStatus.claimed
-    ).length;
-    
+
+    final completedTasks = typeTasks
+        .where((task) =>
+            task.status == TaskStatus.completed ||
+            task.status == TaskStatus.claimed)
+        .length;
+
     return completedTasks / typeTasks.length;
   }
 
   // 獲取今日完成的任務數量
   int getTodayCompletedTasksCount() {
     final today = DateTime.now();
-    return _tasks.where((task) => 
-      task.completedAt != null &&
-      task.completedAt!.year == today.year &&
-      task.completedAt!.month == today.month &&
-      task.completedAt!.day == today.day
-    ).length;
+    return _tasks
+        .where((task) =>
+            task.completedAt != null &&
+            task.completedAt!.year == today.year &&
+            task.completedAt!.month == today.month &&
+            task.completedAt!.day == today.day)
+        .length;
   }
 
   // 檢查是否有新的可領取獎勵
@@ -155,7 +167,7 @@ class TaskProvider with ChangeNotifier {
   String getBonusDescription() {
     final duration = bonusDurationMinutes;
     final range = bonusRangeMeters;
-    
+
     if (duration > 0 && range > 0) {
       final hours = duration ~/ 60;
       final minutes = duration % 60;
@@ -207,10 +219,10 @@ class TaskProvider with ChangeNotifier {
     updateTaskProgress('daily_mystery_messenger');
     updateTaskProgress('weekly_story_weaver');
     updateTaskProgress('achievement_first_whisper');
-    
+
     // 查看訊息任務
     updateTaskProgress('daily_treasure_hunter');
-    
+
     // 點讚任務
     updateTaskProgress('daily_kindness_spreader');
   }

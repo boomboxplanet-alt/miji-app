@@ -299,34 +299,35 @@ class _MapScreenState extends State<MapScreen> {
               _buildTopBar(),
               _buildStatusIndicators(locationProvider, messageProvider),
               // 新的未来感底部导航栏
-              FuturisticBottomNav(
-                onLocationPressed: () {
-                  if (locationProvider.currentPosition != null) {
-                    _goToCurrentLocation(locationProvider.currentPosition!);
-                  } else {
-                    locationProvider.getCurrentLocation();
-                  }
+              Consumer<LocationProvider>(
+                builder: (context, locationProvider, child) {
+                  return FuturisticBottomNav(
+                    onLocationPressed: () async {
+                      try {
+                        // 防止重复点击
+                        if (locationProvider.isLoading) {
+                          return;
+                        }
+
+                        if (locationProvider.currentPosition != null) {
+                          await _goToCurrentLocation(
+                              locationProvider.currentPosition!);
+                        } else {
+                          await locationProvider.getCurrentLocation();
+
+                          // 如果获取位置成功，移动到当前位置
+                          if (locationProvider.currentPosition != null) {
+                            await _goToCurrentLocation(
+                                locationProvider.currentPosition!);
+                          }
+                        }
+                      } catch (e) {
+                        print('定位按钮点击错误: $e');
+                      }
+                    },
+                    onMessagePressed: _openQuickSendSheet,
+                  );
                 },
-                onMessagePressed: _openQuickSendSheet,
-              ),
-              // 添加美觀的覆蓋層遮擋底部版權信息
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: 24,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        AppColors.backgroundColor.withValues(alpha: 0.5),
-                        AppColors.backgroundColor,
-                      ],
-                    ),
-                  ),
-                ),
               ),
             ],
           );
@@ -338,257 +339,262 @@ class _MapScreenState extends State<MapScreen> {
   Widget _buildTopBar() {
     return Positioned(
       top: MediaQuery.of(context).padding.top + 8,
-      left: 16,
-      right: 16,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.surfaceColor.withValues(alpha: 0.15),
-              AppColors.surfaceColor.withValues(alpha: 0.08),
+      left: 0,
+      right: 0,
+      child: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 400),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.surfaceColor.withValues(alpha: 0.15),
+                AppColors.surfaceColor.withValues(alpha: 0.08),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: AppColors.primaryColor.withValues(alpha: 0.3),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primaryColor.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
             ],
           ),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: AppColors.primaryColor.withValues(alpha: 0.3),
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primaryColor.withValues(alpha: 0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // 左側：Logo + 應用名稱
-            Expanded(
-              flex: 2,
-              child: Row(
-                children: [
-                  // Logo
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          AppColors.primaryColor,
-                          AppColors.secondaryColor,
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primaryColor.withValues(alpha: 0.4),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.location_on,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  // 應用名稱和標語
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          AppStrings.appName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                            letterSpacing: 0.5,
-                            shadows: [
-                              Shadow(
-                                offset: const Offset(0, 2),
-                                blurRadius: 8,
-                                color: AppColors.primaryColor
-                                    .withValues(alpha: 0.6),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          AppStrings.tagline,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white.withValues(alpha: 0.8),
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 16),
-            // 右側：用戶權限顯示（水平排列）
-            Consumer<TaskProvider>(
-              builder: (context, taskProvider, child) {
-                final bonusDuration = taskProvider.bonusDurationMinutes;
-                final bonusRange = taskProvider.bonusRangeMeters;
-
-                // 基礎設定：1小時 = 60分鐘，1公里 = 1000米
-                const baseDurationMinutes = 60;
-                const baseRangeMeters = 1000.0;
-
-                // 總計 = 基礎 + 獎勵
-                final totalDurationMinutes =
-                    baseDurationMinutes + bonusDuration;
-                final totalRangeMeters = baseRangeMeters + bonusRange;
-
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // 左側：Logo + 應用名稱
+              Expanded(
+                flex: 2,
+                child: Row(
                   children: [
-                    // 時長權限
+                    // Logo
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
+                          colors: [
+                            AppColors.primaryColor,
+                            AppColors.secondaryColor,
+                          ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [
-                            AppColors.primaryColor.withValues(alpha: 0.2),
-                            AppColors.secondaryColor.withValues(alpha: 0.1),
-                          ],
                         ),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: AppColors.primaryColor.withValues(alpha: 0.4),
-                          width: 1,
-                        ),
+                        borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
                             color:
-                                AppColors.primaryColor.withValues(alpha: 0.2),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                                AppColors.primaryColor.withValues(alpha: 0.4),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
-                      child: Row(
+                      child: const Icon(
+                        Icons.location_on,
+                        color: Colors.white,
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // 應用名稱和標語
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.access_time,
-                            size: 16,
-                            color: Colors.white.withValues(alpha: 0.9),
-                          ),
-                          const SizedBox(width: 6),
                           Text(
-                            '${totalDurationMinutes ~/ 60}h${totalDurationMinutes % 60 > 0 ? '${totalDurationMinutes % 60}m' : ''}',
+                            AppStrings.appName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 13,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
                               color: Colors.white,
-                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
                               shadows: [
                                 Shadow(
-                                  offset: const Offset(0, 1),
-                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                  blurRadius: 8,
                                   color: AppColors.primaryColor
                                       .withValues(alpha: 0.6),
                                 ),
                               ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // 距離權限
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            AppColors.secondaryColor.withValues(alpha: 0.2),
-                            AppColors.primaryColor.withValues(alpha: 0.1),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color:
-                              AppColors.secondaryColor.withValues(alpha: 0.4),
-                          width: 1,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color:
-                                AppColors.secondaryColor.withValues(alpha: 0.2),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.location_on,
-                            size: 16,
-                            color: Colors.white.withValues(alpha: 0.9),
-                          ),
-                          const SizedBox(width: 6),
+                          const SizedBox(height: 2),
                           Text(
-                            '${(totalRangeMeters / 1000).toStringAsFixed(1)}km',
+                            AppStrings.tagline,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              shadows: [
-                                Shadow(
-                                  offset: const Offset(0, 1),
-                                  blurRadius: 4,
-                                  color: AppColors.secondaryColor
-                                      .withValues(alpha: 0.6),
-                                ),
-                              ],
+                              fontSize: 12,
+                              color: Colors.white.withValues(alpha: 0.8),
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.3,
                             ),
                           ),
                         ],
                       ),
                     ),
                   ],
-                );
-              },
-            ),
-          ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              // 右側：用戶權限顯示（水平排列）
+              Consumer<TaskProvider>(
+                builder: (context, taskProvider, child) {
+                  final bonusDuration = taskProvider.bonusDurationMinutes;
+                  final bonusRange = taskProvider.bonusRangeMeters;
+
+                  // 基礎設定：1小時 = 60分鐘，1公里 = 1000米
+                  const baseDurationMinutes = 60;
+                  const baseRangeMeters = 1000.0;
+
+                  // 總計 = 基礎 + 獎勵
+                  final totalDurationMinutes =
+                      baseDurationMinutes + bonusDuration;
+                  final totalRangeMeters = baseRangeMeters + bonusRange;
+
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // 時長權限
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              AppColors.primaryColor.withValues(alpha: 0.2),
+                              AppColors.secondaryColor.withValues(alpha: 0.1),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color:
+                                AppColors.primaryColor.withValues(alpha: 0.4),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color:
+                                  AppColors.primaryColor.withValues(alpha: 0.2),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.access_time,
+                              size: 16,
+                              color: Colors.white.withValues(alpha: 0.9),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              '${totalDurationMinutes ~/ 60}h${totalDurationMinutes % 60 > 0 ? '${totalDurationMinutes % 60}m' : ''}',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                shadows: [
+                                  Shadow(
+                                    offset: const Offset(0, 1),
+                                    blurRadius: 4,
+                                    color: AppColors.primaryColor
+                                        .withValues(alpha: 0.6),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // 距離權限
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              AppColors.secondaryColor.withValues(alpha: 0.2),
+                              AppColors.primaryColor.withValues(alpha: 0.1),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color:
+                                AppColors.secondaryColor.withValues(alpha: 0.4),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.secondaryColor
+                                  .withValues(alpha: 0.2),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.location_on,
+                              size: 16,
+                              color: Colors.white.withValues(alpha: 0.9),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              '${(totalRangeMeters / 1000).toStringAsFixed(1)}km',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                shadows: [
+                                  Shadow(
+                                    offset: const Offset(0, 1),
+                                    blurRadius: 4,
+                                    color: AppColors.secondaryColor
+                                        .withValues(alpha: 0.6),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -997,7 +1003,6 @@ class _MapScreenState extends State<MapScreen> {
     final messageProvider = context.read<MessageProvider>();
 
     if (locationProvider.currentPosition == null) {
-      _showSnackBar('請先獲取您的位置資訊', isError: true);
       return;
     }
 
@@ -1025,31 +1030,44 @@ class _MapScreenState extends State<MapScreen> {
     )
         .then((message) {
       if (messageProvider.errorMessage == null) {
-        _showSnackBar('訊息已發送！將在 ${duration.inMinutes} 分鐘後消失');
-        // 立即顯示訊息泡泡，確保用戶能立即看到自己的訊息
-        Future.delayed(const Duration(milliseconds: 300), () {
-          if (mounted) {
-            _showMessageBubble(message);
-          }
-        });
+        // 訊息發送成功，不顯示任何提示
       }
     });
   }
 
   Future<void> _goToCurrentLocation(dynamic position) async {
-    final GoogleMapController controller = await _controller.future;
+    try {
+      // 等待地图控制器准备就绪，添加超时处理
+      final GoogleMapController controller = await _controller.future.timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          throw Exception('地图控制器初始化超时');
+        },
+      );
 
-    // 只移動到用戶位置，不改變縮放級別
-    final newPosition = CameraPosition(
-      target: LatLng(position.latitude, position.longitude),
-      // 不設置 zoom，保持當前縮放級別
-    );
+      // 只移動到用戶位置，不改變縮放級別
+      final newPosition = CameraPosition(
+        target: LatLng(position.latitude, position.longitude),
+        // 不設置 zoom，保持當前縮放級別
+      );
 
-    // 平滑動畫到新位置
-    await controller.animateCamera(CameraUpdate.newCameraPosition(newPosition));
+      // 平滑動畫到新位置
+      await controller
+          .animateCamera(CameraUpdate.newCameraPosition(newPosition));
 
-    // 更新范围圆
-    _updateCircles(LatLng(position.latitude, position.longitude));
+      // 更新范围圆
+      _updateCircles(LatLng(position.latitude, position.longitude));
+    } catch (e) {
+      print('定位到当前位置失败: $e');
+      // 如果地图控制器还没准备好，延迟重试
+      if (e.toString().contains('超时') ||
+          e.toString().contains('not completed')) {
+        await Future.delayed(const Duration(milliseconds: 500));
+        await _goToCurrentLocation(position);
+      } else {
+        rethrow;
+      }
+    }
   }
 
   // 更新用户范围圆

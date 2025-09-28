@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import '../services/performance_monitor.dart';
 
 /// 性能監控頁面
-/// 
+///
 /// 顯示應用性能數據和監控信息
 class PerformanceScreen extends StatefulWidget {
   const PerformanceScreen({super.key});
-  
+
   @override
   State<PerformanceScreen> createState() => _PerformanceScreenState();
 }
@@ -15,19 +15,19 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
   final PerformanceMonitor _monitor = PerformanceMonitor();
   PerformanceReport? _report;
   bool _isMonitoring = false;
-  
+
   @override
   void initState() {
     super.initState();
     _updateReport();
   }
-  
+
   void _updateReport() {
     setState(() {
       _report = _monitor.getPerformanceReport();
     });
   }
-  
+
   void _toggleMonitoring() {
     setState(() {
       _isMonitoring = !_isMonitoring;
@@ -38,15 +38,12 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
       }
     });
   }
-  
+
   void _clearData() {
     _monitor.clearData();
     _updateReport();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('性能數據已清除')),
-    );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,7 +92,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
             ),
     );
   }
-  
+
   Widget _buildMonitoringStatus() {
     return Card(
       child: Padding(
@@ -103,7 +100,9 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
         child: Row(
           children: [
             Icon(
-              _isMonitoring ? Icons.monitor_heart : Icons.monitor_heart_outlined,
+              _isMonitoring
+                  ? Icons.monitor_heart
+                  : Icons.monitor_heart_outlined,
               color: _isMonitoring ? Colors.green : Colors.grey,
               size: 32,
             ),
@@ -135,7 +134,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
       ),
     );
   }
-  
+
   Widget _buildPerformanceMetrics() {
     return Card(
       child: Padding(
@@ -168,7 +167,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
       ),
     );
   }
-  
+
   Widget _buildNetworkMetrics() {
     return Card(
       child: Padding(
@@ -196,7 +195,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
       ),
     );
   }
-  
+
   Widget _buildUserActionMetrics() {
     return Card(
       child: Padding(
@@ -219,7 +218,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
       ),
     );
   }
-  
+
   Widget _buildPerformanceWarnings() {
     if (_report!.performanceWarnings.isEmpty) {
       return Card(
@@ -238,7 +237,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
         ),
       );
     }
-    
+
     return Card(
       child: Padding(
         padding: EdgeInsets.all(16),
@@ -256,8 +255,8 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
               ],
             ),
             SizedBox(height: 16),
-            ..._report!.performanceWarnings.map((warning) => 
-              Padding(
+            ..._report!.performanceWarnings.map(
+              (warning) => Padding(
                 padding: EdgeInsets.only(bottom: 8),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,7 +278,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
       ),
     );
   }
-  
+
   Widget _buildActions() {
     return Card(
       child: Padding(
@@ -324,7 +323,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
       ),
     );
   }
-  
+
   Widget _buildMetricItem(String label, String value, Color color) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8),
@@ -343,34 +342,34 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
       ),
     );
   }
-  
+
   Color _getFrameRateColor(double frameRate) {
     if (frameRate >= 50) return Colors.green;
     if (frameRate >= 30) return Colors.orange;
     return Colors.red;
   }
-  
+
   Color _getMemoryUsageColor(double memoryUsage) {
     if (memoryUsage <= 50) return Colors.green;
     if (memoryUsage <= 80) return Colors.orange;
     return Colors.red;
   }
-  
+
   Color _getCpuUsageColor(double cpuUsage) {
     if (cpuUsage <= 50) return Colors.green;
     if (cpuUsage <= 80) return Colors.orange;
     return Colors.red;
   }
-  
+
   Color _getLatencyColor(int latency) {
     if (latency <= 100) return Colors.green;
     if (latency <= 500) return Colors.orange;
     return Colors.red;
   }
-  
+
   void _exportData() {
     _monitor.exportData();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

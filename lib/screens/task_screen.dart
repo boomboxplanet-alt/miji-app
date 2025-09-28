@@ -457,6 +457,29 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 8),
+                      // 獎勵內容
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF8B5CF6).withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color:
+                                const Color(0xFF8B5CF6).withValues(alpha: 0.4),
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          task.reward.description,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.white.withValues(alpha: 0.9),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
                       // 進度條
                       _buildProgressBar(task),
                     ],
@@ -634,7 +657,12 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
     // 領取獎勵處理
     showDialog(
       context: context,
-      builder: (context) => RewardClaimDialog(task: task),
+      builder: (context) => RewardClaimDialog(
+        task: task,
+        onClaimed: () {
+          // 獎勵領取成功後的回調
+        },
+      ),
     );
   }
 }

@@ -66,108 +66,82 @@ class _FuturisticBottomNavState extends State<FuturisticBottomNav>
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      bottom: MediaQuery.of(context).padding.bottom + 16,
+      bottom: MediaQuery.of(context).padding.bottom + 8,
       left: 0,
       right: 0,
       child: Center(
         child: Container(
-          width: 360,
-          height: 80,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(28),
-            child: BackdropFilter(
-              filter: ui.ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-              child: Container(
-                decoration: BoxDecoration(
-                  // 深藍漸層背景
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      const Color(0xFF0A0A1A).withValues(alpha: 0.95),
-                      const Color(0xFF1A1A2E).withValues(alpha: 0.95),
-                      const Color(0xFF16213E).withValues(alpha: 0.95),
-                    ],
-                    stops: const [0.0, 0.5, 1.0],
-                  ),
-                  borderRadius: BorderRadius.circular(28),
-                  // 霓虹描邊
-                  border: Border.all(
-                    color: const Color(0xFF00BFFF).withValues(alpha: 0.6),
-                    width: 1.5,
-                  ),
-                  boxShadow: [
-                    // 外層陰影
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.6),
-                      blurRadius: 30,
-                      offset: const Offset(0, 12),
-                    ),
-                    // 霓虹發光效果
-                    BoxShadow(
-                      color: const Color(0xFF00BFFF).withValues(alpha: 0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 0),
-                    ),
-                    // 內層高光
-                    BoxShadow(
-                      color: Colors.white.withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, -2),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      // 1. 用戶按鈕
-                      _buildLuxuryNavButton(
-                        context: context,
-                        icon: Icons.person_rounded,
-                        index: 0,
-                        onTap: () => _handleLogin(context),
-                      ),
-
-                      // 2. 定位按鈕
-                      _buildLuxuryNavButton(
-                        context: context,
-                        icon: Icons.navigation_rounded,
-                        index: 1,
-                        onTap: widget.onLocationPressed,
-                      ),
-
-                      // 3. 中央消息發送按鈕（特殊設計）
-                      _buildLuxuryCentralButton(
-                        context: context,
-                        icon: Icons.chat_bubble_outline_rounded,
-                        onTap: widget.onMessagePressed,
-                      ),
-
-                      // 4. 任務按鈕（帶提示和數量）
-                      _buildTaskButtonWithNotification(
-                        context: context,
-                        icon: Icons.task_alt_rounded,
-                        index: 2,
-                        onTap: () => _handleTask(context),
-                      ),
-
-                      // 5. 設置按鈕
-                      _buildLuxuryNavButton(
-                        context: context,
-                        icon: Icons.settings_rounded,
-                        index: 3,
-                        onTap: () => _handleSettings(context),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+          constraints: const BoxConstraints(maxWidth: 400),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white.withValues(alpha: 0.15),
+                Colors.white.withValues(alpha: 0.08),
+              ],
             ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: const Color(0xFF00BFFF).withValues(alpha: 0.4),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF00BFFF).withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // 1. 用戶按鈕
+              _buildLuxuryNavButton(
+                context: context,
+                icon: Icons.person_rounded,
+                index: 0,
+                onTap: () => _handleLogin(context),
+              ),
+
+              // 2. 定位按鈕
+              _buildLuxuryNavButton(
+                context: context,
+                icon: Icons.navigation_rounded,
+                index: 1,
+                onTap: widget.onLocationPressed,
+              ),
+
+              // 3. 中央消息發送按鈕（特殊設計）
+              _buildLuxuryCentralButton(
+                context: context,
+                icon: Icons.chat_bubble_outline_rounded,
+                onTap: widget.onMessagePressed,
+              ),
+
+              // 4. 任務按鈕（帶提示和數量）
+              _buildTaskButtonWithNotification(
+                context: context,
+                icon: Icons.task_alt_rounded,
+                index: 2,
+                onTap: () => _handleTask(context),
+              ),
+
+              // 5. 設置按鈕
+              _buildLuxuryNavButton(
+                context: context,
+                icon: Icons.settings_rounded,
+                index: 3,
+                onTap: () => _handleSettings(context),
+              ),
+            ],
           ),
         ),
       ),
@@ -202,50 +176,52 @@ class _FuturisticBottomNavState extends State<FuturisticBottomNav>
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    const Color(
-                      0xFF8B5CF6,
-                    ).withValues(alpha: isSelected ? 0.9 : 0.7),
-                    const Color(
-                      0xFF3B82F6,
-                    ).withValues(alpha: isSelected ? 0.9 : 0.7),
-                    const Color(
-                      0xFF06B6D4,
-                    ).withValues(alpha: isSelected ? 0.9 : 0.7),
-                  ],
-                  stops: const [0.0, 0.5, 1.0],
+                  colors: isSelected
+                      ? [
+                          const Color(0xFF8B5CF6),
+                          const Color(0xFF3B82F6),
+                          const Color(0xFF06B6D4),
+                        ]
+                      : [
+                          const Color(0xFF1A1A2E).withValues(alpha: 0.6),
+                          const Color(0xFF16213E).withValues(alpha: 0.4),
+                        ],
                 ),
                 borderRadius: BorderRadius.circular(16),
                 // 霓虹描邊
                 border: Border.all(
                   color: isSelected
                       ? const Color(0xFF00BFFF).withValues(alpha: 0.8)
-                      : const Color(0xFF00BFFF).withValues(alpha: 0.4),
+                      : const Color(0xFF00BFFF).withValues(alpha: 0.3),
                   width: isSelected ? 2.0 : 1.0,
                 ),
                 boxShadow: [
                   // 外層陰影
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.4),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 15,
+                    offset: const Offset(0, 6),
                   ),
                   // 霓虹發光效果
                   if (isSelected)
                     BoxShadow(
-                      color: const Color(0xFF00BFFF).withValues(alpha: 0.6),
-                      blurRadius: 16,
+                      color: const Color(0xFF00BFFF).withValues(alpha: 0.4),
+                      blurRadius: 20,
                       offset: const Offset(0, 0),
                     ),
                   // 內層高光
                   BoxShadow(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    blurRadius: 4,
-                    offset: const Offset(0, -1),
+                    color: Colors.white.withValues(alpha: 0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, -2),
                   ),
                 ],
               ),
-              child: Icon(icon, color: Colors.white, size: 22),
+              child: Icon(
+                icon,
+                color: isSelected ? Colors.white : Colors.white70,
+                size: 24,
+              ),
             ),
           );
         },
@@ -288,79 +264,75 @@ class _FuturisticBottomNavState extends State<FuturisticBottomNav>
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [
-                            const Color(
-                              0xFF8B5CF6,
-                            ).withValues(alpha: isSelected ? 0.9 : 0.7),
-                            const Color(
-                              0xFF3B82F6,
-                            ).withValues(alpha: isSelected ? 0.9 : 0.7),
-                            const Color(
-                              0xFF06B6D4,
-                            ).withValues(alpha: isSelected ? 0.9 : 0.7),
-                          ],
-                          stops: const [0.0, 0.5, 1.0],
+                          colors: isSelected
+                              ? [
+                                  const Color(0xFF8B5CF6),
+                                  const Color(0xFF3B82F6),
+                                  const Color(0xFF06B6D4),
+                                ]
+                              : [
+                                  const Color(0xFF1A1A2E)
+                                      .withValues(alpha: 0.6),
+                                  const Color(0xFF16213E)
+                                      .withValues(alpha: 0.4),
+                                ],
                         ),
                         borderRadius: BorderRadius.circular(16),
                         // 霓虹描邊
                         border: Border.all(
                           color: isSelected
                               ? const Color(0xFF00BFFF).withValues(alpha: 0.8)
-                              : const Color(0xFF00BFFF).withValues(alpha: 0.4),
+                              : const Color(0xFF00BFFF).withValues(alpha: 0.3),
                           width: isSelected ? 2.0 : 1.0,
                         ),
                         boxShadow: [
                           // 外層陰影
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.4),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 15,
+                            offset: const Offset(0, 6),
                           ),
                           // 霓虹發光效果
                           if (isSelected)
                             BoxShadow(
-                              color: const Color(
-                                0xFF00BFFF,
-                              ).withValues(alpha: 0.6),
-                              blurRadius: 16,
+                              color: const Color(0xFF00BFFF)
+                                  .withValues(alpha: 0.4),
+                              blurRadius: 20,
                               offset: const Offset(0, 0),
                             ),
                           // 內層高光
                           BoxShadow(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            blurRadius: 4,
-                            offset: const Offset(0, -1),
+                            color: Colors.white.withValues(alpha: 0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, -2),
                           ),
                         ],
                       ),
-                      child: Icon(icon, color: Colors.white, size: 22),
+                      child: Icon(
+                        icon,
+                        color: isSelected ? Colors.white : Colors.white70,
+                        size: 24,
+                      ),
                     ),
-
-                    // 任務提示和數量徽章
+                    // 通知徽章
                     if (hasUnclaimedTasks)
                       Positioned(
-                        top: -2,
-                        right: -2,
+                        top: 0,
+                        right: 0,
                         child: Container(
                           width: 20,
                           height: 20,
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                const Color(0xFFFF6B6B),
-                                const Color(0xFFFF8E53),
-                                const Color(0xFFFFD93D),
-                              ],
-                            ),
+                            color: const Color(0xFFFF6B6B),
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: Colors.white, width: 2),
+                            border: Border.all(
+                              color: Colors.white,
+                              width: 2,
+                            ),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(
-                                  0xFFFF6B6B,
-                                ).withValues(alpha: 0.6),
+                                color: const Color(0xFFFF6B6B)
+                                    .withValues(alpha: 0.5),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -368,8 +340,8 @@ class _FuturisticBottomNavState extends State<FuturisticBottomNav>
                           ),
                           child: Center(
                             child: Text(
-                              unclaimedCount > 99
-                                  ? '99+'
+                              unclaimedCount > 9
+                                  ? '9+'
                                   : unclaimedCount.toString(),
                               style: const TextStyle(
                                 color: Colors.white,
@@ -378,28 +350,6 @@ class _FuturisticBottomNavState extends State<FuturisticBottomNav>
                               ),
                             ),
                           ),
-                        ),
-                      ),
-
-                    // 脈衝動畫效果（當有未領取任務時）
-                    if (hasUnclaimedTasks)
-                      Positioned(
-                        top: -4,
-                        right: -4,
-                        child: AnimatedBuilder(
-                          animation: _pulseAnimation,
-                          builder: (context, child) {
-                            return Container(
-                              width: 24 + (4 * _pulseAnimation.value),
-                              height: 24 + (4 * _pulseAnimation.value),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: const Color(0xFFFF6B6B).withValues(
-                                  alpha: 0.3 * (1 - _pulseAnimation.value),
-                                ),
-                              ),
-                            );
-                          },
                         ),
                       ),
                   ],
@@ -475,22 +425,15 @@ class _FuturisticBottomNavState extends State<FuturisticBottomNav>
   }
 
   void _handleLogin(BuildContext context) {
-    final authProvider = context.read<AuthProvider>();
-    if (authProvider.isSignedIn) {
-      // 已登录，显示用户信息或退出登录
-      final userInfo = authProvider.getUserInfo();
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    if (authProvider.user != null) {
+      // 已登录，显示用户菜单
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          backgroundColor: const Color(0xFF2D1B69),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: const Text('用户信息', style: TextStyle(color: Colors.white)),
-          content: Text(
-            '当前用户: ${userInfo?['displayName'] ?? userInfo?['email'] ?? "未知"}',
-            style: const TextStyle(color: Colors.white70),
-          ),
+          title: const Text('用户菜单'),
+          content: Text('欢迎，${authProvider.user?.email ?? '用户'}'),
           actions: [
             TextButton(
               onPressed: () {

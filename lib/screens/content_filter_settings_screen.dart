@@ -112,7 +112,8 @@ class _ContentFilterSettingsScreenState
                       SliderTheme(
                         data: SliderTheme.of(context).copyWith(
                           activeTrackColor: Colors.white,
-                          inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
+                          inactiveTrackColor:
+                              Colors.white.withValues(alpha: 0.3),
                           thumbColor: Colors.white,
                           overlayColor: Colors.white.withValues(alpha: 0.2),
                         ),
@@ -389,11 +390,5 @@ class _ContentFilterSettingsScreenState
 
   void _saveSettings() {
     // 這裡應該保存設定到本地存儲或服務器
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('設定已保存'),
-        backgroundColor: Colors.green,
-      ),
-    );
   }
 }

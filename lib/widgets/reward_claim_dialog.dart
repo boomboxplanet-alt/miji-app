@@ -2,7 +2,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:provider/provider.dart';
 import '../models/task.dart';
+import '../providers/task_provider.dart';
 
 class RewardClaimDialog extends StatefulWidget {
   final Task task;
@@ -30,21 +32,22 @@ class _RewardClaimDialogState extends State<RewardClaimDialog>
   @override
   void initState() {
     super.initState();
-    
+
     // 初始化彩帶控制器
-    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
-    
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 3));
+
     // 初始化動畫控制器
     _scaleController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
+
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    
+
     // 設置動畫
     _scaleAnimation = Tween<double>(
       begin: 0.0,
@@ -53,9 +56,7 @@ class _RewardClaimDialogState extends State<RewardClaimDialog>
       parent: _scaleController,
       curve: Curves.elasticOut,
     ));
-    
 
-    
     // 開始動畫和效果
     _startCelebration();
   }
@@ -70,12 +71,12 @@ class _RewardClaimDialogState extends State<RewardClaimDialog>
       // 音效播放失敗時不影響其他功能
       // 在生產環境中可以記錄到日誌系統
     }
-    
+
     // 開始動畫
     await _fadeController.forward();
     await Future.delayed(const Duration(milliseconds: 200));
     await _scaleController.forward();
-    
+
     // 延遲一點再開始彩帶
     await Future.delayed(const Duration(milliseconds: 400));
     _confettiController.play();
@@ -105,7 +106,8 @@ class _RewardClaimDialogState extends State<RewardClaimDialog>
                   backgroundColor: Colors.transparent,
                   elevation: 0,
                   child: Container(
-                    constraints: const BoxConstraints(maxWidth: 350, maxHeight: 500),
+                    constraints:
+                        const BoxConstraints(maxWidth: 350, maxHeight: 500),
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
@@ -139,9 +141,9 @@ class _RewardClaimDialogState extends State<RewardClaimDialog>
                             color: Colors.white,
                           ),
                         ),
-                        
+
                         const SizedBox(height: 20),
-                        
+
                         // 恭喜文字
                         const Text(
                           '🎉 恭喜獲得獎勵！',
@@ -152,9 +154,9 @@ class _RewardClaimDialogState extends State<RewardClaimDialog>
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        
+
                         const SizedBox(height: 16),
-                        
+
                         // 任務標題
                         Text(
                           widget.task.title,
@@ -165,9 +167,9 @@ class _RewardClaimDialogState extends State<RewardClaimDialog>
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        
+
                         const SizedBox(height: 20),
-                        
+
                         // 獎勵內容
                         Container(
                           padding: const EdgeInsets.all(16),
@@ -197,16 +199,25 @@ class _RewardClaimDialogState extends State<RewardClaimDialog>
                             ],
                           ),
                         ),
-                        
+
                         const SizedBox(height: 24),
-                        
+
                         // 確認按鈕
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: () {
-                              widget.onClaimed?.call();
-                              Navigator.of(context).pop();
+                            onPressed: () async {
+                              // 實際領取獎勵
+                              final taskProvider = context.read<TaskProvider>();
+                              final success = await taskProvider
+                                  .claimTaskReward(widget.task.id);
+
+                              if (success) {
+                                widget.onClaimed?.call();
+                                Navigator.of(context).pop();
+                              } else {
+                                // 顯示錯誤訊息
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
@@ -234,7 +245,7 @@ class _RewardClaimDialogState extends State<RewardClaimDialog>
             },
           ),
         ),
-        
+
         // 彩帶效果
         Align(
           alignment: Alignment.topCenter,
@@ -258,7 +269,7 @@ class _RewardClaimDialogState extends State<RewardClaimDialog>
             ],
           ),
         ),
-        
+
         // 左側彩帶
         Align(
           alignment: Alignment.centerLeft,
@@ -280,7 +291,7 @@ class _RewardClaimDialogState extends State<RewardClaimDialog>
             ],
           ),
         ),
-        
+
         // 右側彩帶
         Align(
           alignment: Alignment.centerRight,

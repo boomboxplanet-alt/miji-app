@@ -1,9 +1,12 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'supabase_service.dart';
+
 class AuthUser {
   final String id;
   final String? email;
   final String? displayName;
   final String? photoURL;
-  
+
   AuthUser({
     required this.id,
     this.email,
@@ -17,26 +20,47 @@ class AuthService {
   factory AuthService() => _instance;
   AuthService._internal();
 
-  AuthUser? _currentUser;
+  final SupabaseService _supabaseService = SupabaseService.instance;
 
   // 獲取當前用戶
-  AuthUser? get currentUser => _currentUser;
+  AuthUser? get currentUser {
+    final user = _supabaseService.currentUser;
+    if (user == null) return null;
+
+    return AuthUser(
+      id: user.id,
+      email: user.email,
+      displayName:
+          user.userMetadata?['full_name'] ?? user.userMetadata?['name'],
+      photoURL: user.userMetadata?['avatar_url'],
+    );
+  }
 
   // 檢查是否已登入
-  bool get isSignedIn => _currentUser != null;
+  bool get isSignedIn => _supabaseService.isSignedIn;
 
-  // 簡化登入（暫時使用訪客模式）
+  // Google 登入
+  Future<AuthUser?> signInWithGoogle() async {
+    try {
+      final response = await _supabaseService.signInWithGoogle();
+      if (response?.user != null) {
+        return currentUser;
+      }
+      return null;
+    } catch (e) {
+      print('Google 登入錯誤: $e');
+      return null;
+    }
+  }
+
+  // 訪客登入
   Future<AuthUser?> signInAsGuest() async {
     try {
-      // 創建訪客用戶
-      _currentUser = AuthUser(
-        id: 'guest_${DateTime.now().millisecondsSinceEpoch}',
-        email: null,
-        displayName: '訪客',
-        photoURL: null,
-      );
-      
-      return _currentUser;
+      final response = await _supabaseService.signInAnonymously();
+      if (response?.user != null) {
+        return currentUser;
+      }
+      return null;
     } catch (e) {
       print('訪客登入錯誤: $e');
       return null;
@@ -46,7 +70,7 @@ class AuthService {
   // 登出
   Future<void> signOut() async {
     try {
-      _currentUser = null;
+      await _supabaseService.signOut();
     } catch (e) {
       print('登出錯誤: $e');
       rethrow;
@@ -70,7 +94,7 @@ class AuthService {
   String getUserDisplayName() {
     final user = currentUser;
     if (user == null) return '訪客';
-    
+
     return user.displayName ?? user.email?.split('@').first ?? '用戶';
   }
 
@@ -81,13 +105,19 @@ class AuthService {
 
   // 獲取用戶ID（用於訊息系統）
   String getUserId() {
-    return currentUser?.id ?? 'anonymous_${DateTime.now().millisecondsSinceEpoch}';
+    return currentUser?.id ??
+        'anonymous_${DateTime.now().millisecondsSinceEpoch}';
   }
 
-  // 初始化（簡化版）
-  static Future<void> initializeFirebase() async {
-    // 簡化版本，不需要Firebase初始化
-    print('認證服務已初始化');
+  // 初始化 Supabase
+  static Future<void> initializeSupabase() async {
+    try {
+      await SupabaseService.instance.initialize();
+      print('Supabase 認證服務已初始化');
+    } catch (e) {
+      print('Supabase 初始化失敗: $e');
+      rethrow;
+    }
   }
 
   // 檢查網路連接狀態（簡單實現）

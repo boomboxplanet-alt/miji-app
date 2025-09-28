@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import '../services/firebase_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../services/supabase_service.dart';
 
 class AuthProvider extends ChangeNotifier {
-  final FirebaseService _firebaseService = FirebaseService.instance;
-  
+  final SupabaseService _supabaseService = SupabaseService.instance;
+
   dynamic _user;
   bool _isLoading = false;
   String? _errorMessage;
@@ -13,13 +14,13 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isSignedIn => _user != null;
-  
+
   // 獲取用戶顯示名稱
   String get userDisplayName => _user?['displayName'] ?? '訪客';
-  
+
   // 獲取用戶頭像URL
   String? get userPhotoURL => _user?['photoURL'];
-  
+
   // 獲取用戶ID
   String get userId => _user?['uid'] ?? '';
 
@@ -30,10 +31,10 @@ class AuthProvider extends ChangeNotifier {
   // 初始化認證狀態
   void _initializeAuth() {
     try {
-      _user = _firebaseService.currentUser;
+      _user = _supabaseService.getUserInfo();
       // 監聽認證狀態變化
-      _firebaseService.authStateChanges.listen((dynamic user) {
-        _user = user;
+      _supabaseService.authStateChanges.listen((AuthState state) {
+        _user = _supabaseService.getUserInfo();
         notifyListeners();
       });
     } catch (e) {
@@ -47,17 +48,16 @@ class AuthProvider extends ChangeNotifier {
     try {
       _setLoading(true);
       _clearError();
-      
-      // 模擬訪客登入
-      await Future.delayed(Duration(milliseconds: 500));
-      _user = {
-        'uid': 'guest_${DateTime.now().millisecondsSinceEpoch}',
-        'email': null,
-        'displayName': '訪客用戶',
-        'photoURL': null,
-      };
-      notifyListeners();
-      return true;
+
+      final response = await _supabaseService.signInAnonymously();
+
+      if (response?.user != null) {
+        _user = _supabaseService.getUserInfo();
+        notifyListeners();
+        return true;
+      }
+
+      return false;
     } catch (e) {
       _setError('訪客登入失敗: ${e.toString()}');
       return false;
@@ -71,15 +71,15 @@ class AuthProvider extends ChangeNotifier {
     try {
       _setLoading(true);
       _clearError();
-      
-      final result = await _firebaseService.signInWithGoogle();
-      
-      if (result != null) {
-        _user = result;
+
+      final response = await _supabaseService.signInWithGoogle();
+
+      if (response?.user != null) {
+        _user = _supabaseService.getUserInfo();
         notifyListeners();
         return true;
       }
-      
+
       return false;
     } catch (e) {
       _setError('Google 登入失敗: ${e.toString()}');
@@ -94,8 +94,8 @@ class AuthProvider extends ChangeNotifier {
     try {
       _setLoading(true);
       _clearError();
-      
-      await _firebaseService.signOut();
+
+      await _supabaseService.signOut();
       _user = null;
       notifyListeners();
     } catch (e) {
@@ -108,7 +108,7 @@ class AuthProvider extends ChangeNotifier {
   // 獲取用戶資訊
   Map<String, dynamic>? getUserInfo() {
     if (_user == null) return null;
-    
+
     return {
       'uid': _user['uid'],
       'email': _user['email'],
@@ -154,8 +154,8 @@ class AuthProvider extends ChangeNotifier {
   // 重新載入用戶資訊
   Future<void> reloadUser() async {
     try {
-      await Future.delayed(Duration(milliseconds: 100));
-      _user = _firebaseService.currentUser;
+      await _supabaseService.reloadUser();
+      _user = _supabaseService.getUserInfo();
       notifyListeners();
     } catch (e) {
       _setError('重新載入用戶資訊失敗: ${e.toString()}');

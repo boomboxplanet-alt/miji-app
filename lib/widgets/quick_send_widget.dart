@@ -88,7 +88,8 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.25), width: 1.2),
+            border: Border.all(
+                color: Colors.white.withValues(alpha: 0.25), width: 1.2),
             boxShadow: [
               BoxShadow(
                 color: AppColors.primaryColor.withValues(alpha: 0.18),
@@ -99,162 +100,166 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
             ],
           ),
           child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // 頂部列：標題與匿名切換
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Row(
-              children: [
-                const Icon(Icons.location_on, color: Colors.white, size: 18),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text(
-                    '快速訊息',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                ChoiceChip(
-                  label: const Text('匿名'),
-                  selected: true,
-                  onSelected: null,
-                  labelStyle: const TextStyle(color: Colors.white, fontSize: 12),
-                  selectedColor: Colors.white.withValues(alpha: 0.35),
-                  backgroundColor: Colors.white.withValues(alpha: 0.18),
-                  shape: StadiumBorder(
-                    side: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // 輸入框和發送按鈕區域
-          Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // 輸入框和發送按鈕的行布局
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  // 輸入框區域
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: TextField(
-                        controller: _controller,
-                        maxLength: _maxBytes,
-                        maxLines: null,
-                        minLines: 2,
-                        keyboardType: TextInputType.multiline,
-                        textInputAction: TextInputAction.newline,
-                        enableInteractiveSelection: true,
-                        autocorrect: true,
-                        enableSuggestions: true,
-                        textCapitalization: TextCapitalization.sentences,
-                        style: const TextStyle(
+              // 頂部列：標題與匿名切換
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(
+                  children: [
+                    const Icon(Icons.location_on,
+                        color: Colors.white, size: 18),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        '快速訊息',
+                        style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,
-                          height: 1.4,
+                          fontWeight: FontWeight.w700,
                         ),
-                        decoration: InputDecoration(
-                          hintText: '說點什麼...（最多200字節）',
-                          border: InputBorder.none,
-                          counterText: '',
-                          hintStyle: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7),
-                            fontSize: 14,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          prefixIcon: Padding(
-                            padding: const EdgeInsets.only(top: 12),
-                            child: Icon(
-                              Icons.edit_outlined,
-                              color: Colors.white.withValues(alpha: 0.8),
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                        onChanged: (text) {
-                          if (text.length > _maxBytes) {
-                            _controller.text = text.substring(0, _maxBytes);
-                            _controller.selection = TextSelection.fromPosition(
-                              const TextPosition(offset: _maxBytes),
-                            );
-                          }
-                          // 觸發重繪以更新按鈕可用狀態
-                          setState(() {});
-                        },
                       ),
                     ),
+                    ChoiceChip(
+                      label: const Text('匿名'),
+                      selected: true,
+                      onSelected: null,
+                      labelStyle:
+                          const TextStyle(color: Colors.white, fontSize: 12),
+                      selectedColor: Colors.white.withValues(alpha: 0.35),
+                      backgroundColor: Colors.white.withValues(alpha: 0.18),
+                      shape: StadiumBorder(
+                        side: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.3)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // 輸入框和發送按鈕區域
+              Column(
+                children: [
+                  // 輸入框和發送按鈕的行布局
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      // 輸入框區域
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: TextField(
+                            controller: _controller,
+                            maxLength: _maxBytes,
+                            maxLines: null,
+                            minLines: 2,
+                            keyboardType: TextInputType.multiline,
+                            textInputAction: TextInputAction.newline,
+                            enableInteractiveSelection: true,
+                            autocorrect: true,
+                            enableSuggestions: true,
+                            textCapitalization: TextCapitalization.sentences,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              height: 1.4,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: '說點什麼...（最多200字節）',
+                              border: InputBorder.none,
+                              counterText: '',
+                              hintStyle: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.7),
+                                fontSize: 14,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              prefixIcon: Padding(
+                                padding: const EdgeInsets.only(top: 12),
+                                child: Icon(
+                                  Icons.edit_outlined,
+                                  color: Colors.white.withValues(alpha: 0.8),
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                            onChanged: (text) {
+                              if (text.length > _maxBytes) {
+                                _controller.text = text.substring(0, _maxBytes);
+                                _controller.selection =
+                                    TextSelection.fromPosition(
+                                  const TextPosition(offset: _maxBytes),
+                                );
+                              }
+                              // 觸發重繪以更新按鈕可用狀態
+                              setState(() {});
+                            },
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 8),
+
+                      // 右側操作區（等寬等高）
+                      SizedBox(
+                        width: 112,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildActionButton(
+                              icon: Icons.bubble_chart,
+                              label: '泡泡設置',
+                              onTap: () => _showSettingsBottomSheet(context),
+                              primary: false,
+                            ),
+                            const SizedBox(height: 8),
+                            _buildActionButton(
+                              icon: Icons.send,
+                              label: '發送',
+                              onTap: _controller.text.trim().isEmpty
+                                  ? null
+                                  : () => _handleSendMessage(),
+                              primary: true,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
 
-                  const SizedBox(width: 8),
-
-                  // 右側操作區（等寬等高）
-                  SizedBox(
-                    width: 112,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                  // 字節計數顯示
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        _buildActionButton(
-                          icon: Icons.bubble_chart,
-                          label: '泡泡設置',
-                          onTap: () => _showSettingsBottomSheet(context),
-                          primary: false,
-                        ),
-                        const SizedBox(height: 8),
-                        _buildActionButton(
-                          icon: Icons.send,
-                          label: '發送',
-                          onTap: _controller.text.trim().isEmpty
-                              ? null
-                              : () => _handleSendMessage(),
-                          primary: true,
+                        Text(
+                          '$_currentBytes/$_maxBytes 字節',
+                          style: TextStyle(
+                            color: _currentBytes > _maxBytes * 0.8
+                                ? Colors.orange.withValues(alpha: 0.9)
+                                : Colors.white.withValues(alpha: 0.6),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ],
               ),
-
-              // 字節計數顯示
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      '$_currentBytes/$_maxBytes 字節',
-                      style: TextStyle(
-                        color: _currentBytes > _maxBytes * 0.8
-                            ? Colors.orange.withValues(alpha: 0.9)
-                            : Colors.white.withValues(alpha: 0.6),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
-        ],
-      ),
         ),
       ),
     );
@@ -390,13 +395,6 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
       } else {
         _destroyDuration = maxDuration;
         // 顯示提示訊息
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content:
-                Text('設定時間超過權限上限，已調整為最大可用時間：${_formatDuration(maxDuration)}'),
-            backgroundColor: Colors.orange,
-          ),
-        );
       }
     });
     Navigator.pop(context);
@@ -566,12 +564,6 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
       } else {
         _radius = maxRange;
         // 顯示提示訊息
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('設定範圍超過權限上限，已調整為最大可用範圍：${_formatRange(maxRange)}'),
-            backgroundColor: Colors.orange,
-          ),
-        );
       }
     });
     Navigator.pop(context);
@@ -706,13 +698,19 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
     final Gradient gradient = primary
         ? LinearGradient(
             colors: disabled
-                ? [Colors.grey.shade500.withValues(alpha: 0.6), Colors.grey.shade600.withValues(alpha: 0.6)]
+                ? [
+                    Colors.grey.shade500.withValues(alpha: 0.6),
+                    Colors.grey.shade600.withValues(alpha: 0.6)
+                  ]
                 : [const Color(0xFF667eea), const Color(0xFF764ba2)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           )
         : LinearGradient(
-            colors: [Colors.white.withValues(alpha: 0.28), Colors.white.withValues(alpha: 0.18)],
+            colors: [
+              Colors.white.withValues(alpha: 0.28),
+              Colors.white.withValues(alpha: 0.18)
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           );
@@ -728,7 +726,9 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
           decoration: BoxDecoration(
             gradient: gradient,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withValues(alpha: primary ? 0.25 : 0.2), width: 1),
+            border: Border.all(
+                color: Colors.white.withValues(alpha: primary ? 0.25 : 0.2),
+                width: 1),
             boxShadow: [
               BoxShadow(
                 color: (primary ? const Color(0xFF667eea) : Colors.black)
@@ -947,7 +947,6 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
     );
     _controller.clear();
   }
-  
 
   void _showModerationDialog({
     required String title,
@@ -1271,6 +1270,4 @@ class _QuickSendWidgetState extends State<QuickSendWidget> {
       ),
     );
   }
-
-
 }

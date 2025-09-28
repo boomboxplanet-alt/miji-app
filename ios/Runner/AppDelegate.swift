@@ -1,7 +1,6 @@
 import UIKit
 import Flutter
 import GoogleMaps
-import FirebaseCore
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
@@ -10,11 +9,10 @@ import FirebaseCore
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     
-    // 配置 Firebase
-    FirebaseApp.configure()
+    // Firebase 已移除，使用 Supabase 替代
     
-            // 配置 Google Maps
-        GMSServices.provideAPIKey("AIzaSyAx0HpzU9SSQHKba8wsl-i_z-Gid5Sa9kQ")
+    // 配置 Google Maps
+    GMSServices.provideAPIKey("AIzaSyAx0HpzU9SSQHKba8wsl-i_z-Gid5Sa9kQ")
     
     // 註冊 Flutter 插件
     GeneratedPluginRegistrant.register(with: self)

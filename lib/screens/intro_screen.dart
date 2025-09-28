@@ -30,9 +30,9 @@ class IntroScreen extends StatelessWidget {
                   size: 100,
                   color: Colors.white,
                 ),
-                
+
                 SizedBox(height: 30),
-                
+
                 // 標題
                 Text(
                   '秘跡 Miji',
@@ -42,9 +42,9 @@ class IntroScreen extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
-                
+
                 SizedBox(height: 20),
-                
+
                 // 副標題
                 Text(
                   '限時限地的隱密訊息應用',
@@ -54,39 +54,37 @@ class IntroScreen extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                
+
                 SizedBox(height: 50),
-                
+
                 // 開始按鈕
                 Consumer<AppState>(
                   builder: (context, appState, child) {
                     return ElevatedButton(
                       onPressed: () async {
                         // 請求位置權限
-                        final hasPermission = await appState.requestLocationPermission();
+                        final hasPermission =
+                            await appState.requestLocationPermission();
                         if (hasPermission) {
                           // 獲取位置
                           await appState.getCurrentLocation();
                           // 導航到地圖屏幕
                           if (context.mounted) {
-                            await Navigator.pushReplacementNamed(context, '/map');
+                            await Navigator.pushReplacementNamed(
+                                context, '/map');
                           }
                         } else {
                           // 顯示權限被拒絕的提示
                           if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('需要位置權限才能使用應用程式'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
+                            // 權限被拒絕
                           }
                         }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: Colors.blue.shade600,
-                        padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
@@ -101,9 +99,9 @@ class IntroScreen extends StatelessWidget {
                     );
                   },
                 ),
-                
+
                 SizedBox(height: 20),
-                
+
                 // 加載指示器
                 Consumer<AppState>(
                   builder: (context, appState, child) {
@@ -123,4 +121,3 @@ class IntroScreen extends StatelessWidget {
     );
   }
 }
-

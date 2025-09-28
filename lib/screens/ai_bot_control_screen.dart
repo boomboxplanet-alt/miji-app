@@ -33,7 +33,7 @@ class _AIBotControlScreenState extends State<AIBotControlScreen> {
       setState(() {
         _lastGeneratedMessage = content;
       });
-      
+
       // 這裡可以將訊息添加到地圖上
       // 或者通過 Provider 通知其他組件
       print('🤖 AI 機器人生成訊息: $content');
@@ -54,9 +54,9 @@ class _AIBotControlScreenState extends State<AIBotControlScreen> {
     setState(() {
       _isGenerating = true;
     });
-    
+
     _botService.generateMessageNow();
-    
+
     // 模擬生成過程
     Future.delayed(const Duration(milliseconds: 500), () {
       setState(() {
@@ -70,16 +70,11 @@ class _AIBotControlScreenState extends State<AIBotControlScreen> {
     // 目前使用澳門的座標作為示例
     const double lat = 22.1667;
     const double lng = 113.5500;
-    
+
     _botService.updateUserLocation(lat, lng);
     _loadBotStatus();
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('📍 機器人位置已更新為澳門'),
-        backgroundColor: Colors.green,
-      ),
-    );
+
+    // 機器人位置已更新
   }
 
   @override
@@ -103,19 +98,19 @@ class _AIBotControlScreenState extends State<AIBotControlScreen> {
             // 機器人狀態卡片
             _buildStatusCard(),
             const SizedBox(height: 20),
-            
+
             // 控制按鈕
             _buildControlButtons(),
             const SizedBox(height: 20),
-            
+
             // 機器人設置
             _buildBotSettings(),
             const SizedBox(height: 20),
-            
+
             // 最後生成的訊息
             _buildLastMessageCard(),
             const SizedBox(height: 20),
-            
+
             // 機器人信息
             _buildBotInfo(),
           ],
@@ -154,7 +149,8 @@ class _AIBotControlScreenState extends State<AIBotControlScreen> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: _isBotEnabled ? Colors.green.shade800 : Colors.red.shade800,
+                color:
+                    _isBotEnabled ? Colors.green.shade800 : Colors.red.shade800,
               ),
             ),
             const SizedBox(height: 8),
@@ -162,7 +158,8 @@ class _AIBotControlScreenState extends State<AIBotControlScreen> {
               _isBotEnabled ? '正在自動生成地理相關訊息' : '點擊啟動按鈕開始工作',
               style: TextStyle(
                 fontSize: 14,
-                color: _isBotEnabled ? Colors.green.shade600 : Colors.red.shade600,
+                color:
+                    _isBotEnabled ? Colors.green.shade600 : Colors.red.shade600,
               ),
               textAlign: TextAlign.center,
             ),
@@ -194,13 +191,14 @@ class _AIBotControlScreenState extends State<AIBotControlScreen> {
         Expanded(
           child: ElevatedButton.icon(
             onPressed: _isBotEnabled ? _generateMessageNow : null,
-            icon: _isGenerating 
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                )
-              : const Icon(Icons.auto_awesome),
+            icon: _isGenerating
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Colors.white),
+                  )
+                : const Icon(Icons.auto_awesome),
             label: Text(_isGenerating ? '生成中...' : '立即生成'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue,
@@ -239,7 +237,7 @@ class _AIBotControlScreenState extends State<AIBotControlScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // 位置更新按鈕
             SizedBox(
               width: double.infinity,
@@ -255,16 +253,18 @@ class _AIBotControlScreenState extends State<AIBotControlScreen> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // 當前狀態顯示
             _buildStatusItem('📍 當前位置', _botStatus['location'] ?? '未知'),
             _buildStatusItem('🌍 國家/地區', _botStatus['country'] ?? '未知'),
             _buildStatusItem('🌤️ 天氣', _botStatus['weather'] ?? '未知'),
-            _buildStatusItem('🌡️ 溫度', _botStatus['temperature'] != null 
-              ? '${_botStatus['temperature'].toStringAsFixed(1)}°C' 
-              : '未知'),
+            _buildStatusItem(
+                '🌡️ 溫度',
+                _botStatus['temperature'] != null
+                    ? '${_botStatus['temperature'].toStringAsFixed(1)}°C'
+                    : '未知'),
             _buildStatusItem('🌸 季節', _botStatus['season'] ?? '未知'),
             _buildStatusItem('⏰ 時間段', _botStatus['timeOfDay'] ?? '未知'),
           ],
@@ -302,7 +302,7 @@ class _AIBotControlScreenState extends State<AIBotControlScreen> {
     if (_lastGeneratedMessage.isEmpty) {
       return const SizedBox.shrink();
     }
-    
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -338,7 +338,8 @@ class _AIBotControlScreenState extends State<AIBotControlScreen> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.smart_toy, color: Colors.blue.shade600, size: 20),
+                      Icon(Icons.smart_toy,
+                          color: Colors.blue.shade600, size: 20),
                       const SizedBox(width: 8),
                       Text(
                         'AI 機器人',
@@ -406,7 +407,6 @@ class _AIBotControlScreenState extends State<AIBotControlScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            
             _buildInfoItem(
               '🌍 地理位置檢測',
               '自動檢測用戶當前地理位置，包括國家、城市等信息',

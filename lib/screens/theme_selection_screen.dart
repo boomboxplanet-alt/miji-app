@@ -347,13 +347,6 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen>
                   await _themeService.setTheme(_selectedTheme!);
                   if (mounted) {
                     Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('已切換到「${_selectedTheme!.name}」主題'),
-                        duration: const Duration(seconds: 2),
-                        backgroundColor: _selectedTheme!.primaryColor,
-                      ),
-                    );
                   }
                 }
               },

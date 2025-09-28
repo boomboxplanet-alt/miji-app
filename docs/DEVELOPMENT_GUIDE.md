@@ -64,7 +64,7 @@ lib/
 │   ├── bot_service.dart
 │   ├── content_moderation_service.dart
 │   ├── enhanced_ai_service.dart
-│   ├── firebase_service.dart
+│   ├── supabase_service.dart
 │   ├── location_service.dart
 │   ├── message_service.dart
 │   ├── smart_message_generator.dart
