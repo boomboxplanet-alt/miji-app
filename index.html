@@ -110,30 +110,55 @@
         // 監聽視口變化
         window.addEventListener('resize', handleViewportChange);
         
-        // 監聽輸入框焦點
+        // 監聽輸入框焦點 - 防止藍色區域
         document.addEventListener('focusin', function(e) {
           if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-            // 輸入框獲得焦點，防止頁面滾動
+            // 輸入框獲得焦點，強制固定頁面並防止藍色區域
             document.body.style.overflow = 'hidden';
             document.body.style.position = 'fixed';
             document.body.style.top = '0';
             document.body.style.left = '0';
             document.body.style.right = '0';
             document.body.style.bottom = '0';
+            document.body.style.background = '#000000';
+            document.body.classList.add('keyboard-open');
+            
+            // 強制 Flutter 容器保持固定
+            const flutterTarget = document.getElementById('flutter_target');
+            if (flutterTarget) {
+              flutterTarget.style.position = 'fixed';
+              flutterTarget.style.top = '0';
+              flutterTarget.style.left = '0';
+              flutterTarget.style.width = '100vw';
+              flutterTarget.style.height = initialViewportHeight + 'px';
+              flutterTarget.style.background = '#000000';
+              flutterTarget.style.zIndex = '9999';
+            }
           }
         });
         
         document.addEventListener('focusout', function(e) {
           if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-            // 輸入框失去焦點，延遲恢復
+            // 輸入框失去焦點，延遲恢復但保持固定
             setTimeout(() => {
-              if (!isKeyboardOpen) {
-                document.body.style.overflow = 'hidden';
-                document.body.style.position = 'fixed';
-                document.body.style.top = '0';
-                document.body.style.left = '0';
-                document.body.style.right = '0';
-                document.body.style.bottom = '0';
+              document.body.style.overflow = 'hidden';
+              document.body.style.position = 'fixed';
+              document.body.style.top = '0';
+              document.body.style.left = '0';
+              document.body.style.right = '0';
+              document.body.style.bottom = '0';
+              document.body.style.background = '#000000';
+              
+              // 保持 Flutter 容器固定
+              const flutterTarget = document.getElementById('flutter_target');
+              if (flutterTarget) {
+                flutterTarget.style.position = 'fixed';
+                flutterTarget.style.top = '0';
+                flutterTarget.style.left = '0';
+                flutterTarget.style.width = '100vw';
+                flutterTarget.style.height = initialViewportHeight + 'px';
+                flutterTarget.style.background = '#000000';
+                flutterTarget.style.zIndex = '9999';
               }
             }, 300);
           }
@@ -227,7 +252,7 @@
         z-index: 1;
       }
       
-      /* 鍵盤彈出時的修復 */
+      /* 鍵盤彈出時的修復 - 防止藍色區域 */
       body.keyboard-open {
         height: var(--vh, 100vh) !important;
         overflow: hidden !important;
@@ -236,14 +261,27 @@
         left: 0 !important;
         right: 0 !important;
         bottom: 0 !important;
+        background: #000000 !important;
       }
       
       body.keyboard-open #flutter_target {
         height: var(--vh, 100vh) !important;
+        width: 100vw !important;
         transform: translateZ(0);
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
+        background: #000000 !important;
+        z-index: 9999 !important;
+      }
+      
+      /* 防止藍色區域出現 */
+      body.keyboard-open * {
+        background: transparent !important;
+      }
+      
+      body.keyboard-open #flutter_target * {
+        background: transparent !important;
       }
     }
     
