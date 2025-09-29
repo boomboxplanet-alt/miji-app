@@ -91,13 +91,13 @@ class Message {
       likeCount: likeCount ?? this.likeCount,
       dislikeCount: dislikeCount ?? this.dislikeCount,
       viewedBy: viewedBy ?? this.viewedBy,
-       likedBy: likedBy ?? this.likedBy,
-       dislikedBy: dislikedBy ?? this.dislikedBy,
-       bubbleColor: bubbleColor ?? this.bubbleColor,
-       originalLanguage: originalLanguage ?? this.originalLanguage,
-       translatedContent: translatedContent ?? this.translatedContent,
-       isTranslated: isTranslated ?? this.isTranslated,
-       isBotGenerated: isBotGenerated ?? this.isBotGenerated,
+      likedBy: likedBy ?? this.likedBy,
+      dislikedBy: dislikedBy ?? this.dislikedBy,
+      bubbleColor: bubbleColor ?? this.bubbleColor,
+      originalLanguage: originalLanguage ?? this.originalLanguage,
+      translatedContent: translatedContent ?? this.translatedContent,
+      isTranslated: isTranslated ?? this.isTranslated,
+      isBotGenerated: isBotGenerated ?? this.isBotGenerated,
     );
   }
 
@@ -123,7 +123,8 @@ class Message {
       viewedBy: List<String>.from(json['viewedBy'] ?? []),
       likedBy: List<String>.from(json['likedBy'] ?? []),
       dislikedBy: List<String>.from(json['dislikedBy'] ?? []),
-      bubbleColor: json['bubbleColor'] != null ? Color(json['bubbleColor']) : null,
+      bubbleColor:
+          json['bubbleColor'] != null ? Color(json['bubbleColor']) : null,
     );
   }
 
@@ -146,7 +147,7 @@ class Message {
       'viewedBy': viewedBy,
       'likedBy': likedBy,
       'dislikedBy': dislikedBy,
-      'bubbleColor': bubbleColor?.value,
+      'bubbleColor': bubbleColor?.toARGB32(),
     };
   }
 }

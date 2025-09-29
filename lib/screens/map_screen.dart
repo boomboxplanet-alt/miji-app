@@ -2,22 +2,21 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import '../models/message.dart';
 import '../providers/message_provider.dart';
 import '../providers/location_provider.dart';
 import '../providers/task_provider.dart';
-import '../providers/auth_provider.dart';
-import '../screens/settings_screen.dart';
-import '../screens/task_screen.dart';
-import '../screens/ai_bot_control_screen.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_strings.dart';
 import '../utils/map_styles.dart';
 import '../widgets/quick_send_widget.dart';
 import '../widgets/message_bubble_overlay.dart';
 import '../widgets/night_fog_overlay.dart';
+import '../widgets/futuristic_bottom_nav.dart';
+import '../widgets/premium_message_dialog.dart';
 // 移除自定義圖示import，使用原始Material Design圖示
 import '../config/ai_bot_config.dart';
 import '../services/ai_geographic_bot_service.dart';
@@ -32,7 +31,7 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   final Completer<GoogleMapController> _controller = Completer();
   final Set<Marker> _markers = {};
-  final Set<Circle> _circles = {}; // 保留型別，但不再加入任何圓圈
+  final Set<Circle> _circles = {}; // 用户范围圆
   Marker? _userLocationMarker;
   BitmapDescriptor? _cachedUserPinIcon;
   double _currentRadius = 1000.0; // 基礎範圍1公里，將根據用戶權限動態更新
@@ -41,7 +40,7 @@ class _MapScreenState extends State<MapScreen> {
   final GlobalKey _mapKey = GlobalKey();
   Timer? _bubbleRotationTimer;
   int _currentTopBubbleIndex = 0;
-  
+
   @override
   void initState() {
     super.initState();
@@ -59,47 +58,41 @@ class _MapScreenState extends State<MapScreen> {
     return baseRangeMeters + bonusRange;
   }
 
+  // 移除固定的初始位置，改为动态获取用户位置
 
-
-  static const CameraPosition _kInitialPosition = CameraPosition(
-    target: LatLng(25.0330, 121.5654), // Default location: Taipei 101
-    zoom: 15.0, // 回復原本的街道級別視角
-  );
-
-  // 根據用戶範圍計算適合的縮放級別（進一步最小化到用戶範圍）
+  // 根據用戶範圍計算適合的縮放級別（放大20%顯示範圍）
   double _getInitialZoomForRadius(double radius) {
-    // 進一步最小化地圖範圍，讓用戶範圍圓圈更緊密地顯示
+    // 顯示用戶範圍圓的120%，放大20%
+    double displayRadius = radius * 1.2; // 用戶範圍的120%
 
-    // 更緊密的顯示範圍，讓用戶範圍圓圈剛好可見
-    double displayRadius = radius * 1.1; // 減少放大倍數，讓地圖更小
-
-    // 提高所有縮放級別，讓地圖顯示範圍更小
-    if (displayRadius >= 1200) return 14.5; // 1公里範圍進一步縮小
-    if (displayRadius >= 900) return 15.0; // 750米範圍進一步縮小
-    if (displayRadius >= 600) return 15.5; // 500米範圍進一步縮小
-    if (displayRadius >= 360) return 16.0; // 300米範圍進一步縮小
-    if (displayRadius >= 240) return 16.5; // 200米範圍進一步縮小
-    if (displayRadius >= 120) return 17.0; // 100米範圍進一步縮小
-    if (displayRadius >= 60) return 17.5; // 50米範圍進一步縮小
-    return 18.0; // 最小範圍進一步縮小
+    // 根據用戶範圍計算縮放級別，使用較小的縮放值來顯示更大範圍
+    if (displayRadius >= 5000) return 12.0; // 5公里範圍
+    if (displayRadius >= 4000) return 12.5; // 4公里範圍
+    if (displayRadius >= 3000) return 13.0; // 3公里範圍
+    if (displayRadius >= 2500) return 13.5; // 2.5公里範圍
+    if (displayRadius >= 2000) return 14.0; // 2公里範圍
+    if (displayRadius >= 1500) return 14.5; // 1.5公里範圍
+    if (displayRadius >= 1000) return 15.0; // 1公里範圍
+    if (displayRadius >= 750) return 15.5; // 750米範圍
+    if (displayRadius >= 500) return 16.0; // 500米範圍
+    return 16.5; // 最小範圍
   }
 
-  
-
-  // 計算最小縮放級別（顯示用戶範圍的2倍區域，這是最大可放大的限制）
+  // 計算最小縮放級別（允許更大的縮放範圍）
   double _getMinZoomLevel() {
-    // 根據用戶範圍計算最小縮放級別
-    // 範圍越大，縮放級別越小（顯示更大區域）
-    double maxViewRadius = _currentRadius * 2; // 最大可視範圍為用戶範圍的2倍
+    // 允許更大的縮放範圍，讓用戶可以縮小地圖
+    double maxViewRadius = _currentRadius * 5; // 最大可視範圍為用戶範圍的5倍
 
-    // 根據範圍計算縮放級別，確保不超過用戶範圍的2倍放大
-    if (maxViewRadius >= 2000) return 11.0; // 1公里範圍的2倍 = 2公里
-    if (maxViewRadius >= 1500) return 11.5;
-    if (maxViewRadius >= 1000) return 12.0;
-    if (maxViewRadius >= 750) return 12.5;
-    if (maxViewRadius >= 500) return 13.0;
-    if (maxViewRadius >= 250) return 13.5;
-    return 14.0;
+    // 根據範圍計算縮放級別，允許更大的顯示範圍
+    if (maxViewRadius >= 5000) return 7.0; // 5公里範圍
+    if (maxViewRadius >= 3000) return 8.0; // 3公里範圍
+    if (maxViewRadius >= 2000) return 9.0; // 2公里範圍
+    if (maxViewRadius >= 1500) return 9.5;
+    if (maxViewRadius >= 1000) return 10.0;
+    if (maxViewRadius >= 750) return 10.5;
+    if (maxViewRadius >= 500) return 11.0;
+    if (maxViewRadius >= 250) return 11.5;
+    return 12.0;
   }
 
   // 計算最大縮放級別
@@ -116,36 +109,11 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  // 檢查縮放限制 - 確保不超過用戶範圍的二倍
+  // 檢查縮放限制 - 完全禁用，允許自由縮放和拖動
   void _checkZoomLimits(CameraPosition position) {
-    double minZoom = _getMinZoomLevel(); // 最小縮放級別（最大顯示範圍）
-    double maxZoom = _getMaxZoomLevel(); // 最大縮放級別
-
-    if (position.zoom < minZoom) {
-      // 如果縮放級別太小（顯示範圍超過用戶範圍的2倍），強制回到限制內
-      Future.delayed(const Duration(milliseconds: 100), () {
-        _mapController?.animateCamera(
-          CameraUpdate.newCameraPosition(
-            CameraPosition(
-              target: position.target,
-              zoom: minZoom,
-            ),
-          ),
-        );
-      });
-    } else if (position.zoom > maxZoom) {
-      // 如果縮放級別太大，限制到最大縮放級別
-      Future.delayed(const Duration(milliseconds: 100), () {
-        _mapController?.animateCamera(
-          CameraUpdate.newCameraPosition(
-            CameraPosition(
-              target: position.target,
-              zoom: maxZoom,
-            ),
-          ),
-        );
-      });
-    }
+    // 完全禁用縮放限制檢查，允許用戶自由縮放和拖動地圖
+    // 不再強制地圖回到用戶中心
+    return;
   }
 
   @override
@@ -197,13 +165,17 @@ class _MapScreenState extends State<MapScreen> {
       // 使用 addPostFrameCallback 來避免在 build 過程中調用 setState
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await _updateMarkers(
-            messageProvider.messages, context.read<LocationProvider>());
+          messageProvider.messages,
+          context.read<LocationProvider>(),
+        );
       });
     });
 
+    // 立即获取用户位置并设置地图
     locationProvider.getCurrentLocation().then((_) {
       if (locationProvider.currentPosition != null) {
-        _goToCurrentLocation(locationProvider.currentPosition!);
+        // 等待地图控制器准备就绪后再设置位置
+        _waitForMapControllerAndSetPosition(locationProvider.currentPosition!);
         // 啟動 AI 機器人自動生成訊息
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _startAIBotService(locationProvider.currentPosition!);
@@ -216,42 +188,46 @@ class _MapScreenState extends State<MapScreen> {
   void _startAIBotService(dynamic position) {
     try {
       final aiBotService = AIGeographicBotService();
-      
+
       // 設置用戶位置
-      aiBotService.updateUserLocation(
-        position.latitude,
-        position.longitude,
-      );
-      
+      aiBotService.updateUserLocation(position.latitude, position.longitude);
+
       // 設置用戶範圍（基礎範圍 + 獎勵範圍）
       final userRadius = _getUserTotalRange();
       aiBotService.updateUserRadius(userRadius);
-      
+
       // 配置回調函數，將生成的訊息添加到地圖
       aiBotService.setOnMessageGenerated((content, lat, lng, radius, duration) {
         final messageProvider = context.read<MessageProvider>();
-        
+
         // 直接添加機器人訊息，不通過 sendMessage 方法
         messageProvider.addBotMessage(content, lat, lng, radius, duration);
       });
-      
+
       // 啟動機器人服務
       aiBotService.startService();
-      
+
       // 立即生成初始訊息，讓用戶感覺有活躍度
       if (AIBotConfig.autoStartOnAppLaunch) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          final initialCount = AIBotConfig.initialMessageMin + 
-            (DateTime.now().millisecond % (AIBotConfig.initialMessageMax - AIBotConfig.initialMessageMin + 1));
-          
+          final initialCount =
+              AIBotConfig.initialMessageMin +
+              (DateTime.now().millisecond %
+                  (AIBotConfig.initialMessageMax -
+                      AIBotConfig.initialMessageMin +
+                      1));
+
           for (int i = 0; i < initialCount; i++) {
-            Timer(Duration(milliseconds: i * AIBotConfig.initialMessageInterval), () {
-              aiBotService.generateMessageNow();
-            });
+            Timer(
+              Duration(milliseconds: i * AIBotConfig.initialMessageInterval),
+              () {
+                aiBotService.generateMessageNow();
+              },
+            );
           }
         });
       }
-      
+
       // 靜默啟動，不在控制台輸出任何機器人提示
     } catch (e) {
       print('❌ 啟動 AI 機器人服務失敗: $e');
@@ -271,36 +247,51 @@ class _MapScreenState extends State<MapScreen> {
                   GoogleMap(
                     key: _mapKey,
                     mapType: MapType.normal,
-                    style: MapStyles.forPlatform(),
-                    initialCameraPosition: _kInitialPosition,
-                    minMaxZoomPreference: MinMaxZoomPreference(
-                      _getMinZoomLevel(), // 限制最小縮放（最大顯示範圍為用戶範圍的2倍）
-                      _getMaxZoomLevel(), // 限制最大縮放到街道級別
+                    style: MapStyles.forPlatform(), // 重新啟用玻璃感霓虹風格地圖樣式
+                    initialCameraPosition: CameraPosition(
+                      target: LatLng(0, 0), // 臨時位置，會被用戶位置覆蓋
+                      zoom: 15.0,
                     ),
+                    // 完全移除縮放限制，允許自由縮放
+                    // minMaxZoomPreference: MinMaxZoomPreference(
+                    //   _getMinZoomLevel(),
+                    //   _getMaxZoomLevel(),
+                    // ),
                     onMapCreated: (GoogleMapController controller) {
                       if (!_controller.isCompleted) {
                         _controller.complete(controller);
                       }
                       _mapController = controller;
-                      // 設定縮放限制
-                      _updateZoomLimits();
+                      // 完全移除縮放限制設定
+                      // _updateZoomLimits();
+
+                      // 如果用户位置已经获取，立即设置地图位置
+                      final locationProvider = context.read<LocationProvider>();
+                      if (locationProvider.currentPosition != null) {
+                        _setInitialMapPosition(
+                          locationProvider.currentPosition!,
+                        );
+                      }
                     },
                     markers: _getAllMarkers(),
                     circles: _circles,
                     myLocationEnabled: false,
                     myLocationButtonEnabled: false,
                     zoomControlsEnabled: false,
-                    // 隱藏Google標誌和版權資訊
                     compassEnabled: false,
                     mapToolbarEnabled: false,
-                    buildingsEnabled: true,
+                    buildingsEnabled: false,
                     liteModeEnabled: false,
                     indoorViewEnabled: false,
                     trafficEnabled: false,
+                    rotateGesturesEnabled: false,
+                    scrollGesturesEnabled: false,
+                    tiltGesturesEnabled: false,
+                    zoomGesturesEnabled: true,
                     onCameraMove: (CameraPosition position) {
                       // 地圖移動時更新泡泡位置
                       _updateBubblePositions();
-                      // 檢查縮放限制
+                      // 啟用縮放限制檢查（但現在已完全禁用限制）
                       _checkZoomLimits(position);
                     },
                     onCameraIdle: () {
@@ -314,7 +305,17 @@ class _MapScreenState extends State<MapScreen> {
               ),
               _buildTopBar(),
               _buildStatusIndicators(locationProvider, messageProvider),
-              _buildBottomWidgets(locationProvider),
+              // 新的未来感底部导航栏
+              FuturisticBottomNav(
+                onLocationPressed: () {
+                  if (locationProvider.currentPosition != null) {
+                    _goToCurrentLocation(locationProvider.currentPosition!);
+                  } else {
+                    locationProvider.getCurrentLocation();
+                  }
+                },
+                onMessagePressed: _openQuickSendSheet,
+              ),
               // 添加美觀的覆蓋層遮擋底部版權信息
               Positioned(
                 bottom: 0,
@@ -327,7 +328,7 @@ class _MapScreenState extends State<MapScreen> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        AppColors.backgroundColor.withOpacity(0.5),
+                        AppColors.backgroundColor.withValues(alpha: 0.5),
                         AppColors.backgroundColor,
                       ],
                     ),
@@ -346,39 +347,10 @@ class _MapScreenState extends State<MapScreen> {
       top: MediaQuery.of(context).padding.top + 12,
       left: 12,
       right: 12,
-      child: Container(
+      child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              const Color(0xFF667eea).withOpacity(0.95),
-              const Color(0xFF764ba2).withOpacity(0.95),
-              const Color(0xFFf093fb).withOpacity(0.95),
-            ],
-            stops: const [0.0, 0.5, 1.0],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(28),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.2),
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF667eea).withOpacity(0.4),
-              blurRadius: 25,
-              offset: const Offset(0, 8),
-              spreadRadius: 2,
-            ),
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 40,
-              offset: const Offset(0, 15),
-            ),
-          ],
-        ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Logo
             Container(
@@ -388,7 +360,7 @@ class _MapScreenState extends State<MapScreen> {
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -400,12 +372,24 @@ class _MapScreenState extends State<MapScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.primaryColor,
+                        AppColors.secondaryColor,
+                      ], // 未來主義霓虹藍漸層
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primaryColor.withValues(
+                          alpha: 0.4,
+                        ), // 霓虹藍陰影
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: const Icon(
                     Icons.location_on,
@@ -416,46 +400,53 @@ class _MapScreenState extends State<MapScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            // App名稱和標語（可縮放避免溢出）
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    AppStrings.appName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: 0.5,
-                      shadows: [
-                        Shadow(
-                          offset: const Offset(0, 2),
-                          blurRadius: 8,
-                          color: Colors.black.withOpacity(0.3),
-                        ),
-                      ],
-                    ),
+            // App名稱和標語（居中顯示）
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  AppStrings.appName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: 0.5,
+                    shadows: [
+                      Shadow(
+                        offset: const Offset(0, 3),
+                        blurRadius: 12,
+                        color: AppColors.primaryColor.withValues(
+                          alpha: 0.8,
+                        ), // 霓虹藍陰影
+                      ),
+                      Shadow(
+                        offset: const Offset(0, 1),
+                        blurRadius: 6,
+                        color: AppColors.secondaryColor.withValues(
+                          alpha: 0.6,
+                        ), // 亮霓虹藍陰影
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    AppStrings.tagline,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.white.withOpacity(0.85),
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0.3,
-                    ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  AppStrings.tagline,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.3,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const Spacer(),
+            const SizedBox(width: 24),
             // 中間：用戶權限顯示（兩排）
             Consumer<TaskProvider>(
               builder: (context, taskProvider, child) {
@@ -479,14 +470,29 @@ class _MapScreenState extends State<MapScreen> {
                       width: 80, // 固定寬度確保一致
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
+                          color: AppColors.surfaceColor.withValues(
+                            alpha: 0.3,
+                          ), // 半透明深藍表面
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.3),
-                            width: 0.5,
+                            color: AppColors.primaryColor.withValues(
+                              alpha: 0.5,
+                            ), // 霓虹藍邊框
+                            width: 1,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primaryColor.withValues(
+                                alpha: 0.2,
+                              ), // 霓虹藍陰影
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -495,16 +501,31 @@ class _MapScreenState extends State<MapScreen> {
                             Icon(
                               Icons.access_time,
                               size: 12,
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                             ),
                             const SizedBox(width: 4),
                             Flexible(
                               child: Text(
                                 '${totalDurationMinutes ~/ 60}h${totalDurationMinutes % 60 > 0 ? '${totalDurationMinutes % 60}m' : ''}',
-                                style: const TextStyle(
-                                  fontSize: 10,
+                                style: TextStyle(
+                                  fontSize: 14,
                                   color: Colors.white,
                                   fontWeight: FontWeight.w700,
+                                  shadows: [
+                                    Shadow(
+                                      offset: const Offset(0, 2),
+                                      blurRadius: 8,
+                                      color: AppColors.primaryColor.withValues(
+                                        alpha: 0.8,
+                                      ), // 霓虹藍陰影
+                                    ),
+                                    Shadow(
+                                      offset: const Offset(0, 1),
+                                      blurRadius: 4,
+                                      color: AppColors.secondaryColor
+                                          .withValues(alpha: 0.6), // 亮霓虹藍陰影
+                                    ),
+                                  ],
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -519,14 +540,29 @@ class _MapScreenState extends State<MapScreen> {
                       width: 80, // 固定寬度確保一致
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
+                          color: AppColors.surfaceColor.withValues(
+                            alpha: 0.3,
+                          ), // 半透明深藍表面
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.3),
-                            width: 0.5,
+                            color: AppColors.primaryColor.withValues(
+                              alpha: 0.5,
+                            ), // 霓虹藍邊框
+                            width: 1,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primaryColor.withValues(
+                                alpha: 0.2,
+                              ), // 霓虹藍陰影
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -535,16 +571,31 @@ class _MapScreenState extends State<MapScreen> {
                             Icon(
                               Icons.location_on,
                               size: 12,
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                             ),
                             const SizedBox(width: 4),
                             Flexible(
                               child: Text(
                                 '${(totalRangeMeters / 1000).toStringAsFixed(1)}km',
-                                style: const TextStyle(
-                                  fontSize: 10,
+                                style: TextStyle(
+                                  fontSize: 14,
                                   color: Colors.white,
                                   fontWeight: FontWeight.w700,
+                                  shadows: [
+                                    Shadow(
+                                      offset: const Offset(0, 2),
+                                      blurRadius: 8,
+                                      color: AppColors.primaryColor.withValues(
+                                        alpha: 0.8,
+                                      ), // 霓虹藍陰影
+                                    ),
+                                    Shadow(
+                                      offset: const Offset(0, 1),
+                                      blurRadius: 4,
+                                      color: AppColors.secondaryColor
+                                          .withValues(alpha: 0.6), // 亮霓虹藍陰影
+                                    ),
+                                  ],
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -558,99 +609,6 @@ class _MapScreenState extends State<MapScreen> {
               },
             ),
             const Spacer(),
-            // 右側按鈕區域
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // 登入按鈕
-                Consumer<AuthProvider>(
-                  builder: (context, authProvider, child) {
-                    return _buildTopBarButton(
-                      icon: authProvider.isSignedIn
-                          ? Icons.account_circle
-                          : Icons.login,
-                      onTap: () {
-                        if (authProvider.isSignedIn) {
-                          _showUserMenu(context, authProvider);
-                        } else {
-                          _showLoginOptions(context, authProvider);
-                        }
-                      },
-                      isActive: authProvider.isSignedIn,
-                    );
-                  },
-                ),
-                const SizedBox(width: 8),
-                // 任務中心按鈕
-                Consumer<TaskProvider>(
-                  builder: (context, taskProvider, child) {
-                    final claimableCount = taskProvider.claimableTasks.length;
-
-                    return _buildTopBarButton(
-                      icon: Icons.task_alt,
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          barrierDismissible: true,
-                          builder: (context) => Dialog(
-                            backgroundColor: Colors.transparent,
-                            insetPadding: EdgeInsets.symmetric(
-                              horizontal:
-                                  MediaQuery.of(context).size.width * 0.25,
-                              vertical:
-                                  MediaQuery.of(context).size.height * 0.2,
-                            ),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.2),
-                                    blurRadius: 15,
-                                    offset: const Offset(0, 5),
-                                  ),
-                                ],
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(20),
-                                child: const TaskScreen(),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                      badge: claimableCount > 0 ? claimableCount : null,
-                    );
-                  },
-                ),
-                const SizedBox(width: 8),
-                // AI 機器人按鈕
-                _buildTopBarButton(
-                  icon: Icons.smart_toy,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AIBotControlScreen(),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(width: 8),
-                // 設定按鈕
-                _buildTopBarButton(
-                  icon: Icons.tune_rounded,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const SettingsScreen(),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
           ],
         ),
       ),
@@ -667,7 +625,9 @@ class _MapScreenState extends State<MapScreen> {
           if (lp.isLoading) _buildStatusIndicator('正在獲取位置...'),
           if (lp.errorMessage != null)
             _buildErrorIndicator(
-                lp.errorMessage!, () => lp.getCurrentLocation()),
+              lp.errorMessage!,
+              () => lp.getCurrentLocation(),
+            ),
           if (mp.errorMessage != null)
             _buildErrorIndicator(mp.errorMessage!, () => mp.clearError()),
         ],
@@ -675,118 +635,10 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  Widget _buildBottomWidgets(LocationProvider locationProvider) {
-    return Stack(
-      children: [
-        // 定位按鈕（位於右下角，位於 + 按鈕上方避免重疊）
-        Positioned(
-          bottom: MediaQuery.of(context).padding.bottom + 96,
-          right: 20,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  AppColors.primaryColor,
-                  AppColors.secondaryColor,
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: const [
-                BoxShadow(
-                  color: AppColors.primaryColor,
-                  blurRadius: 15,
-                  offset: Offset(0, 6),
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: FloatingActionButton(
-              onPressed: () {
-                if (locationProvider.currentPosition != null) {
-                  _goToCurrentLocation(locationProvider.currentPosition!);
-                } else {
-                  locationProvider.getCurrentLocation();
-                }
-              },
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              child: const Icon(
-                Icons.my_location_rounded,
-                color: Colors.white,
-                size: 28,
-              ),
-            ),
-          ),
-        ),
-
-        // 「+」主動作按鈕：展開下方功能區
-        Positioned(
-          bottom: MediaQuery.of(context).padding.bottom + 20,
-          right: 20,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  AppColors.primaryColor,
-                  AppColors.secondaryColor,
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: const [
-                BoxShadow(
-                  color: AppColors.primaryColor,
-                  blurRadius: 16,
-                  offset: Offset(0, 8),
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: FloatingActionButton(
-              onPressed: _openQuickSendSheet,
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              child: const Icon(
-                Icons.add,
-                color: Colors.white,
-                size: 30,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // 以底部彈出面板顯示原本的輸入與設定功能
-  void _openQuickSendSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: 12,
-              right: 12,
-              bottom: MediaQuery.of(context).viewInsets.bottom + 12,
-            ),
-            child: QuickSendWidget(onSend: _handleSendMessage),
-          ),
-        );
-      },
-    );
-  }
-
   Set<Marker> _getAllMarkers() {
-    // 不再顯示用戶位置標記
     final allMarkers = <Marker>{};
     allMarkers.addAll(_markers);
+    // 不显示用户位置标记
     return allMarkers;
   }
 
@@ -797,14 +649,73 @@ class _MapScreenState extends State<MapScreen> {
         locationProvider.currentPosition!.longitude,
       );
 
-      // 不再加入用戶位置標記
+      // 不创建用户位置标记
       setState(() {
         _userLocationMarker = null;
         _markers.clear();
       });
 
-      // 調整地圖縮放到最佳視角以最大化顯示用戶範圍
-      _adjustMapViewToShowRange(userPosition);
+      // 更新范围圆
+      _updateCircles(userPosition);
+
+      // 暫時禁用自動縮放調整，允許用戶自由縮放
+      // _adjustMapViewToShowRange(userPosition);
+    }
+  }
+
+  // 等待地图控制器准备就绪并设置位置
+  void _waitForMapControllerAndSetPosition(dynamic position) {
+    if (_controller.isCompleted) {
+      _setInitialMapPosition(position);
+    } else {
+      // 等待控制器准备就绪
+      _controller.future
+          .then((_) {
+            _setInitialMapPosition(position);
+          })
+          .catchError((error) {
+            print('等待地图控制器失败: $error');
+            // 延迟重试
+            Future.delayed(const Duration(milliseconds: 1000), () {
+              _waitForMapControllerAndSetPosition(position);
+            });
+          });
+    }
+  }
+
+  // 设置初始地图位置到用户位置
+  Future<void> _setInitialMapPosition(dynamic position) async {
+    // 等待地图控制器准备就绪
+    if (_controller.isCompleted) {
+      try {
+        final GoogleMapController controller = await _controller.future;
+
+        // 計算適合的縮放級別，讓地圖顯示範圍為用戶範圍圓的一倍
+        final optimalZoom = _getInitialZoomForRadius(_currentRadius);
+
+        final newPosition = CameraPosition(
+          target: LatLng(position.latitude, position.longitude),
+          zoom: optimalZoom, // 使用計算出的最佳縮放級別
+        );
+
+        // 立即设置位置，不使用动画
+        await controller.moveCamera(
+          CameraUpdate.newCameraPosition(newPosition),
+        );
+      } catch (e) {
+        print('设置初始地图位置失败: $e');
+        // 如果失败，稍后重试
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (_controller.isCompleted) {
+            _setInitialMapPosition(position);
+          }
+        });
+      }
+    } else {
+      // 如果控制器还没准备好，稍后重试
+      Future.delayed(const Duration(milliseconds: 300), () {
+        _setInitialMapPosition(position);
+      });
     }
   }
 
@@ -816,10 +727,7 @@ class _MapScreenState extends State<MapScreen> {
       // 計算最佳縮放級別
       final optimalZoom = _getInitialZoomForRadius(_currentRadius);
 
-      final newPosition = CameraPosition(
-        target: center,
-        zoom: optimalZoom,
-      );
+      final newPosition = CameraPosition(target: center, zoom: optimalZoom);
 
       // 平滑動畫到最佳視角
       await controller.animateCamera(
@@ -830,7 +738,9 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _updateMarkers(
-      List<Message> messages, LocationProvider locationProvider) async {
+    List<Message> messages,
+    LocationProvider locationProvider,
+  ) async {
     if (locationProvider.currentPosition == null) {
       setState(() {
         _markers.clear();
@@ -910,7 +820,9 @@ class _MapScreenState extends State<MapScreen> {
         final zIndex = i == reorderedMessages.length - 1 ? 1 : 0;
 
         // 距離顯示（以目前相機中心近似使用者位置計算）
-        final cameraPosition = await _mapController!.getLatLng(const ScreenCoordinate(x: 0, y: 0));
+        final cameraPosition = await _mapController!.getLatLng(
+          const ScreenCoordinate(x: 0, y: 0),
+        );
         final distanceMeters = _calculateDistance(
           cameraPosition.latitude,
           cameraPosition.longitude,
@@ -953,11 +865,16 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   double _calculateDistance(
-      double lat1, double lon1, double lat2, double lon2) {
+    double lat1,
+    double lon1,
+    double lat2,
+    double lon2,
+  ) {
     const double earthRadius = 6371000; // 地球半徑（米）
     final double dLat = _degreesToRadians(lat2 - lat1);
     final double dLon = _degreesToRadians(lon2 - lon1);
-    final double a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+    final double a =
+        math.sin(dLat / 2) * math.sin(dLat / 2) +
         math.cos(_degreesToRadians(lat1)) *
             math.cos(_degreesToRadians(lat2)) *
             math.sin(dLon / 2) *
@@ -1004,7 +921,9 @@ class _MapScreenState extends State<MapScreen> {
         _cachedUserPinIcon = icon;
         // 立即用新圖示替換既有的用戶標記
         if (_userLocationMarker != null) {
-          _userLocationMarker = _userLocationMarker!.copyWith(iconParam: _cachedUserPinIcon);
+          _userLocationMarker = _userLocationMarker!.copyWith(
+            iconParam: _cachedUserPinIcon,
+          );
         }
       });
     }
@@ -1014,31 +933,41 @@ class _MapScreenState extends State<MapScreen> {
     final double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
     final double canvasSize = size * devicePixelRatio;
     final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder, Rect.fromLTWH(0, 0, canvasSize, canvasSize));
+    final canvas = Canvas(
+      recorder,
+      Rect.fromLTWH(0, 0, canvasSize, canvasSize),
+    );
 
     final center = Offset(canvasSize / 2, canvasSize / 2);
     final radius = canvasSize * 0.28;
 
-    // 外圍星光藍光暈
+    // 外圍未來主義霓虹光暈
     final glowPaint = Paint()
-      ..color = const Color(0xFF5FA8FF).withOpacity(0.55)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18);
-    canvas.drawCircle(center, radius * 1.35, glowPaint);
+      ..color = AppColors.primaryColor
+          .withValues(alpha: 0.7) // 使用新的霓虹藍
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 22); // 更強的光暈效果
+    canvas.drawCircle(center, radius * 1.4, glowPaint);
 
     // 內部底圓（半透明白）
-    final basePaint = Paint()..color = const Color(0xFFFFFFFF).withOpacity(0.95);
+    final basePaint = Paint()
+      ..color = const Color(0xFFFFFFFF).withValues(alpha: 0.95);
     canvas.drawCircle(center, radius, basePaint);
 
-    // 外框：品牌紫藍 (#8A7CCF)
+    // 外框：未來主義霓虹藍
     final borderPaint = Paint()
-      ..color = const Color(0xFF8A7CCF)
+      ..color = AppColors
+          .secondaryColor // 使用亮霓虹藍
       ..style = PaintingStyle.stroke
-      ..strokeWidth = radius * 0.22;
-    canvas.drawCircle(center, radius - borderPaint.strokeWidth / 2, borderPaint);
+      ..strokeWidth = radius * 0.25; // 稍微加粗邊框
+    canvas.drawCircle(
+      center,
+      radius - borderPaint.strokeWidth / 2,
+      borderPaint,
+    );
 
     // 中央白色星型
     final starPath = Path();
-    final int points = 5;
+    const int points = 5;
     final double outerR = radius * 0.58;
     final double innerR = outerR * 0.48;
     for (int i = 0; i < points * 2; i++) {
@@ -1063,7 +992,7 @@ class _MapScreenState extends State<MapScreen> {
     final picture = recorder.endRecording();
     final img = await picture.toImage(canvasSize.toInt(), canvasSize.toInt());
     final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
-    return BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List());
+    return BitmapDescriptor.bytes(byteData!.buffer.asUint8List());
   }
 
   Color _getBubbleColor(Message message) {
@@ -1084,7 +1013,12 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _handleSendMessage(
-      String message, double radius, Duration duration, bool isAnonymous, [String? customSenderName]) {
+    String message,
+    double radius,
+    Duration duration,
+    bool isAnonymous, [
+    String? customSenderName,
+  ]) {
     final locationProvider = context.read<LocationProvider>();
     final messageProvider = context.read<MessageProvider>();
 
@@ -1107,46 +1041,61 @@ class _MapScreenState extends State<MapScreen> {
 
     messageProvider
         .sendMessage(
-      content: message,
-      latitude: locationProvider.currentPosition!.latitude,
-      longitude: locationProvider.currentPosition!.longitude,
-      radius: radius,
-      duration: duration,
-      isAnonymous: isAnonymous,
-      customSenderName: customSenderName,
-    )
+          content: message,
+          latitude: locationProvider.currentPosition!.latitude,
+          longitude: locationProvider.currentPosition!.longitude,
+          radius: radius,
+          duration: duration,
+          isAnonymous: isAnonymous,
+          customSenderName: customSenderName,
+        )
         .then((message) {
-      if (messageProvider.errorMessage == null) {
-        _showSnackBar('訊息已發送！將在 ${duration.inMinutes} 分鐘後消失');
-        // 立即顯示訊息泡泡，確保用戶能立即看到自己的訊息
-        Future.delayed(const Duration(milliseconds: 300), () {
-          if (mounted) {
-            _showMessageBubble(message);
+          if (messageProvider.errorMessage == null) {
+            _showSnackBar('訊息已發送！將在 ${duration.inMinutes} 分鐘後消失');
+            // 立即顯示訊息泡泡，確保用戶能立即看到自己的訊息
+            Future.delayed(const Duration(milliseconds: 300), () {
+              if (mounted) {
+                _showMessageBubble(message);
+              }
+            });
           }
         });
-      }
-    });
   }
 
   Future<void> _goToCurrentLocation(dynamic position) async {
     final GoogleMapController controller = await _controller.future;
 
-    // 計算最佳縮放級別以最大化顯示用戶範圍
-    final optimalZoom = _getInitialZoomForRadius(_currentRadius);
-
+    // 只移動到用戶位置，不改變縮放級別
     final newPosition = CameraPosition(
       target: LatLng(position.latitude, position.longitude),
-      zoom: optimalZoom,
+      // 不設置 zoom，保持當前縮放級別
     );
 
     // 平滑動畫到新位置
     await controller.animateCamera(CameraUpdate.newCameraPosition(newPosition));
 
-    // 取消範圍圓圈顯示
+    // 更新范围圆
+    _updateCircles(LatLng(position.latitude, position.longitude));
   }
 
-  // 已移除範圍圓圈，保留空方法避免引用
-  void _updateCircles(LatLng center) {}
+  // 更新用户范围圆
+  void _updateCircles(LatLng center) {
+    setState(() {
+      _circles.clear();
+      _circles.add(
+        Circle(
+          circleId: const CircleId('user_range'),
+          center: center,
+          radius: _currentRadius,
+          fillColor: AppColors.primaryColor.withValues(
+            alpha: 0.08,
+          ), // 未來主義霓虹藍填充
+          strokeColor: AppColors.primaryColor.withValues(alpha: 0.6), // 發光邊框
+          strokeWidth: 3, // 更粗的邊框以增強發光效果
+        ),
+      );
+    });
+  }
 
   void _showSnackBar(String text, {bool isError = false}) {
     if (!mounted) return;
@@ -1159,8 +1108,6 @@ class _MapScreenState extends State<MapScreen> {
       ),
     );
   }
-
-
 
   void _showMessageBubble(Message message) {
     if (!mounted) return;
@@ -1199,7 +1146,7 @@ class _MapScreenState extends State<MapScreen> {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 blurRadius: 15,
                 offset: const Offset(0, 8),
               ),
@@ -1210,10 +1157,12 @@ class _MapScreenState extends State<MapScreen> {
             children: [
               // 發送者資訊
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -1224,13 +1173,13 @@ class _MapScreenState extends State<MapScreen> {
                       message.gender == Gender.male
                           ? Icons.male
                           : message.gender == Gender.female
-                              ? Icons.female
-                              : Icons.person,
+                          ? Icons.female
+                          : Icons.person,
                       color: message.gender == Gender.male
                           ? Colors.blue[200]
                           : message.gender == Gender.female
-                              ? Colors.pink[200]
-                              : Colors.white70,
+                          ? Colors.pink[200]
+                          : Colors.white70,
                       size: 16,
                     ),
                     const SizedBox(width: 6),
@@ -1275,10 +1224,12 @@ class _MapScreenState extends State<MapScreen> {
 
               // 資訊區域
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
+                  color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -1288,8 +1239,11 @@ class _MapScreenState extends State<MapScreen> {
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.visibility,
-                            color: Colors.white70, size: 14),
+                        const Icon(
+                          Icons.visibility,
+                          color: Colors.white70,
+                          size: 14,
+                        ),
                         const SizedBox(height: 2),
                         Text(
                           '${message.viewCount}',
@@ -1306,8 +1260,11 @@ class _MapScreenState extends State<MapScreen> {
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.thumb_up,
-                            color: Colors.white70, size: 14),
+                        const Icon(
+                          Icons.thumb_up,
+                          color: Colors.white70,
+                          size: 14,
+                        ),
                         const SizedBox(height: 2),
                         Text(
                           '${message.likeCount}',
@@ -1324,8 +1281,11 @@ class _MapScreenState extends State<MapScreen> {
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.timer,
-                            color: Colors.white70, size: 14),
+                        const Icon(
+                          Icons.timer,
+                          color: Colors.white70,
+                          size: 14,
+                        ),
                         const SizedBox(height: 2),
                         Text(
                           remainingText,
@@ -1346,10 +1306,7 @@ class _MapScreenState extends State<MapScreen> {
               // 發送時間
               Text(
                 timeText,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 11,
-                ),
+                style: const TextStyle(color: Colors.white70, fontSize: 11),
               ),
 
               const SizedBox(height: 12),
@@ -1370,10 +1327,7 @@ class _MapScreenState extends State<MapScreen> {
                   ),
                   child: const Text(
                     '關閉',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                 ),
               ),
@@ -1389,15 +1343,16 @@ class _MapScreenState extends State<MapScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.surfaceColor.withOpacity(0.9),
+        color: AppColors.surfaceColor.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
           const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2)),
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
           const SizedBox(width: 12),
           Text(text, style: const TextStyle(color: AppColors.textPrimary)),
         ],
@@ -1410,17 +1365,20 @@ class _MapScreenState extends State<MapScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.errorColor.withOpacity(0.1),
+        color: AppColors.errorColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.errorColor.withOpacity(0.3)),
+        border: Border.all(color: AppColors.errorColor.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
           const Icon(Icons.error_outline, color: AppColors.errorColor),
           const SizedBox(width: 12),
           Expanded(
-              child: Text(message,
-                  style: const TextStyle(color: AppColors.errorColor))),
+            child: Text(
+              message,
+              style: const TextStyle(color: AppColors.errorColor),
+            ),
+          ),
           TextButton(onPressed: onRetry, child: const Text('重試')),
         ],
       ),
@@ -1428,205 +1386,266 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   // 顯示登入選項
-  void _showLoginOptions(BuildContext context, AuthProvider authProvider) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('登入選項'),
-        content: const Text('選擇登入方式或以訪客身份繼續使用'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // 以訪客身份繼續，不做任何操作
-            },
-            child: const Text('訪客模式'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              // 檢查是否使用佔位符Client ID
-              if (_isPlaceholderClientId()) {
-                _showConfigurationDialog(context);
-                return;
-              }
-
-              final success = await authProvider.signInAsGuest();
-              if (success && context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('登入成功！')),
-                );
-              }
-            },
-            child: const Text('Google登入'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // 顯示用戶選單
-  void _showUserMenu(BuildContext context, AuthProvider authProvider) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('歡迎，${authProvider.userDisplayName}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (authProvider.user?.email != null)
-              Text('Email: ${authProvider.user!.email}'),
-            const SizedBox(height: 8),
-            const Text('您已成功登入'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('關閉'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await authProvider.signOut();
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('已登出')),
-                );
-              }
-            },
-            child: const Text('登出'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // 檢查是否為佔位符Client ID
-  bool _isPlaceholderClientId() {
-    return true; // 目前總是返回true，因為我們使用的是佔位符
-  }
 
   // 顯示配置提示對話框
-  void _showConfigurationDialog(BuildContext context) {
+
+  // 開啟新的未來感訊息發送介面
+  // 顯示高端訊息發送對話框
+  void _openQuickSendSheet() {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Google登入配置'),
-          content: const Text(
-            'Google登入功能需要配置有效的Client ID。\n\n'
-            '請聯繫開發者完成配置，或繼續使用訪客模式。',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('了解'),
-            ),
-          ],
-        );
-      },
+      barrierDismissible: true,
+      builder: (context) => PremiumMessageDialog(
+        onSend: (radius, duration, isAnonymous, message) {
+          // 關閉對話框
+          Navigator.of(context).pop();
+
+          // 處理發送訊息
+          _handleSendMessage(message, radius, duration, isAnonymous);
+        },
+        onCancel: () {
+          Navigator.of(context).pop();
+        },
+      ),
     );
   }
 
-  // 重新設計的按鈕圖示 - 使用原始Material Design圖示
-  Widget _buildButtonIcon(IconData icon) {
+  // 顯示訊息輸入對話框
+  void _showMessageInputDialog(
+    double radius,
+    Duration duration,
+    bool isAnonymous,
+  ) {
+    final TextEditingController messageController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 100),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 400, maxHeight: 300),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color(0xFF0A0A1A).withValues(alpha: 0.95),
+                const Color(0xFF1A1A2E).withValues(alpha: 0.95),
+                const Color(0xFF16213E).withValues(alpha: 0.95),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: const Color(0xFF00BFFF).withValues(alpha: 0.6),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.6),
+                blurRadius: 25,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: const Color(0xFF00BFFF).withValues(alpha: 0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 0),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 標題
+              Text(
+                '發送訊息',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // 參數顯示
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildParameterCard(
+                    icon: Icons.access_time_rounded,
+                    label: '持續時間',
+                    value: '${duration.inHours}h',
+                    color: const Color(0xFF8B5CF6),
+                  ),
+                  _buildParameterCard(
+                    icon: Icons.straighten_rounded,
+                    label: '距離範圍',
+                    value: '${(radius / 1000).toStringAsFixed(1)}km',
+                    color: const Color(0xFF06B6D4),
+                  ),
+                  _buildParameterCard(
+                    icon: Icons.person_rounded,
+                    label: '發送方式',
+                    value: isAnonymous ? '匿名' : '實名',
+                    color: const Color(0xFF00BFFF),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // 訊息輸入框
+              Container(
+                height: 60,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withValues(alpha: 0.1),
+                      Colors.white.withValues(alpha: 0.05),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFF00BFFF).withValues(alpha: 0.3),
+                    width: 1.0,
+                  ),
+                ),
+                child: TextField(
+                  controller: messageController,
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                  decoration: InputDecoration(
+                    hintText: '輸入您的訊息...',
+                    hintStyle: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.5),
+                      fontSize: 16,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // 按鈕
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDialogButton(
+                      text: '取消',
+                      color: Colors.grey,
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildDialogButton(
+                      text: '發送',
+                      color: const Color(0xFF00BFFF),
+                      onPressed: () {
+                        if (messageController.text.isNotEmpty) {
+                          Navigator.of(context).pop();
+                          _handleSendMessage(
+                            messageController.text,
+                            radius,
+                            duration,
+                            isAnonymous,
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildParameterCard({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
     return Container(
-      width: 20,
-      height: 20,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(4),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [color.withValues(alpha: 0.3), color.withValues(alpha: 0.1)],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.4), width: 1.0),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(fontSize: 10, color: color.withValues(alpha: 0.8)),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
         ],
       ),
-      child: Icon(
-        icon,
-        color: const Color(0xFF667eea),
-        size: 14,
-      ),
     );
   }
 
-  Widget _buildTopBarButton({
-    required IconData icon,
-    required VoidCallback onTap,
-    bool isActive = false,
-    int? badge,
+  Widget _buildDialogButton({
+    required String text,
+    required Color color,
+    required VoidCallback onPressed,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+    return GestureDetector(
+      onTap: onPressed,
       child: Container(
-        width: 36,
-        height: 36,
+        height: 48,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Colors.white.withOpacity(isActive ? 0.3 : 0.2),
-              Colors.white.withOpacity(isActive ? 0.2 : 0.1),
-            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
+            colors: [
+              color.withValues(alpha: 0.8),
+              color.withValues(alpha: 0.6),
+            ],
           ),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Colors.white.withOpacity(isActive ? 0.4 : 0.3),
-            width: 1,
-          ),
+          border: Border.all(color: color.withValues(alpha: 0.6), width: 1.0),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: color.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
           ],
         ),
-        child: Stack(
-          children: [
-            Center(
-              child: _buildButtonIcon(icon),
+        child: Center(
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
-            if (badge != null && badge > 0)
-              Positioned(
-                right: 2,
-                top: 2,
-                child: Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white,
-                      width: 1,
-                    ),
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 14,
-                    minHeight: 14,
-                  ),
-                  child: Text(
-                    badge.toString(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 8,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-          ],
+          ),
         ),
       ),
     );

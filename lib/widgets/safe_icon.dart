@@ -24,7 +24,7 @@ class SafeIcon extends StatelessWidget {
               color: backgroundColor,
               borderRadius: BorderRadius.circular(size * 0.2),
               border: Border.all(
-                color: color.withOpacity(0.3),
+                color: color.withValues(alpha: 0.3),
                 width: 1,
               ),
             )

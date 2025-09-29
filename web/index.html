@@ -32,10 +32,22 @@
   <title>秘跡 Miji</title>
   <link rel="manifest" href="manifest.json">
   
+  <!-- 隱藏 Google 地圖所有商標和版權資訊 -->
+  <link rel="stylesheet" href="google_maps_clean.css">
+  
   <!-- Google Sign-In Configuration -->
   <meta name="google-signin-client_id" content="508695711441-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com">
   
-      <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB5EIX3h6jLAF7C_5_fsE_lOQUjTMr7J58"></script>
+  <!-- Google Maps JavaScript API -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB5EIX3h6jLAF7C_5_fsE_lOQUjTMr7J58&libraries=places&callback=initMap"></script>
+  
+  <script>
+    function initMap() {
+      // Placeholder for now. This will be called when the Google Maps API is ready.
+      console.log('Google Maps API loaded via callback.');
+      // The Flutter app will then interact with the loaded map.
+    }
+  </script>
   
   <style>
     html, body {

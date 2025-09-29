@@ -113,7 +113,7 @@ class _CountdownOverlayState extends State<CountdownOverlay>
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.red.withOpacity(0.3),
+                      color: Colors.red.withValues(alpha: 0.3),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -125,7 +125,7 @@ class _CountdownOverlayState extends State<CountdownOverlay>
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Center(
@@ -169,7 +169,7 @@ class _CountdownOverlayState extends State<CountdownOverlay>
                     ),
                     Icon(
                       Icons.auto_delete,
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                       size: 24,
                     ),
                   ],

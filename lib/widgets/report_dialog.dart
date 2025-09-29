@@ -20,7 +20,8 @@ class ReportDialog extends StatefulWidget {
 
 class _ReportDialogState extends State<ReportDialog> {
   String? _selectedReason;
-  final TextEditingController _additionalInfoController = TextEditingController();
+  final TextEditingController _additionalInfoController =
+      TextEditingController();
   bool _isSubmitting = false;
 
   @override
@@ -66,35 +67,37 @@ class _ReportDialogState extends State<ReportDialog> {
               ),
             ),
             const SizedBox(height: 12),
-            
+
             // 舉報原因選項
             Container(
               constraints: const BoxConstraints(maxHeight: 200),
               child: SingleChildScrollView(
-                child: Column(
-                  children: reasons.map((reason) {
-                    return RadioListTile<String>(
-                      title: Text(
-                        reason,
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                      value: reason,
-                      groupValue: _selectedReason,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedReason = value;
-                        });
-                      },
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                    );
-                  }).toList(),
+                child: RadioGroup<String>(
+                  groupValue: _selectedReason,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedReason = value;
+                    });
+                  },
+                  child: Column(
+                    children: reasons.map((reason) {
+                      return RadioListTile<String>(
+                        title: Text(
+                          reason,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        value: reason,
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // 額外說明
             const Text(
               '額外說明（選填）：',
@@ -123,9 +126,8 @@ class _ReportDialogState extends State<ReportDialog> {
           child: const Text('取消'),
         ),
         ElevatedButton(
-          onPressed: _isSubmitting || _selectedReason == null
-              ? null
-              : _submitReport,
+          onPressed:
+              _isSubmitting || _selectedReason == null ? null : _submitReport,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.red,
             foregroundColor: Colors.white,

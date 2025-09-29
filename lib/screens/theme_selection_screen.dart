@@ -9,7 +9,8 @@ class ThemeSelectionScreen extends StatefulWidget {
   State<ThemeSelectionScreen> createState() => _ThemeSelectionScreenState();
 }
 
-class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> with TickerProviderStateMixin {
+class _ThemeSelectionScreenState extends State<ThemeSelectionScreen>
+    with TickerProviderStateMixin {
   final ThemeService _themeService = ThemeService();
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -19,12 +20,12 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> with Ticker
   void initState() {
     super.initState();
     _selectedTheme = _themeService.currentTheme;
-    
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -32,7 +33,7 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> with Ticker
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-    
+
     _animationController.forward();
   }
 
@@ -49,7 +50,8 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> with Ticker
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: Container(
-          decoration: _themeService.currentTheme.getRoundedGradientDecoration(28, opacity: 0.95),
+          decoration: _themeService.currentTheme
+              .getRoundedGlassmorphismDecoration(28, opacity: 0.95),
           child: AppBar(
             title: const Text(
               '主題選擇',
@@ -90,12 +92,12 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> with Ticker
           children: [
             // 當前主題預覽
             _buildCurrentThemePreview(),
-            
+
             // 主題選擇列表
             Expanded(
               child: _buildThemeList(),
             ),
-            
+
             // 底部按鈕
             _buildBottomButtons(),
           ],
@@ -108,7 +110,8 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> with Ticker
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
-      decoration: _selectedTheme!.getRoundedGradientDecoration(24, opacity: 0.9),
+      decoration:
+          _selectedTheme!.getRoundedGlassmorphismDecoration(24, opacity: 0.9),
       child: Column(
         children: [
           Row(
@@ -136,7 +139,7 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> with Ticker
                       _selectedTheme!.description,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.8),
                       ),
                     ),
                   ],
@@ -156,12 +159,12 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> with Ticker
                   color: color,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withValues(alpha: 0.3),
                     width: 2,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: color.withOpacity(0.4),
+                      color: color.withValues(alpha: 0.4),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
@@ -182,7 +185,7 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> with Ticker
       itemBuilder: (context, index) {
         final theme = AppTheme.allThemes[index];
         final isSelected = _selectedTheme?.type == theme.type;
-        
+
         return AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           margin: const EdgeInsets.only(bottom: 16),
@@ -198,29 +201,34 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> with Ticker
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: isSelected
-                      ? theme.gradientColors.map((c) => c.withOpacity(0.3)).toList()
-                      : [Colors.white.withOpacity(0.1), Colors.white.withOpacity(0.05)],
+                      ? theme.gradientColors
+                          .map((c) => c.withValues(alpha: 0.3))
+                          .toList()
+                      : [
+                          Colors.white.withValues(alpha: 0.1),
+                          Colors.white.withValues(alpha: 0.05)
+                        ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: isSelected
-                      ? theme.primaryColor.withOpacity(0.6)
-                      : Colors.white.withOpacity(0.2),
+                      ? theme.primaryColor.withValues(alpha: 0.6)
+                      : Colors.white.withValues(alpha: 0.2),
                   width: isSelected ? 2 : 1,
                 ),
                 boxShadow: isSelected
                     ? [
                         BoxShadow(
-                          color: theme.primaryColor.withOpacity(0.3),
+                          color: theme.primaryColor.withValues(alpha: 0.3),
                           blurRadius: 15,
                           offset: const Offset(0, 6),
                         ),
                       ]
                     : [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
@@ -240,7 +248,7 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> with Ticker
                       ),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                         width: 2,
                       ),
                     ),
@@ -252,9 +260,9 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> with Ticker
                           )
                         : null,
                   ),
-                  
+
                   const SizedBox(width: 16),
-                  
+
                   // 主題信息
                   Expanded(
                     child: Column(
@@ -281,7 +289,7 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> with Ticker
                       ],
                     ),
                   ),
-                  
+
                   // 選中指示器
                   if (isSelected)
                     Container(
@@ -314,7 +322,7 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> with Ticker
             child: ElevatedButton(
               onPressed: () => Navigator.of(context).pop(),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey.withOpacity(0.3),
+                backgroundColor: Colors.grey.withValues(alpha: 0.3),
                 foregroundColor: const Color(0xFF2D3748),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(

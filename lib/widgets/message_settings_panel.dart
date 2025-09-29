@@ -67,9 +67,9 @@ class _MessageSettingsPanelState extends State<MessageSettingsPanel> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.white.withOpacity(0.25),
-            Colors.white.withOpacity(0.15),
-            Colors.white.withOpacity(0.08),
+            Colors.white.withValues(alpha: 0.25),
+            Colors.white.withValues(alpha: 0.15),
+            Colors.white.withValues(alpha: 0.08),
           ],
           stops: const [0.0, 0.6, 1.0],
           begin: Alignment.topLeft,
@@ -77,12 +77,12 @@ class _MessageSettingsPanelState extends State<MessageSettingsPanel> {
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.white.withOpacity(0.4),
+          color: Colors.white.withValues(alpha: 0.4),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -148,10 +148,10 @@ class _MessageSettingsPanelState extends State<MessageSettingsPanel> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.05),
+              color: Colors.grey.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: AppColors.primaryColor.withOpacity(0.2),
+                color: AppColors.primaryColor.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -164,8 +164,8 @@ class _MessageSettingsPanelState extends State<MessageSettingsPanel> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        AppColors.secondaryColor.withOpacity(0.1),
-                        AppColors.accentColor.withOpacity(0.1),
+                        AppColors.secondaryColor.withValues(alpha: 0.1),
+                        AppColors.accentColor.withValues(alpha: 0.1),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -200,9 +200,9 @@ class _MessageSettingsPanelState extends State<MessageSettingsPanel> {
                   data: SliderTheme.of(context).copyWith(
                     activeTrackColor: AppColors.secondaryColor,
                     inactiveTrackColor:
-                        AppColors.secondaryColor.withOpacity(0.3),
+                        AppColors.secondaryColor.withValues(alpha: 0.3),
                     thumbColor: AppColors.secondaryColor,
-                    overlayColor: AppColors.secondaryColor.withOpacity(0.2),
+                    overlayColor: AppColors.secondaryColor.withValues(alpha: 0.2),
                     thumbShape: const RoundSliderThumbShape(
                       enabledThumbRadius: 10,
                     ),
@@ -269,15 +269,15 @@ class _MessageSettingsPanelState extends State<MessageSettingsPanel> {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.green.withOpacity(0.1),
-                            Colors.green.withOpacity(0.05),
+                            Colors.green.withValues(alpha: 0.1),
+                            Colors.green.withValues(alpha: 0.05),
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Colors.green.withOpacity(0.3),
+                          color: Colors.green.withValues(alpha: 0.3),
                           width: 1,
                         ),
                       ),

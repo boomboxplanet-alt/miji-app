@@ -112,9 +112,9 @@ class _ContentFilterSettingsScreenState
                       SliderTheme(
                         data: SliderTheme.of(context).copyWith(
                           activeTrackColor: Colors.white,
-                          inactiveTrackColor: Colors.white.withOpacity(0.3),
+                          inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
                           thumbColor: Colors.white,
-                          overlayColor: Colors.white.withOpacity(0.2),
+                          overlayColor: Colors.white.withValues(alpha: 0.2),
                         ),
                         child: Slider(
                           value: _filterSensitivity,
@@ -136,21 +136,21 @@ class _ContentFilterSettingsScreenState
                           Text(
                             '寬鬆',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.7),
+                              color: Colors.white.withValues(alpha: 0.7),
                               fontSize: 12,
                             ),
                           ),
                           Text(
                             '標準',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.7),
+                              color: Colors.white.withValues(alpha: 0.7),
                               fontSize: 12,
                             ),
                           ),
                           Text(
                             '嚴格',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.7),
+                              color: Colors.white.withValues(alpha: 0.7),
                               fontSize: 12,
                             ),
                           ),
@@ -262,10 +262,10 @@ class _ContentFilterSettingsScreenState
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -316,7 +316,7 @@ class _ContentFilterSettingsScreenState
       subtitle: Text(
         subtitle,
         style: TextStyle(
-          color: Colors.white.withOpacity(0.7),
+          color: Colors.white.withValues(alpha: 0.7),
           fontSize: 12,
         ),
       ),
@@ -326,11 +326,11 @@ class _ContentFilterSettingsScreenState
         if (states.contains(WidgetState.selected)) {
           return Colors.white;
         }
-        return Colors.white.withOpacity(0.5);
+        return Colors.white.withValues(alpha: 0.5);
       }),
-      activeTrackColor: Colors.white.withOpacity(0.5),
-      inactiveThumbColor: Colors.white.withOpacity(0.5),
-      inactiveTrackColor: Colors.white.withOpacity(0.2),
+      activeTrackColor: Colors.white.withValues(alpha: 0.5),
+      inactiveThumbColor: Colors.white.withValues(alpha: 0.5),
+      inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
     );
   }
 
@@ -363,7 +363,7 @@ class _ContentFilterSettingsScreenState
               Text(
                 description,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   fontSize: 12,
                 ),
               ),
