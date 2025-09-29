@@ -14,7 +14,7 @@
     This is a placeholder for base href that will be replaced by the value of
     the `--base-href` argument provided to `flutter build`.
   -->
-  <base href="/miji-app/">
+  <base href="/">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
@@ -25,6 +25,13 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="秘跡 Miji">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  
+  <!-- 移動設備視口設置 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  
+  <!-- 防止移動設備上的縮放和滾動問題 -->
+  <meta name="format-detection" content="telephone=no">
+  <meta name="msapplication-tap-highlight" content="no">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
@@ -47,12 +54,92 @@
       console.log('Google Maps API loaded via callback.');
       // The Flutter app will then interact with the loaded map.
     }
+    
+    // 修復移動設備上的鍵盤和輸入問題
+    document.addEventListener('DOMContentLoaded', function() {
+      // 防止移動設備上的縮放
+      document.addEventListener('touchstart', function(e) {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+      
+      // 防止雙擊縮放
+      let lastTouchEnd = 0;
+      document.addEventListener('touchend', function(e) {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+          e.preventDefault();
+        }
+        lastTouchEnd = now;
+      }, false);
+      
+      // 處理鍵盤彈出時的視口調整
+      let initialViewportHeight = window.innerHeight;
+      
+      window.addEventListener('resize', function() {
+        const currentHeight = window.innerHeight;
+        const heightDifference = initialViewportHeight - currentHeight;
+        
+        if (heightDifference > 150) {
+          // 鍵盤彈出，調整視口
+          document.body.style.height = currentHeight + 'px';
+        } else {
+          // 鍵盤收起，恢復正常
+          document.body.style.height = '100vh';
+        }
+      });
+      
+      // 防止頁面滾動
+      document.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+      }, { passive: false });
+    });
   </script>
   
   <style>
     html, body {
       height: 100%;
       margin: 0;
+      padding: 0;
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+    }
+    
+    /* 修復移動設備上的輸入問題 */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    
+    /* 允許輸入框選擇文字 */
+    input, textarea {
+      -webkit-user-select: text;
+      -khtml-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
+    }
+    
+    /* 防止移動設備上的彈跳效果 */
+    body {
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: none;
+    }
+    
+    /* 確保 Flutter 容器正確顯示 */
+    #flutter_target {
+      height: 100vh;
+      width: 100vw;
+      position: fixed;
+      top: 0;
+      left: 0;
     }
   </style>
 </head>
