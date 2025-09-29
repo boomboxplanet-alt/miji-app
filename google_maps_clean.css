@@ -1,0 +1,135 @@
+/* 隱藏所有 Google 地圖商標和版權資訊 */
+.gmnoprint,
+.gm-style-cc,
+.gm-style .gmnoprint,
+.gm-style .gm-style-cc,
+.gm-style-cc a,
+.gm-style-cc span,
+.gm-style-cc div,
+.gm-style .gm-style-cc a,
+.gm-style .gm-style-cc span,
+.gm-style .gm-style-cc div {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+/* 隱藏 Google 標誌 */
+.gm-style a[href*="google.com"],
+.gm-style a[href*="maps.google.com"],
+.gm-style .gmnoprint a,
+.gm-style .gmnoprint span {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* 隱藏地圖工具欄 */
+.gm-bundled-control,
+.gm-bundled-control-on-bottom,
+.gm-style .gm-bundled-control,
+.gm-style .gm-bundled-control-on-bottom {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* 隱藏縮放控制 */
+.gm-style .gm-bundled-control-on-bottom,
+.gm-style .gmnoprint div[role="button"][aria-label*="Zoom"],
+.gm-style .gmnoprint div[role="button"][title*="Zoom"],
+.gm-style .gmnoprint div[role="button"][aria-label*="放大"],
+.gm-style .gmnoprint div[role="button"][title*="放大"],
+.gm-style .gmnoprint div[role="button"][aria-label*="縮小"],
+.gm-style .gmnoprint div[role="button"][title*="縮小"],
+.gm-style .gmnoprint div[role="button"][aria-label*="+"],
+.gm-style .gmnoprint div[role="button"][title*="+"],
+.gm-style .gmnoprint div[role="button"][aria-label*="-"],
+.gm-style .gmnoprint div[role="button"][title*="-"],
+.gm-style .gmnoprint div[role="button"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+/* 隱藏全螢幕控制 */
+.gm-style .gmnoprint div[role="button"][aria-label*="fullscreen"],
+.gm-style .gmnoprint div[role="button"][title*="fullscreen"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* 隱藏地圖類型控制 */
+.gm-style .gmnoprint div[role="button"][aria-label*="map"],
+.gm-style .gmnoprint div[role="button"][title*="map"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* 隱藏街景控制 */
+.gm-style .gmnoprint div[role="button"][aria-label*="Street View"],
+.gm-style .gmnoprint div[role="button"][title*="Street View"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* 隱藏鍵盤快捷鍵提示 */
+.gm-style .gmnoprint div[title*="Keyboard"],
+.gm-style .gmnoprint div[aria-label*="Keyboard"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* 隱藏所有 Google 相關文字和連結 */
+.gm-style div:contains("Google"),
+.gm-style div:contains("Terms"),
+.gm-style div:contains("Report"),
+.gm-style div:contains("©"),
+.gm-style div:contains("Map data") {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* 隱藏地圖錯誤報告 */
+.gm-style div[title*="Report"],
+.gm-style div[aria-label*="Report"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* 隱藏使用條款連結 */
+.gm-style div[title*="Terms"],
+.gm-style div[aria-label*="Terms"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* 隱藏地圖數據來源 */
+.gm-style div[aria-label*="Map data"],
+.gm-style div[title*="Map data"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* 確保地圖容器沒有多餘的邊距或填充 */
+.gm-style {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* 隱藏任何可能出現的 Google 品牌元素 */
+.gm-style .gmnoprint * {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* 隱藏地圖右下角的控制面板 */
+.gm-style .gm-style-cc,
+.gm-style .gm-style-cc div,
+.gm-style .gm-style-cc a,
+.gm-style .gm-style-cc span {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+    overflow: hidden !important;
+}
