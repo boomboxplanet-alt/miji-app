@@ -57,7 +57,7 @@
     
     // 修復移動設備上的鍵盤和輸入問題
     document.addEventListener('DOMContentLoaded', function() {
-      // 防止移動設備上的縮放
+      // 完全禁用移動設備上的縮放
       document.addEventListener('touchstart', function(e) {
         if (e.touches.length > 1) {
           e.preventDefault();
@@ -74,58 +74,44 @@
         lastTouchEnd = now;
       }, false);
       
-      // 處理鍵盤彈出時的視口調整
-      let initialViewportHeight = window.innerHeight;
-      let isKeyboardOpen = false;
+      // 完全禁用頁面滾動
+      document.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+      }, { passive: false });
       
-      // 監聽視口變化
-      function handleViewportChange() {
-        const currentHeight = window.innerHeight;
-        const heightDifference = initialViewportHeight - currentHeight;
-        
-        // 鍵盤彈出檢測（高度減少超過 150px）
-        if (heightDifference > 150 && !isKeyboardOpen) {
-          isKeyboardOpen = true;
-          // 鍵盤彈出，保持原始高度
-          document.body.style.height = initialViewportHeight + 'px';
-          document.body.style.overflow = 'hidden';
-          document.body.classList.add('keyboard-open');
-        } 
-        // 鍵盤收起檢測（高度恢復）
-        else if (heightDifference <= 50 && isKeyboardOpen) {
-          isKeyboardOpen = false;
-          // 鍵盤收起，恢復正常
-          document.body.style.height = '100vh';
-          document.body.style.overflow = 'auto';
-          document.body.classList.remove('keyboard-open');
-        }
-      }
+      // 防止頁面滾動
+      document.addEventListener('scroll', function(e) {
+        e.preventDefault();
+        window.scrollTo(0, 0);
+      }, { passive: false });
       
-      window.addEventListener('resize', handleViewportChange);
-      
-      // 監聽輸入框焦點變化
+      // 監聽輸入框焦點變化 - 簡化版本
       document.addEventListener('focusin', function(e) {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-          // 輸入框獲得焦點，防止頁面滾動
+          // 輸入框獲得焦點，強制固定頁面
+          document.body.style.position = 'fixed';
+          document.body.style.top = '0';
+          document.body.style.left = '0';
+          document.body.style.right = '0';
+          document.body.style.bottom = '0';
           document.body.style.overflow = 'hidden';
+          document.body.classList.add('keyboard-open');
         }
       });
       
       document.addEventListener('focusout', function(e) {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-          // 輸入框失去焦點，恢復滾動
+          // 輸入框失去焦點，保持固定狀態
           setTimeout(() => {
-            if (!isKeyboardOpen) {
-              document.body.style.overflow = 'auto';
-            }
-          }, 300);
+            document.body.style.position = 'fixed';
+            document.body.style.top = '0';
+            document.body.style.left = '0';
+            document.body.style.right = '0';
+            document.body.style.bottom = '0';
+            document.body.style.overflow = 'hidden';
+          }, 100);
         }
       });
-      
-      // 防止頁面滾動
-      document.addEventListener('touchmove', function(e) {
-        e.preventDefault();
-      }, { passive: false });
     });
   </script>
   
@@ -137,9 +123,10 @@
       overflow: hidden;
       position: fixed;
       width: 100%;
+      touch-action: manipulation;
     }
     
-    /* 修復移動設備上的輸入問題 */
+    /* 完全禁用移動設備上的縮放和滾動 */
     * {
       -webkit-tap-highlight-color: transparent;
       -webkit-touch-callout: none;
@@ -148,6 +135,7 @@
       -moz-user-select: none;
       -ms-user-select: none;
       user-select: none;
+      touch-action: manipulation;
     }
     
     /* 允許輸入框選擇文字 */
@@ -157,12 +145,21 @@
       -moz-user-select: text;
       -ms-user-select: text;
       user-select: text;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      border-radius: 0;
     }
     
     /* 防止移動設備上的彈跳效果 */
     body {
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
     }
     
     /* 確保 Flutter 容器正確顯示 */
@@ -172,41 +169,58 @@
       position: fixed;
       top: 0;
       left: 0;
+      z-index: 1;
     }
     
-    /* 修復重複輸入時的黑色區域問題 */
+    /* 完全禁用鍵盤彈出時的視口變化 */
     body.keyboard-open {
       height: 100vh !important;
       overflow: hidden !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
     }
     
     body.keyboard-open #flutter_target {
       height: 100vh !important;
       transform: translateZ(0);
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
     }
     
-    /* 防止輸入框重複觸發問題 */
-    input, textarea {
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-      border-radius: 0;
-    }
-    
-    /* 優化移動設備上的輸入體驗 */
+    /* 移動設備專用修復 */
     @media screen and (max-width: 768px) {
+      html, body {
+        height: 100vh;
+        width: 100vw;
+        position: fixed;
+        overflow: hidden;
+        touch-action: manipulation;
+      }
+      
+      /* 防止任何滾動 */
       body {
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
       }
       
-      /* 防止鍵盤彈出時的視口跳動 */
-      .keyboard-adjust {
+      /* 鍵盤彈出時保持固定 */
+      body.keyboard-open {
         height: 100vh !important;
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
-        width: 100% !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        overflow: hidden !important;
       }
     }
   </style>
